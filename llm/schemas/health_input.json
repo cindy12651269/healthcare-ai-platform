@@ -1,0 +1,53 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "HealthInput",
+    "type": "object",
+    "properties": {
+      "input_id": {
+        "type": "string",
+        "description": "Unique trace ID for this input event."
+      },
+      "user_id": {
+        "type": "string",
+        "description": "Unique user or patient identifier."
+      },
+      "raw_text": {
+        "type": "string",
+        "description": "Unstructured raw user or clinical input."
+      },
+      "source": {
+        "type": "string",
+        "enum": ["web", "sms", "voice", "api", "email"],
+        "description": "Input source channel."
+      },
+      "input_type": {
+        "type": "string",
+        "enum": ["chat", "intake", "survey", "referral"],
+        "description": "Type of healthcare input."
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "UTC ISO timestamp."
+      },
+      "contains_phi": {
+        "type": "boolean",
+        "description": "Whether this input may contain PHI."
+      },
+      "consent_granted": {
+        "type": "boolean",
+        "description": "Whether patient consent has been granted for clinical processing."
+      }
+    },
+    "required": [
+      "input_id",
+      "user_id",
+      "raw_text",
+      "source",
+      "input_type",
+      "timestamp",
+      "contains_phi",
+      "consent_granted"
+    ]
+  }
+  
