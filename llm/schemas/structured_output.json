@@ -1,0 +1,183 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "StructuredHealthOutput",
+    "type": "object",
+    "description": "Enterprise-grade structured health output aligned with clinical NLP, LLM agents, HIPAA, and EHR interoperability.",
+    "properties": {
+      "trace": {
+        "type": "object",
+        "description": "Traceability and linkage to original input.",
+        "properties": {
+          "input_id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "source": {
+            "type": "string",
+            "enum": ["web", "sms", "voice", "api", "email"]
+          },
+          "input_type": {
+            "type": "string",
+            "enum": ["chat", "intake", "survey", "referral"]
+          }
+        },
+        "required": ["input_id", "user_id", "timestamp", "source", "input_type"]
+      },
+  
+      "compliance": {
+        "type": "object",
+        "description": "HIPAA, PHI and consent status.",
+        "properties": {
+          "contains_phi": { "type": "boolean" },
+          "consent_granted": { "type": "boolean" },
+          "data_zone": {
+            "type": "string",
+            "enum": ["public_zone", "hipaa_zone"]
+          },
+          "audit_required": { "type": "boolean" }
+        },
+        "required": ["contains_phi", "consent_granted", "data_zone", "audit_required"]
+      },
+  
+      "clinical_structuring": {
+        "type": "object",
+        "description": "Core NLP clinical extraction.",
+        "properties": {
+          "symptoms": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "severity": { "type": "string" },
+          "duration": { "type": "string" },
+          "onset": { "type": "string" },
+          "triggers": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "red_flags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "clinical_summary": { "type": "string" },
+          "confidence_level": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": ["symptoms", "clinical_summary", "confidence_level"]
+      },
+  
+      "medical_coding": {
+        "type": "object",
+        "description": "Ontology and clinical coding layer.",
+        "properties": {
+          "icd10_codes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "snomed_codes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "clinical_entities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "category": {
+                  "type": "string",
+                  "enum": ["condition", "medication", "procedure", "lab", "device"]
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": ["name", "category", "confidence"]
+            }
+          }
+        }
+      },
+  
+      "risk_and_prediction": {
+        "type": "object",
+        "description": "Risk scoring and predictive insight.",
+        "properties": {
+          "risk_score": { "type": "number" },
+          "risk_factors": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "trend_patterns": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "predicted_outcomes": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+  
+      "agent_decisioning": {
+        "type": "object",
+        "description": "Agent-level reasoning and actions.",
+        "properties": {
+          "recommendations": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "next_actions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "escalation_required": { "type": "boolean" }
+        }
+      },
+  
+      "ehr_interoperability": {
+        "type": "object",
+        "description": "EHR / FHIR / HL7 integration placeholder.",
+        "properties": {
+          "patient_id": { "type": "string" },
+          "encounter_id": { "type": "string" },
+          "fhir_resources": {
+            "type": "array",
+            "items": { "type": "object" }
+          },
+          "hl7_messages": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "sync_status": {
+            "type": "string",
+            "enum": ["pending", "synced", "failed"]
+          }
+        }
+      },
+  
+      "output_metadata": {
+        "type": "object",
+        "description": "System-level output quality and audit trail.",
+        "properties": {
+          "generated_at": { "type": "string", "format": "date-time" },
+          "model_version": { "type": "string" },
+          "prompt_version": { "type": "string" },
+          "latency_ms": { "type": "number" }
+        },
+        "required": ["generated_at", "model_version", "prompt_version"]
+      }
+    },
+  
+    "required": [
+      "trace",
+      "compliance",
+      "clinical_structuring",
+      "agent_decisioning",
+      "ehr_interoperability",
+      "output_metadata"
+    ]
+  }
+  
