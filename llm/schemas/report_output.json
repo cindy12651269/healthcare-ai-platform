@@ -1,0 +1,102 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "HealthReportOutput",
+    "type": "object",
+    "description": "Human-readable health summary report generated from structured clinical data. HIPAA-safe, PHI-free, compliant with healthcare AI regulations.",
+  
+    "properties": {
+      "source_struct_id": {
+        "type": "string",
+        "description": "Reference to the structured output object that this report is generated from."
+      },
+  
+      "report_sections": {
+        "type": "object",
+        "description": "Core report body, written for clinicians or end-users without containing PHI.",
+        "properties": {
+          "overview": {
+            "type": "string",
+            "description": "High-level summary of the user's health concerns based on structured data."
+          },
+          "symptom_analysis": {
+            "type": "string",
+            "description": "Narrative analysis of symptoms, severity, duration, triggers and patterns."
+          },
+          "clinical_insights": {
+            "type": "string",
+            "description": "LLM-generated insights derived from clinical_structuring without providing medical diagnosis."
+          },
+          "risk_summary": {
+            "type": "string",
+            "description": "Description of risk factors, trend patterns and possible outcomes (non-diagnostic)."
+          },
+          "recommendations": {
+            "type": "string",
+            "description": "Safe recommendations within AI non-diagnostic boundaries (e.g., hydration, sleep tracking, symptom monitoring, escalation advice)."
+          }
+        },
+        "required": [
+          "overview",
+          "symptom_analysis",
+          "clinical_insights",
+          "risk_summary",
+          "recommendations"
+        ]
+      },
+  
+      "input_context": {
+        "type": "string",
+        "description": "Optional high-level context describing the input type (e.g., 'intake form', 'chat symptom entry'). Must not contain PHI or raw text.",
+        "maxLength": 200
+      },
+  
+      "safety_checks": {
+        "type": "object",
+        "description": "Safety validation summary ensuring clinical boundaries are respected.",
+        "properties": {
+          "diagnostic_check_passed": {
+            "type": "boolean",
+            "description": "Ensures the LLM did NOT produce medical diagnoses."
+          },
+          "phi_safe": {
+            "type": "boolean",
+            "description": "Report contains no PHI trace."
+          },
+          "compliance_notes": {
+            "type": "string",
+            "description": "Optional system-level notes ensuring HIPAA and safety boundaries were applied."
+          }
+        },
+        "required": ["diagnostic_check_passed", "phi_safe"]
+      },
+  
+      "report_metadata": {
+        "type": "object",
+        "description": "Generation metadata and audit-compatible fields.",
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "model_version": {
+            "type": "string"
+          },
+          "prompt_version": {
+            "type": "string"
+          },
+          "latency_ms": {
+            "type": "number"
+          }
+        },
+        "required": ["generated_at", "model_version", "prompt_version"]
+      }
+    },
+  
+    "required": [
+      "source_struct_id",
+      "report_sections",
+      "safety_checks",
+      "report_metadata"
+    ]
+  }
+  

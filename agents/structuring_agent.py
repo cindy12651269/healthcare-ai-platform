@@ -14,7 +14,6 @@ SCHEMA_PATH = ROOT_DIR / "llm" / "schemas" / "structured_output.json"
 PROMPT_PATH = ROOT_DIR / "llm" / "prompts" / "structuring.txt"
 
 # Exceptions 
-
 class StructuringError(Exception):
     pass
 
@@ -28,7 +27,6 @@ class SchemaValidationError(StructuringError):
     pass
 
 # Loaders 
-
 # Load structured output JSON schema.
 def load_structured_schema() -> Dict[str, Any]:
     with SCHEMA_PATH.open("r", encoding="utf-8") as f:
@@ -62,10 +60,8 @@ def extract_json_block(text: str) -> str:
 
 
 # Core Agent 
-
 # Enterprise-grade LLM structuring engine.
 class StructuringAgent:
-
     def __init__(
         self,
         model: str = "gpt-4o-mini",
@@ -134,7 +130,6 @@ class StructuringAgent:
         return content
     # Validate structured output against JSON schema.
     def _validate_schema(self, structured: Dict[str, Any]) -> None:
-        """"""
         try:
             jsonschema.validate(instance=structured, schema=self._schema)
         except ValidationError as exc:
