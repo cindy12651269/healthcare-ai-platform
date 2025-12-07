@@ -122,6 +122,6 @@ class IntakeAgent:
             raw_text=raw_text,
             source=meta.get("source", InputSource.web),
             input_type=meta.get("input_type", InputType.chat),
-            consent_granted=meta.get("consent", False),
+            consent_granted=meta.get("consent_granted", False),
             user_id=meta.get("user_id"),
         )
