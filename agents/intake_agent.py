@@ -113,3 +113,15 @@ def process_raw_input(
     )
 
     return health_input
+
+# Class wrapper used by the pipeline
+# Wrapper class so HealthcarePipeline can call: self.intake.run(raw_text, meta)
+class IntakeAgent:
+    def run(self, raw_text: str, meta: dict) -> HealthInput:
+        return process_raw_input(
+            raw_text=raw_text,
+            source=meta.get("source", InputSource.web),
+            input_type=meta.get("input_type", InputType.chat),
+            consent_granted=meta.get("consent", False),
+            user_id=meta.get("user_id"),
+        )
