@@ -8,7 +8,10 @@ from agents.structuring_agent import (
     SchemaValidationError,
 )
 from agents.output_agent import OutputAgent
-from agents.retrieval_agent import RetrievalAgent   # ← Week 2 addition (optional)
+from agents.retrieval_agent import RetrievalAgent   # Week 2 addition (optional)
+from rag.document_loader import DocumentLoader
+from rag.embeddings import Embeddings
+from rag.vector_store import InMemoryVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,7 @@ logger = logging.getLogger(__name__)
 class HealthcarePipeline:
     """
     Production-grade multi-agent pipeline:
-      Raw → Intake → Structuring → (Retrieval optional) → Output Report
+    Raw → Intake → Structuring → (Retrieval optional) → Output Report
     """
 
     def __init__(
@@ -108,3 +111,21 @@ class HealthcarePipeline:
 
         trace["success"] = True
         return trace
+    
+# Initialize the RAG vector store with source documents.
+# This is a one-time setup step executed at startup,not during request-time pipeline execution.
+def seed_vector_store(
+    loader: DocumentLoader,
+    embedder: Embeddings,
+    store: InMemoryVectorStore,
+    source_path: str,
+) -> int:
+    documents = loader.load_directory(source_path)
+    if not documents:
+        logger.warning("No documents found for RAG seeding.")
+        return 0
+    embeddings = embedder.embed_texts(documents)
+    store.add_batch(documents, embeddings)
+    logger.info(f"Seeded vector store with {len(documents)} documents.")
+    return len(documents)
+
