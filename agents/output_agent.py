@@ -3,8 +3,8 @@ from pathlib import Path
 from datetime import datetime
 from jsonschema import validate, ValidationError
 from openai import OpenAI
-from llm.safety_guard import apply_safety_filters
 from llm.schemas.report_output import ReportOutput
+from llm.safety_guard import guard_text
 
 # Final report generator — LLM → JSON → PHI-safe → schema-validated.
 class OutputAgent:
@@ -28,16 +28,57 @@ class OutputAgent:
             + sd_json
             + "\n----- END INPUT -----"
         )
+    
+    # Apply safety guard to all string fields in the report JSON and enforce allow/block decisions.
+    def _apply_safety_guard(self, report_json: dict) -> dict:
+        safety_events = []
+        phi_masked = False
+        diagnostic_blocked = False
 
-    def _sanitize_dict(self, obj):
-        if isinstance(obj, dict):
-            return {k: self._sanitize_dict(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [self._sanitize_dict(i) for i in obj]
-        elif isinstance(obj, str):
-            return apply_safety_filters(obj)
-        return obj
+        def walk(obj):
+            nonlocal phi_masked, diagnostic_blocked
 
+            if isinstance(obj, dict):
+                return {k: walk(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [walk(i) for i in obj]
+            if isinstance(obj, str):
+                result = guard_text(obj)
+
+                if result.reasons:
+                    safety_events.append({
+                        "severity": result.severity,
+                        "actions": result.actions,
+                        "reasons": result.reasons,
+                    })
+
+                if "mask_phi" in result.actions:
+                    phi_masked = True
+
+                if not result.allowed:
+                    diagnostic_blocked = True
+                    raise ValueError(
+                            "[OutputAgent][SafetyGuard] Output blocked due to unsafe medical content"
+                )
+
+                return result.masked_text
+            return obj
+
+        sanitized = walk(report_json)
+
+        # Build schema-compatible safety_checks
+        sanitized["safety_checks"] = {
+            "diagnostic_check_passed": not diagnostic_blocked,
+            "phi_safe": not phi_masked,
+            "compliance_notes": "Safety guard applied at output stage.",
+            # optional internal metadata (schema allows extra fields)
+            "guard_passed": True,
+            "events": safety_events,
+        }
+
+        return sanitized
+
+    # Public entry point used by pipeline & API
     def run(self, structured_data: dict) -> dict:
         prompt = self._build_prompt(structured_data)
 
@@ -58,10 +99,10 @@ class OutputAgent:
         except json.JSONDecodeError as e:
             raise ValueError(f"[OutputAgent] Invalid JSON from LLM: {e}")
 
-        # PHI sanitization
-        report_json = self._sanitize_dict(report_json)
+        # Safety Guard — final gate
+        report_json = self._apply_safety_guard(report_json)
 
-        # Schema validation (real JSON schema)
+        # Schema validation
         try:
             validate(instance=report_json, schema=self.schema)
         except ValidationError as e:

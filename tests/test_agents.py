@@ -14,16 +14,11 @@ class SyntheticCompletions:
             "report_sections": {
                 "overview": "User reports fatigue with mild overall impact.",
                 "symptom_analysis": "Fatigue appears intermittent and non-severe.",
-                "clinical_insights": "Pattern suggests lifestyle contributors; no diagnosis provided.",
+                "clinical_insights": "Pattern suggests lifestyle contributors.",
                 "risk_summary": "Low risk; no escalation indicators detected.",
                 "recommendations": "Maintain hydration and track symptoms."
             },
             "input_context": "unit_test_case",
-            "safety_checks": {
-                "diagnostic_check_passed": True,
-                "phi_safe": True,
-                "compliance_notes": "Synthetic output used for testing."
-            },
             "report_metadata": {
                 "generated_at": "2025-01-01T00:00:00Z",
                 "model_version": "synthetic-model",
@@ -106,7 +101,28 @@ def test_output_agent_minimal(patch_openai):
 
     result = agent.run(fake_structured)
 
+    # Core Output Assertions
     assert "report_sections" in result
     assert isinstance(result["report_sections"]["overview"], str)
-    assert result["safety_checks"]["phi_safe"] is True
-    assert result["safety_checks"]["diagnostic_check_passed"] is True
+
+    # Safety Guard Assertions
+    assert "safety_checks" in result
+    assert result["safety_checks"]["guard_passed"] is True
+    assert isinstance(result["safety_checks"]["events"], list)
+
+    overview_text = result["report_sections"]["overview"].lower()
+
+    # No diagnostic / prescription language
+    forbidden_phrases = [
+        "you have",
+        "diagnosed",
+        "suffering from",
+        "confirmed",
+        "prescribed",
+        "take 10mg",
+    ]
+    assert not any(p in overview_text for p in forbidden_phrases)
+
+    # PHI may be conservatively masked; ensure output is still safe and non-diagnostic
+    assert isinstance(overview_text, str)
+

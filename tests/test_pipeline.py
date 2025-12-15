@@ -1,60 +1,96 @@
 import pytest
-from unittest.mock import patch
 from agents.pipeline import HealthcarePipeline
 from agents.intake_agent import IntakeValidationError
 from agents.structuring_agent import StructuringError
+from llm.safety_guard import GuardResult
+
+
+# Mock Agents
+class MockStructuringAgent:
+    def run(self, intake_dict):
+        return {"structured": True}
+
+
+class MockOutputAgent:
+    def run(self, structured_data, retrieval_context=None):
+        return {
+            "report": {"summary": "ok"},
+            "_safety": None,  # pipeline should auto-fill default safety
+        }
 
 # SUCCESS: full pipeline
-@patch("agents.output_agent.OutputAgent.run", return_value={"report": "ok"})
-@patch("agents.structuring_agent.StructuringAgent.run", return_value={"structured": True})
-@patch("agents.intake_agent.IntakeAgent.run", return_value={"raw": True})
-@patch("agents.structuring_agent.StructuringAgent.__init__", return_value=None)
-@patch("agents.output_agent.OutputAgent.__init__", return_value=None)
-def test_pipeline_success(
-    mock_out_init,
-    mock_struct_init,
-    mock_intake,
-    mock_struct,
-    mock_output,
-):
-    pipeline = HealthcarePipeline()
+def test_pipeline_success(monkeypatch):
+    # Mock intake layer
+    class MockIntake:
+        def dict(self):
+            return {"raw": True}
+
+    def mock_process_raw_input(*args, **kwargs):
+        return MockIntake()
+
+    monkeypatch.setattr(
+        "agents.pipeline.process_raw_input",
+        mock_process_raw_input,
+    )
+
+    pipeline = HealthcarePipeline(
+        structuring_agent=MockStructuringAgent(),
+        output_agent=MockOutputAgent(),
+    )
 
     result = pipeline.run("hello world example input", meta={})
 
-    # Original expectations
-    assert "structured" in result
-    assert "report" in result
+    assert result["success"] is True
+    assert result["intake"] == {"raw": True}
+    assert result["structured"] == {"structured": True}
+    assert result["report"] == {"summary": "ok"}
 
-    # NEW: pipeline always outputs retrieval_context field
-    assert "retrieval_context" in result
+    # Retrieval is optional in Week 2
     assert result["retrieval_context"] is None
 
+    # Safety trace MUST exist
+    assert result["safety"] is not None
+    assert result["safety"]["allowed"] is True
+    assert result["safety"]["severity"] == "low"
+
 # Intake failure
-@patch("agents.intake_agent.IntakeAgent.run", side_effect=IntakeValidationError("bad input"))
-@patch("agents.structuring_agent.StructuringAgent.__init__", return_value=None)
-@patch("agents.output_agent.OutputAgent.__init__", return_value=None)
-def test_pipeline_intake_fail(
-    mock_out_init,
-    mock_struct_init,
-    mock_intake,
-):
-    pipeline = HealthcarePipeline()
+def test_pipeline_intake_fail(monkeypatch):
+    def mock_process_raw_input(*args, **kwargs):
+        raise IntakeValidationError("bad input")
+
+    monkeypatch.setattr(
+        "agents.pipeline.process_raw_input",
+        mock_process_raw_input,
+    )
+
+    pipeline = HealthcarePipeline(
+        structuring_agent=MockStructuringAgent(),
+        output_agent=MockOutputAgent(),
+    )
 
     with pytest.raises(IntakeValidationError):
         pipeline.run("", meta={})
 
 # Structuring failure
-@patch("agents.intake_agent.IntakeAgent.run", return_value={"raw": True})
-@patch("agents.structuring_agent.StructuringAgent.run", side_effect=StructuringError("struct fail"))
-@patch("agents.structuring_agent.StructuringAgent.__init__", return_value=None)
-@patch("agents.output_agent.OutputAgent.__init__", return_value=None)
-def test_pipeline_structuring_fail(
-    mock_out_init,
-    mock_struct_init,
-    mock_struct_run,
-    mock_intake,
-):
-    pipeline = HealthcarePipeline()
+
+class FailingStructuringAgent:
+    def run(self, intake_dict):
+        raise StructuringError("struct fail")
+
+def test_pipeline_structuring_fail(monkeypatch):
+    class MockIntake:
+        def dict(self):
+            return {"raw": True}
+
+    monkeypatch.setattr(
+        "agents.pipeline.process_raw_input",
+        lambda *args, **kwargs: MockIntake(),
+    )
+
+    pipeline = HealthcarePipeline(
+        structuring_agent=FailingStructuringAgent(),
+        output_agent=MockOutputAgent(),
+    )
 
     with pytest.raises(StructuringError):
         pipeline.run("valid text for intake", meta={})

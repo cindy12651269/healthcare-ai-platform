@@ -5,41 +5,49 @@ from pathlib import Path
 from typing import Any, Dict
 import jsonschema
 from jsonschema import ValidationError
-import openai
 
-
-# Paths 
+# Paths
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT_DIR / "llm" / "schemas" / "structured_output.json"
 PROMPT_PATH = ROOT_DIR / "llm" / "prompts" / "structuring.txt"
 
-# Exceptions 
-class StructuringError(Exception):
-    pass
+# Exceptions
 
-class LLMCallError(StructuringError):
-    pass
+class StructuringError(Exception):
+    """Base error for structuring failures."""
+
 
 class JSONParsingError(StructuringError):
-    pass
+    """Raised when LLM output cannot be parsed as JSON."""
+
 
 class SchemaValidationError(StructuringError):
-    pass
+    """Raised when output does not match JSON schema."""
 
-# Loaders 
-# Load structured output JSON schema.
+
+class LLMCallError(StructuringError):
+    """Reserved for Week 3 real LLM failures."""
+
+# Loaders
 def load_structured_schema() -> Dict[str, Any]:
     with SCHEMA_PATH.open("r", encoding="utf-8") as f:
         return json.load(f)
 
-# Load LLM system structuring prompt.
+
 def load_structuring_prompt() -> str:
     with PROMPT_PATH.open("r", encoding="utf-8") as f:
         return f.read()
 
-# Extract the first valid JSON object from LLM output.
+# Utilities
+
 def extract_json_block(text: str) -> str:
+    """
+    Extract the first valid JSON object from text.
+    Deterministic and test-safe.
+    """
     text = text.strip()
+
+    # Fast path
     try:
         json.loads(text)
         return text
@@ -48,87 +56,81 @@ def extract_json_block(text: str) -> str:
 
     start = text.find("{")
     end = text.rfind("}")
+
     if start == -1 or end == -1 or end <= start:
         raise JSONParsingError("No valid JSON block found.")
 
     candidate = text[start : end + 1]
+
     try:
         json.loads(candidate)
         return candidate
     except Exception as exc:
         raise JSONParsingError(f"Invalid JSON block: {exc}") from exc
 
-
-# Core Agent 
-# Enterprise-grade LLM structuring engine.
+# Core Agent
 class StructuringAgent:
+    """
+    Enterprise-grade structuring agent.
+    Week 1–2: Deterministic mock output, no external API calls, CI-safe, offline-safe
+    Week 3: Real LLM support will be enabled explicitly
+    """
+
     def __init__(
         self,
         model: str = "gpt-4o-mini",
-        openai_api_key: str | None = None,
+        mode: str | None = None,  # "mock" | "real"
     ) -> None:
-        """Initialize agent with model and API key."""
         self.model = model
-        openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
-        if not openai_api_key:
-            raise ValueError("OPENAI_API_KEY is missing.")
+        self.mode = mode or os.getenv("LLM_MODE", "mock")
 
-        openai.api_key = openai_api_key
+        # Load static assets (always safe)
         self._schema = load_structured_schema()
         self._base_prompt = load_structuring_prompt()
-    
-    # Run full structuring pipeline: LLM → JSON → Schema validation.
-    def run(self, health_input: Dict[str, Any]) -> Dict[str, Any]:
-        messages = self._build_messages(health_input)
-        raw_output = self._call_llm(messages)
-        json_str = extract_json_block(raw_output)
 
-        try:
-            structured = json.loads(json_str)
-        except Exception as exc:
-            raise JSONParsingError(f"JSON parse failed: {exc}") from exc
+        if self.mode not in {"mock", "real"}:
+            raise ValueError(f"Invalid LLM mode: {self.mode}")
 
-        self._validate_schema(structured)
-        return structured
-    # Build system + user messages for LLM call.
-    def _build_messages(self, health_input: Dict[str, Any]) -> list[Dict[str, str]]:
-        schema_json = json.dumps(self._schema, indent=2)
-        input_json = json.dumps(health_input, indent=2)
-
-        user_content = (
-            "HealthInput:\n"
-            f"{input_json}\n\n"
-            "Target JSON Schema:\n"
-            f"{schema_json}\n\n"
-            "Return ONLY valid JSON."
-        )
-
-        return [
-            {"role": "system", "content": self._base_prompt},
-            {"role": "user", "content": user_content},
-        ]
-    # Call OpenAI Chat Completion API.
-    def _call_llm(self, messages: list[Dict[str, str]]) -> str:
-        try:
-            response = openai.ChatCompletion.create(
-                model=self.model,
-                messages=messages,
-                temperature=0.1,
-                max_tokens=2048,
+        if self.mode == "real":
+            # Explicitly disabled until Week 3
+            raise NotImplementedError(
+                "Real LLM calls are disabled until Week 3."
             )
-        except Exception as exc:
-            raise LLMCallError(f"LLM call failed: {exc}") from exc
 
-        try:
-            content = response["choices"][0]["message"]["content"]
-        except Exception as exc:
-            raise LLMCallError(f"Malformed LLM response: {exc}") from exc
+    # Public API
+    # Run structuring pipeline: Currently supports: mock mode only
+    def run(self, health_input: Dict[str, Any]) -> Dict[str, Any]:
+ 
+        if self.mode == "mock":
+            structured = self._mock_structuring(health_input)
+            self._validate_schema(structured)
+            return structured
 
-        if not content:
-            raise LLMCallError("LLM returned empty response.")
+        # Safety net (should never be reached)
+        raise StructuringError("Unsupported structuring mode.")
 
-        return content
-    # Validate structured output against JSON schema.
+    # Mock Implementation (Week 1–2)
+    def _mock_structuring(self, health_input: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Deterministic mock output.
+
+        This ensures:
+        - predictable tests
+        - no hallucinations
+        - schema stability
+        """
+        return {
+            "chief_complaint": health_input.get("raw_text", "")[:200],
+            "symptoms": [],
+            "duration": "unspecified",
+            "severity": "unknown",
+            "additional_context": {
+                "source": health_input.get("source"),
+                "input_type": health_input.get("input_type"),
+            },
+        }
+
+    # Schema Validation
     def _validate_schema(self, structured: Dict[str, Any]) -> None:
         try:
             jsonschema.validate(instance=structured, schema=self._schema)
@@ -137,3 +139,20 @@ class StructuringAgent:
                 f"Schema validation error: {exc.message}"
             ) from exc
 
+# Week 3: Real LLM Support (INTENTIONALLY DISABLED)
+#
+# def _call_llm(self, messages: list[Dict[str, str]]) -> str:
+#     import openai
+#
+#     response = openai.ChatCompletion.create(
+#         model=self.model,
+#         messages=messages,
+#         temperature=0.1,
+#         max_tokens=2048,
+#     )
+#
+#     content = response["choices"][0]["message"]["content"]
+#     if not content:
+#         raise LLMCallError("LLM returned empty response.")
+#
+#     return content
