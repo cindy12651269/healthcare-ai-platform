@@ -1,5 +1,8 @@
 import logging
 from typing import Any, Dict, Optional, List
+import hashlib
+from uuid import uuid4
+
 from agents.intake_agent import process_raw_input, IntakeValidationError
 from agents.structuring_agent import (
     StructuringAgent,
@@ -15,6 +18,11 @@ from llm.safety_guard import GuardResult
 from rag.document_loader import DocumentLoader
 from rag.embeddings import Embeddings
 from rag.vector_store import InMemoryVectorStore
+
+# Persistence imports (isolated)
+from api.config import get_settings
+from db.models import HealthRecord
+from db.session import SessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +46,55 @@ class HealthcarePipeline:
         retrieval_agent: Optional[RetrievalAgent] = None,
         enable_retrieval: bool = False,
     ):
-        # Pipeline NEVER instantiates agents that may touch real APIs.
-        # All agents must be injected explicitly.
         self.struct = structuring_agent
         self.output = output_agent
         self.retrieval = retrieval_agent
         self.enable_retrieval = enable_retrieval
 
+    # Persistence Helper (isolated DB side-effect)
+    def _compute_input_hash(self, raw_text: str) -> str:
+        return hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
+
+    # Isolated persistence helper. 
+    # Opens its own DB session, commits safely, rolls back on failure, and never crashes the pipeline
+    def save_record(
+        self,
+        *,
+        raw_text: str,
+        trace: Dict[str, Any],
+    ) -> None:
+       
+        settings = get_settings()
+
+        if not settings.enable_persistence:
+            return
+
+        session = SessionLocal()
+
+        try:
+            input_hash = self._compute_input_hash(raw_text)
+
+            record = HealthRecord.from_pipeline_trace(
+                trace_id=str(uuid4()),
+                pipeline_version=settings.pipeline_version,
+                intake=trace["intake"],
+                structured_output=trace["structured"],
+                report_json=trace["report"],
+                safety_audit=trace["safety"],
+                input_hash=input_hash,
+            )
+
+            session.add(record)
+            session.commit()
+
+        except Exception as e:
+            session.rollback()
+            logger.error("Persistence failed", exc_info=e)
+
+        finally:
+            session.close()
+
+    # Main Pipeline
     def run(self, raw_text: str, meta: dict) -> Dict[str, Any]:
         trace: Dict[str, Any] = {
             "success": False,
@@ -123,7 +173,6 @@ class HealthcarePipeline:
 
             safety: Optional[GuardResult] = output_result.get("_safety")
 
-            # Safety trace MUST always exist
             if safety:
                 trace["safety"] = safety.to_dict()
             else:
@@ -146,7 +195,19 @@ class HealthcarePipeline:
             raise
 
         trace["success"] = True
+
+        # Step 5 — Optional Persistence Integration
+        try:
+            self.save_record(
+                raw_text=raw_text,
+                trace=trace,
+            )
+        except Exception:
+            # Absolute isolation — pipeline must NEVER fail due to DB
+            logger.warning("Persistence hook failed but pipeline succeeded.")
+
         return trace
+
 
 # RAG Vector Store Seeding (startup-time only)
 def seed_vector_store(

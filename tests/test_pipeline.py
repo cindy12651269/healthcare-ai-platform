@@ -3,24 +3,29 @@ from agents.pipeline import HealthcarePipeline
 from agents.intake_agent import IntakeValidationError
 from agents.structuring_agent import StructuringError
 from llm.safety_guard import GuardResult
-
+from api.config import get_settings
 
 # Mock Agents
 class MockStructuringAgent:
     def run(self, intake_dict):
         return {"structured": True}
 
-
 class MockOutputAgent:
     def run(self, structured_data, retrieval_context=None):
         return {
             "report": {"summary": "ok"},
-            "_safety": None,  # pipeline should auto-fill default safety
+            "_safety": None,
         }
 
 # SUCCESS: full pipeline
 def test_pipeline_success(monkeypatch):
-    # Mock intake layer
+    # Disable persistence
+    monkeypatch.setattr(
+        get_settings(),
+        "enable_persistence",
+        False,
+    )
+
     class MockIntake:
         def dict(self):
             return {"raw": True}
@@ -45,16 +50,21 @@ def test_pipeline_success(monkeypatch):
     assert result["structured"] == {"structured": True}
     assert result["report"] == {"summary": "ok"}
 
-    # Retrieval is optional in Week 2
     assert result["retrieval_context"] is None
 
-    # Safety trace MUST exist
     assert result["safety"] is not None
     assert result["safety"]["allowed"] is True
     assert result["safety"]["severity"] == "low"
 
+
 # Intake failure
 def test_pipeline_intake_fail(monkeypatch):
+    monkeypatch.setattr(
+        get_settings(),
+        "enable_persistence",
+        False,
+    )
+
     def mock_process_raw_input(*args, **kwargs):
         raise IntakeValidationError("bad input")
 
@@ -71,13 +81,20 @@ def test_pipeline_intake_fail(monkeypatch):
     with pytest.raises(IntakeValidationError):
         pipeline.run("", meta={})
 
-# Structuring failure
 
+# Structuring failure
 class FailingStructuringAgent:
     def run(self, intake_dict):
         raise StructuringError("struct fail")
 
+
 def test_pipeline_structuring_fail(monkeypatch):
+    monkeypatch.setattr(
+        get_settings(),
+        "enable_persistence",
+        False,
+    )
+
     class MockIntake:
         def dict(self):
             return {"raw": True}
