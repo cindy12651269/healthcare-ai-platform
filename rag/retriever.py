@@ -45,14 +45,38 @@ class Retriever:
         # Minimal query builder; can be expanded later
         return text.strip()
 
-    def retrieve(self, text: str) -> List[str]:
+    def retrieve(self, text: str, *, top_k: Optional[int] = None) -> List[dict]:
+        """
+        Retrieve top-k semantically similar documents.
+        Returns:
+            List[dict] with:
+            {
+                "text": str,
+                "source": str,
+                "score": float
+            }
+        """
+
         q = self.build_query(text)
         if not q:
             return []
 
+        k = top_k if top_k is not None else self.top_k
+
         q_emb = self.embeddings.embed_text(q)
-        results = self.store.query(q_emb, top_k=self.top_k)
-        return [doc for doc, _score in results]
+
+        results = self.store.query(q_emb, top_k=k)
+
+        formatted = [
+            {
+                "text": doc,
+                "source": "vector_store",
+                "score": score,
+            }
+            for doc, score in results
+        ]
+
+        return formatted
 
     def add_documents(self, docs: List[str]) -> None:
         embeddings = self.embeddings.embed_texts(docs)

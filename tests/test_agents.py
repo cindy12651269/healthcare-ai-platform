@@ -2,13 +2,10 @@ import json
 import pytest
 from agents.output_agent import OutputAgent
 
-# Synthetic LLM client (Mimics OpenAI behavior)
 
-# Mimics OpenAI chat completion behavior with synthetic structured output.
+# Synthetic OpenAI mock
 class SyntheticCompletions:
-
     def create(self, *args, **kwargs):
-        # Synthetic JSON response generated for deterministic testing
         synthetic_json = {
             "source_struct_id": "test1",
             "report_sections": {
@@ -44,75 +41,45 @@ class SyntheticChat:
 
 
 class SyntheticOpenAI:
-    # Drop-in replacement for OpenAI() that returns deterministic synthetic outputs.
     def __init__(self, *args, **kwargs):
         self.chat = SyntheticChat()
 
 
-# Pytest fixture for patching OpenAI client
-
 @pytest.fixture
-# Patch OpenAI client with deterministic synthetic client for testing.
 def patch_openai(monkeypatch):
     monkeypatch.setattr("agents.output_agent.OpenAI", SyntheticOpenAI)
 
-# Actual test case
+
 def test_output_agent_minimal(patch_openai):
     agent = OutputAgent(model="gpt-4o-mini")
 
     fake_structured = {
-        "trace": {
-            "input_id": "test1",
-            "user_id": "u123",
-            "timestamp": "2025-01-01T00:00:00Z",
-            "source": "web",
-            "input_type": "chat"
-        },
-        "compliance": {
-            "contains_phi": False,
-            "consent_granted": True,
-            "data_zone": "public_zone",
-            "audit_required": False
-        },
+        "trace": {"input_id": "test1"},
+        "compliance": {"consent_granted": True},
         "clinical_structuring": {
             "symptoms": ["fatigue"],
             "clinical_summary": "User reports fatigue.",
             "confidence_level": 0.9
         },
-        "agent_decisioning": {
-            "recommendations": ["monitor symptoms"],
-            "next_actions": ["send_followup"],
-            "escalation_required": False
-        },
-        "ehr_interoperability": {
-            "patient_id": "u123",
-            "encounter_id": "encounter_test1",
-            "fhir_resources": [],
-            "hl7_messages": [],
-            "sync_status": "pending"
-        },
-        "output_metadata": {
-            "generated_at": "2025-01-01T00:00:00Z",
-            "model_version": "test",
-            "prompt_version": "v1",
-            "latency_ms": 1
-        }
+        "agent_decisioning": {},
+        "ehr_interoperability": {},
+        "output_metadata": {}
     }
 
-    result = agent.run(fake_structured)
+    result = agent.run(fake_structured, retrieval_context=None)
 
-    # Core Output Assertions
+    # Core structure
     assert "report_sections" in result
     assert isinstance(result["report_sections"]["overview"], str)
 
-    # Safety Guard Assertions
+    # Safety layer must exist
     assert "safety_checks" in result
     assert result["safety_checks"]["guard_passed"] is True
     assert isinstance(result["safety_checks"]["events"], list)
 
     overview_text = result["report_sections"]["overview"].lower()
 
-    # No diagnostic / prescription language
+    # Ensure no direct diagnostic language
     forbidden_phrases = [
         "you have",
         "diagnosed",
@@ -123,6 +90,23 @@ def test_output_agent_minimal(patch_openai):
     ]
     assert not any(p in overview_text for p in forbidden_phrases)
 
-    # PHI may be conservatively masked; ensure output is still safe and non-diagnostic
-    assert isinstance(overview_text, str)
+
+def test_output_agent_with_retrieval_context(patch_openai):
+    agent = OutputAgent(model="gpt-4o-mini")
+
+    fake_structured = {"trace": {"input_id": "test2"}}
+
+    retrieval_context = [
+        {
+            "text": "Fatigue may relate to sleep quality.",
+            "source": "kb_doc_1",
+            "score": 0.87,
+        }
+    ]
+
+    result = agent.run(fake_structured, retrieval_context=retrieval_context)
+
+    assert "report_sections" in result
+    assert "safety_checks" in result
+    assert result["safety_checks"]["guard_passed"] is True
 

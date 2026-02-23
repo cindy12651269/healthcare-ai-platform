@@ -15,16 +15,13 @@ from agents.retrieval_agent import RetrievalAgent
 
 from llm.safety_guard import GuardResult
 
-from rag.document_loader import DocumentLoader
-from rag.embeddings import Embeddings
-from rag.vector_store import InMemoryVectorStore
-
 # Persistence imports (isolated)
 from api.config import get_settings
 from db.models import HealthRecord
 from db.session import SessionLocal
 
 logger = logging.getLogger(__name__)
+
 
 class HealthcarePipeline:
     """
@@ -33,10 +30,11 @@ class HealthcarePipeline:
     Week 1–2:
         - StructuringAgent: mock-only
         - OutputAgent: mock-only
-        - No external API calls
+        - RetrievalAgent optional (RAG mode)
         - Fully testable & CI-safe
 
-    Week 3: Real LLM agents are injected explicitly
+    Week 3+:
+        - Real LLM and embedding backends injected explicitly.
     """
 
     def __init__(
@@ -46,17 +44,22 @@ class HealthcarePipeline:
         retrieval_agent: Optional[RetrievalAgent] = None,
         enable_retrieval: bool = False,
     ):
+        # Core agents
         self.struct = structuring_agent
         self.output = output_agent
         self.retrieval = retrieval_agent
+
+        # Default RAG mode (can be overridden at runtime)
         self.enable_retrieval = enable_retrieval
 
-    # Persistence Helper (isolated DB side-effect)
+    # Persistence Layer (Isolated Side Effect)
+
+    # Compute deterministic SHA256 hash for idempotency.
     def _compute_input_hash(self, raw_text: str) -> str:
         return hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
 
-    # Isolated persistence helper. 
-    # Opens its own DB session, commits safely, rolls back on failure, and never crashes the pipeline
+    # Save pipeline output into DB. 
+    # Completely isolated: Own DB session, safe rollback, and NEVER crashes pipeline
     def save_record(
         self,
         *,
@@ -95,12 +98,40 @@ class HealthcarePipeline:
             session.close()
 
     # Main Pipeline
-    def run(self, raw_text: str, meta: dict) -> Dict[str, Any]:
+    def run(
+        self,
+        raw_text: str,
+        meta: dict,
+        *,
+        enable_rag: Optional[bool] = None,
+        rag_top_k: int = 3,
+    ) -> Dict[str, Any]:
+        """
+        Flow (RAG disabled):
+            Intake → Structuring → Output
+
+        Flow (RAG enabled):
+            Intake → Structuring → Retrieval → Output
+
+        Retrieval is OPTIONAL and NON-FATAL:
+        - If retrieval fails, pipeline continues without context.
+        - Retrieval errors are recorded in trace.
+        """
+
+        rag_enabled = enable_rag if enable_rag is not None else self.enable_retrieval
+
         trace: Dict[str, Any] = {
             "success": False,
             "intake": None,
             "structured": None,
-            "retrieval_context": None,
+            "rag": {
+                "enabled": rag_enabled,
+                "used": False,
+                "query": None,
+                "top_k": rag_top_k,
+                "chunks": [],   # Always a list for deterministic contract
+                "error": None,
+            },
             "report": None,
             "safety": None,
             "errors": [],
@@ -142,23 +173,41 @@ class HealthcarePipeline:
             )
             raise StructuringError(str(e))
 
-        # 3. Retrieval (optional, non-fatal)
-        retrieval_results: List[str] = []
+        # 3. Retrieval (Optional)
+        retrieval_results: List[Any] = []
 
-        if self.enable_retrieval and self.retrieval:
+        if rag_enabled and self.retrieval:
             try:
-                retrieval_results = self.retrieval.run(structured)
-                trace["retrieval_context"] = retrieval_results
+                # Unified RetrievalAgent interface
+                retrieval_payload = self.retrieval.run(
+                    structured_data=structured,
+                    top_k=rag_top_k,
+                )
+
+                retrieval_results = retrieval_payload.get("chunks", [])
+
+                trace["rag"].update(
+                    {
+                        "used": True,
+                        "query": retrieval_payload.get("query"),
+                        "chunks": retrieval_results,
+                    }
+                )
 
             except Exception as e:
+                # NON-FATAL failure
                 logger.warning(
-                    "Retrieval failed, continuing without context", exc_info=e
+                    "Retrieval failed. Continuing without RAG context.",
+                    exc_info=e,
                 )
-                trace["errors"].append(
+
+                trace["rag"].update(
                     {
-                        "stage": "retrieval",
-                        "error_type": type(e).__name__,
-                        "message": str(e),
+                        "used": False,
+                        "error": {
+                            "type": type(e).__name__,
+                            "message": str(e),
+                        },
                     }
                 )
 
@@ -194,35 +243,16 @@ class HealthcarePipeline:
             )
             raise
 
+        # 5. Mark Success
         trace["success"] = True
 
-        # Step 5 — Optional Persistence Integration
+        # 6. Optional Persistence
         try:
             self.save_record(
                 raw_text=raw_text,
                 trace=trace,
             )
         except Exception:
-            # Absolute isolation — pipeline must NEVER fail due to DB
             logger.warning("Persistence hook failed but pipeline succeeded.")
 
         return trace
-
-
-# RAG Vector Store Seeding (startup-time only)
-def seed_vector_store(
-    loader: DocumentLoader,
-    embedder: Embeddings,
-    store: InMemoryVectorStore,
-    source_path: str,
-) -> int:
-    documents = loader.load_directory(source_path)
-    if not documents:
-        logger.warning("No documents found for RAG seeding.")
-        return 0
-
-    embeddings = embedder.embed_texts(documents)
-    store.add_batch(documents, embeddings)
-
-    logger.info("Seeded vector store with %d documents.", len(documents))
-    return len(documents)
