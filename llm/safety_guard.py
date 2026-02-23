@@ -56,7 +56,7 @@ PHI_PATTERNS: List[Tuple[str, str]] = [
     ("PHI_DATE", r"\b\d{1,2}/\d{1,2}/\d{2,4}\b"),
     ("PHI_ZIP", r"\b\d{5}(?:-\d{4})?\b"),
     ("PHI_ID", r"\b(?:MRN|ID|Patient\s*ID|Record\s*ID)\s*[:#]?\s*[A-Z0-9-]{4,}\b"),
-    # Weak / contextual name detection (Week 1–2 safe)
+    # Weak / contextual name detection (Phase 1–2 safe)
     ("PHI_NAME", r"\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)+\b"),
 ]
 

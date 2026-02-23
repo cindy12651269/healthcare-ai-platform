@@ -27,13 +27,13 @@ class HealthcarePipeline:
     """
     Production-grade multi-agent pipeline.
 
-    Week 1–2:
+    Phase 1–2:
         - StructuringAgent: mock-only
         - OutputAgent: mock-only
         - RetrievalAgent optional (RAG mode)
         - Fully testable & CI-safe
 
-    Week 3+:
+    Phase 3+:
         - Real LLM and embedding backends injected explicitly.
     """
 

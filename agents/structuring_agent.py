@@ -26,7 +26,7 @@ class SchemaValidationError(StructuringError):
 
 
 class LLMCallError(StructuringError):
-    """Reserved for Week 3 real LLM failures."""
+    """Reserved for Phase 3 real LLM failures."""
 
 # Loaders
 def load_structured_schema() -> Dict[str, Any]:
@@ -72,8 +72,8 @@ def extract_json_block(text: str) -> str:
 class StructuringAgent:
     """
     Enterprise-grade structuring agent.
-    Week 1–2: Deterministic mock output, no external API calls, CI-safe, offline-safe
-    Week 3: Real LLM support will be enabled explicitly
+    Phase 1–2: Deterministic mock output, no external API calls, CI-safe, offline-safe
+    Phase 3: Real LLM support will be enabled explicitly
     """
 
     def __init__(
@@ -92,9 +92,9 @@ class StructuringAgent:
             raise ValueError(f"Invalid LLM mode: {self.mode}")
 
         if self.mode == "real":
-            # Explicitly disabled until Week 3
+            # Explicitly disabled until Phase 3
             raise NotImplementedError(
-                "Real LLM calls are disabled until Week 3."
+                "Real LLM calls are disabled until Phase 3."
             )
 
     # Public API
@@ -109,7 +109,7 @@ class StructuringAgent:
         # Safety net (should never be reached)
         raise StructuringError("Unsupported structuring mode.")
 
-    # Mock Implementation (Week 1–2)
+    # Mock Implementation (Phase 1–2)
     def _mock_structuring(self, health_input: Dict[str, Any]) -> Dict[str, Any]:
         """
         Deterministic mock output.
@@ -139,7 +139,7 @@ class StructuringAgent:
                 f"Schema validation error: {exc.message}"
             ) from exc
 
-# Week 3: Real LLM Support (INTENTIONALLY DISABLED)
+# Phase 3: Real LLM Support (INTENTIONALLY DISABLED)
 #
 # def _call_llm(self, messages: list[Dict[str, str]]) -> str:
 #     import openai

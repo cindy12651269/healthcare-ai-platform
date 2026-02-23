@@ -91,7 +91,7 @@ These patterns help transform raw text into structured fields.
 
 * Chief complaint
 * Symptom list
-* Duration (hours, days, weeks)
+* Duration (hours, days, Phases)
 * Triggers or context
 * Severity (mild, moderate, severe)
 * Aggravating or relieving factors
@@ -153,7 +153,7 @@ Seek timely medical attention if:
 
 ### Patterns to Extract
 
-* Workload: "busy week," "high stress," "long hours"
+* Workload: "busy Phase," "high stress," "long hours"
 * Sleep quality: "sleeping 4 hours," "waking up often"
 * Hydration: "forgot to drink water"
 * Exercise: "started new workout," "no exercise recently"

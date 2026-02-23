@@ -54,7 +54,7 @@ Set compliance as follows:
 From input.raw_text, extract:
 - symptoms: list of distinct symptoms mentioned
 - severity: "mild" / "moderate" / "severe" if inferable, otherwise null
-- duration: time-related wording (e.g., "2 days", "3 weeks")
+- duration: time-related wording (e.g., "2 days", "3 Phases")
 - onset: when the issue started if stated
 - triggers: activities, foods, events that trigger symptoms
 - red_flags: any critical warning signals explicitly stated

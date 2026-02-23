@@ -28,12 +28,12 @@ At a high level, the platform is a **backend-centric AI service** with a thin de
 
   * `IntakeAgent` – input normalization and validation
   * `StructuringAgent` – LLM-driven JSON structuring
-  * `RetrievalAgent` – RAG integration (Week 2+)
+  * `RetrievalAgent` – RAG integration (Phase 2+)
   * `OutputAgent` – final human-readable report generation
   * `HealthcarePipeline` – orchestrator that chains agents
 
 * **LLM Layer (`llm/`)**
-  Prompts, schemas, and safety guard around any LLM provider (mock in Week 1, real in Week 3+).
+  Prompts, schemas, and safety guard around any LLM provider (mock in Phase 1, real in Phase 3+).
 
 * **RAG Layer (`rag/`)**
   Vector store, embeddings, and retrieval flows for grounding health content.
@@ -67,7 +67,7 @@ subgraph Backend
   subgraph Agents
     INTAKE[IntakeAgent]
     STRUCT[StructuringAgent]
-    RETR[RetrievalAgent (Week 2+)]
+    RETR[RetrievalAgent (Phase 2+)]
     OUTPUT[OutputAgent]
   end
 
@@ -189,13 +189,13 @@ Convert normalized intake data into structured, clinical-style JSON using an LLM
 **Responsibilities:**
 
 * Construct prompt using `llm/prompts/structuring.txt`
-* Call a pluggable LLM interface (mock in Week 1, provider in Week 3+)
+* Call a pluggable LLM interface (mock in Phase 1, provider in Phase 3+)
 * Enforce schema via `llm/schemas/structured_output.json`
 * Raise `StructuringError` if output is invalid or unsafe
 
 ---
 
-### 4.3 RetrievalAgent (`agents/retrieval_agent.py` – Week 2+)
+### 4.3 RetrievalAgent (`agents/retrieval_agent.py` – Phase 2+)
 
 **Purpose:**
 Enhance LLM reasoning with clinical knowledge grounding (RAG).
@@ -228,13 +228,13 @@ Generate a human-readable, safe summary report.
 **Purpose:**
 Coordinate all agents into a single end-to-end pipeline.
 
-**High-level flow (Week 1):**
+**High-level flow (Phase 1):**
 
 ```text
 HealthInput → IntakeAgent → StructuringAgent → OutputAgent → Result
 ```
 
-Planned extension (Week 2+):
+Planned extension (Phase 2+):
 
 ```text
 HealthInput → IntakeAgent
@@ -423,7 +423,7 @@ This structure allows mapping directly to job descriptions that require AWS, HIP
 
 ## 11. Request–Response Flow (Sequence)
 
-Current Week-1 flow (mock LLM):
+Current Phase-1 flow (mock LLM):
 
 ```mermaid
 sequenceDiagram
@@ -446,7 +446,7 @@ sequenceDiagram
     API-->>Client: 200 OK JSON response
 ```
 
-Future Week-2+ flow will insert:
+Future Phase-2+ flow will insert:
 
 * `RetrievalAgent` (RAG) between structuring and report generation
 * DB persistence after successful pipeline execution
@@ -458,13 +458,13 @@ Future Week-2+ flow will insert:
 
 The architecture intentionally separates:
 
-* **Mock mode** (Week 1):
+* **Mock mode** (Phase 1):
 
   * Deterministic outputs for reliable tests
   * No external dependencies
   * Ideal for early pipeline and infra work
 
-* **Real LLM mode** (Week 3+):
+* **Real LLM mode** (Phase 3+):
 
   * Switched via config (`settings.app_env` / env var)
   * Same interface, different backend

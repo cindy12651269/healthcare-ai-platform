@@ -1,16 +1,16 @@
-# Week 1 Project Log — Core Foundation (System Spine)
+# Phase 1 Project Log — Core Foundation (System Spine)
 
-## 1. Weekly Goal
+## 1. Phase Goal
 
 Establish the complete system spine and make the healthcare AI pipeline runnable end-to-end using **dummy / dry-run LLM outputs**.
 
-This provides a stable foundation for Week 2 (RAG, Safety, Persistence) and Week 3 (Demo UI + Deployment).
+This provides a stable foundation for Phase 2 (RAG, Safety, Persistence) and Phase 3 (Demo UI + Deployment).
 
 ---
 
 ## 2. Summary of Accomplishments
 
-During Week 1, the full backend architecture was successfully set up:
+During Phase 1, the full backend architecture was successfully set up:
 
 ### End-to-end pipeline functional
 
@@ -28,7 +28,7 @@ During Week 1, the full backend architecture was successfully set up:
 * Makefile one-command workflow
 * Unified env config loader with Pydantic
 
-### All Week-1 Agents implemented
+### All Phase-1 Agents implemented
 
 * IntakeAgent
 * StructuringAgent (schema-enforced LLM output)
@@ -108,7 +108,7 @@ Transform raw health input into structured clinical-style output.
 * Strong JSON schema validation
 * Integrated prompt template: `llm/prompts/structuring.txt`
 * Added `structured_output.json` schema
-* Deterministic **dry-run LLM mock** (Week 1 does NOT call real API)
+* Deterministic **dry-run LLM mock** (Phase 1 does NOT call real API)
 
 #### Reference Files
 
@@ -178,7 +178,7 @@ Expose the complete pipeline as a REST API.
 
 #### Notes
 
-All Week-1 responses are deterministic using mock LLM, ensuring:
+All Phase-1 responses are deterministic using mock LLM, ensuring:
 
 * reproducible test runs
 * zero dependency on OpenAI keys
@@ -186,7 +186,7 @@ All Week-1 responses are deterministic using mock LLM, ensuring:
 
 ---
 
-## 4. Architecture Progress After Week 1
+## 4. Architecture Progress After Phase 1
 
 ### Functional System Spine Now Exists
 
@@ -203,7 +203,7 @@ curl -X POST http://localhost:8000/api/ingest
 
 ### Deterministic, testable, production-grade modular design
 
-The architecture is now ready for Week 2 enhancements:
+The architecture is now ready for Phase 2 enhancements:
 
 * Real retrieval
 * Safety guard enforcement
@@ -211,7 +211,7 @@ The architecture is now ready for Week 2 enhancements:
 
 ---
 
-## 5. Week 1 Acceptance Criteria — Achieved
+## 5. Phase 1 Acceptance Criteria — Achieved
 
 | Requirement                       | Status |
 | --------------------------------- | ------ |
@@ -224,9 +224,9 @@ The architecture is now ready for Week 2 enhancements:
 
 ---
 
-## 6. Preview of Week 2 – RAG + Safety + Persistence
+## 6. Preview of Phase 2 – RAG + Safety + Persistence
 
-Week 2 will introduce:
+Phase 2 will introduce:
 
 ### Retrieval Agent (`retrieval_agent.py`)
 
@@ -246,16 +246,16 @@ Retrieval improves structuring accuracy.
 
 ---
 
-## 7. Notes on Mock-Only Implementation (Important for Employers)
+## 7. Notes on Mock-Only Implementation 
 
-> **During Week 1, the system does NOT contact OpenAI or external LLM providers.**
+> **During Phase 1, the system does NOT contact OpenAI or external LLM providers.**
 > All LLM outputs are served through a controlled, deterministic mock layer.
 > This ensures stable architecture development, reproducible tests, and clean separation of concerns.
 
-Real LLM calls will be enabled in Week 3 via a single configuration flag.
+Real LLM calls will be enabled in Phase 3 via a single configuration flag.
 
 ---
 
-## Week 1 Completed Successfully
+## Phase 1 Completed Successfully
 
 The system has a solid, enterprise-grade foundation and is fully ready for expansion.

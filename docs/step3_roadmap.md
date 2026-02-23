@@ -1,10 +1,10 @@
-# Step 3 — Development Roadmap (4-Week Sprint Plan)
+# Step 3 — Development Roadmap (Sprint Plan)
 
-This roadmap is designed for a fast MVP build targeting healthcare AI projects** with clear weekly deliverables.
+This roadmap is designed for a fast MVP build targeting healthcare AI projects** with clear Phasely deliverables.
 
 ---
 
-## Week 1 — Core Foundation (System Spine)
+## Phase 1 — Core Foundation (System Spine)
 
 **Goal:** Make the system runnable end-to-end with dummy data.
 
@@ -32,7 +32,7 @@ This roadmap is designed for a fast MVP build targeting healthcare AI projects**
 
 ---
 
-## Week 2 — RAG + Safety + Persistence
+## Phase 2 — RAG + Safety + Persistence
 
 **Goal:** Introduce memory, knowledge grounding, and safety controls.
 
@@ -58,7 +58,7 @@ This roadmap is designed for a fast MVP build targeting healthcare AI projects**
 
 ---
 
-## Week 3 — UI + Evaluation + Observability
+## Phase 3 — UI + Evaluation + Observability
 
 **Goal:** Make the system demo-ready and measurable.
 
@@ -83,7 +83,7 @@ This roadmap is designed for a fast MVP build targeting healthcare AI projects**
 
 ---
 
-## Week 4 — Interoperability + Portfolio Hardening
+## Phase 4 — Interoperability + Portfolio Hardening
 
 ### Deliverables
 
@@ -107,7 +107,7 @@ This roadmap is designed for a fast MVP build targeting healthcare AI projects**
 
 ---
 
-## Final Output After 4 Weeks
+## Final Output After 4 Phases
 
 * ✅ Full Health LLM + Mini Agent System
 * ✅ RAG + Safety + Observability

@@ -1,14 +1,14 @@
 # Step 5 — Demo & Evaluation Guide
 
-Healthcare AI Platform — Week 1 Evaluation Documentation
+Healthcare AI Platform — Phase 1 Evaluation Documentation
 
-This document presents **formal evaluation outputs** for all Week‑1 modules, based entirely on deterministic mock behavior (no real OpenAI calls). It is written in a **portfolio‑ready, enterprise technical documentation format**.
+This document presents **formal evaluation outputs** for all Phase‑1 modules, based entirely on deterministic mock behavior (no real OpenAI calls). It is written in a **portfolio‑ready, enterprise technical documentation format**.
 
 ---
 
 # 1. Overview
 
-Week 1 established the full system spine:
+Phase 1 established the full system spine:
 
 ```
 Raw Text → Intake Agent → Structuring Agent → Output Agent → API Response
@@ -283,9 +283,9 @@ Response:
 
 ---
 
-# 8. Week‑1 Evaluation Conclusion
+# 8. Phase‑1 Evaluation Conclusion
 
-All Week‑1 modules are:
+All Phase‑1 modules are:
 
 * Fully implemented
 * Deterministically testable
@@ -295,7 +295,7 @@ All Week‑1 modules are:
 
 This completes Step 5 Demo & Evaluation for the Core System Spine.
 
-Week 2 will introduce:
+Phase 2 will introduce:
 
 * Retrieval (FAISS/Chroma)
 * Safety Guard

@@ -50,11 +50,11 @@ class MockEmbeddings:
 
 class OpenAIEmbeddings(Embeddings):
     """
-    Placeholder for real embedding backend (Week 3+).
+    Placeholder for real embedding backend (Phase 3+).
     """
 
     def __init__(self, model: str = "text-embedding-3-small"):
         self.model = model
 
     def embed_text(self, text: str) -> List[float]:
-        raise NotImplementedError("Real embedding backend will be implemented in Week 3.")
+        raise NotImplementedError("Real embedding backend will be implemented in Phase 3.")

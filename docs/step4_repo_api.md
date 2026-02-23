@@ -16,7 +16,7 @@ healthcare-ai-platform/
 ├── api/                   # FastAPI service (endpoints, dependencies, config)
 ├── app/                   # Frontend demo UI
 ├── llm/                   # Prompts, schemas, safety guard
-├── rag/                   # Retrieval and vector storage (Week 2+)
+├── rag/                   # Retrieval and vector storage (Phase 2+)
 ├── db/                    # Database models and migrations
 ├── interoperability/      # FHIR, HL7, EHR routing modules
 ├── observability/         # Audit logs, metrics, tracing
@@ -242,7 +242,7 @@ This environment ensures the project runs identically on any machine.
 
 ## 8. Deployment Considerations
 
-Although Week 1 only covers local execution, the repo is structured for production:
+Although Phase 1 only covers local execution, the repo is structured for production:
 
 * `infra/aws/` contains Terraform examples
 * Observability hooks exist for metrics + audit logs
