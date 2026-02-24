@@ -1,71 +1,81 @@
-# Step 4 — Repository & API Documentation
+# Step 4 — Repository & API Documentation (Updated After Phase 2)
 
 Healthcare AI Platform — Repository Structure and API Specification
 
-This document describes how the repository is organized and how the backend API (FastAPI) is structured, implemented, and used. It provides a complete reference for developers, reviewers, and potential clients evaluating the system.
+This document reflects the **current repository structure and API behavior after Phase 2 (RAG, Safety, Persistence)**.
+
+It serves as a technical reference for:
+
+* Developers contributing to the codebase
+* Reviewers evaluating backend quality
+* Clients assessing healthcare AI readiness
 
 ---
 
-## 1. Repository Overview
+# 1. Repository Overview
 
-The project follows a modular architecture designed for clarity, scalability, and portfolio readability.
+The project follows a modular, layered architecture designed for clarity, testability, and healthcare SaaS extensibility.
 
 ```
 healthcare-ai-platform/
-├── agents/                # Core LLM-driven agents and pipeline
-├── api/                   # FastAPI service (endpoints, dependencies, config)
+├── agents/                # Core agents and HealthcarePipeline
+├── api/                   # FastAPI service (routes, config, deps)
 ├── app/                   # Frontend demo UI
 ├── llm/                   # Prompts, schemas, safety guard
-├── rag/                   # Retrieval and vector storage (Phase 2+)
-├── db/                    # Database models and migrations
-├── interoperability/      # FHIR, HL7, EHR routing modules
-├── observability/         # Audit logs, metrics, tracing
-├── infra/                 # AWS, IaC, Docker service config
-├── docs/                  # Architecture, product, roadmap, demo docs
-├── tests/                 # Automated tests (agents, pipeline, API)
+├── rag/                   # Deterministic RAG + vector store abstraction
+├── db/                    # ORM models, migrations, session management
+├── interoperability/      # FHIR, HL7, consent, EHR routing (Phase 4)
+├── observability/         # Audit, tracing, metrics hooks (Phase 3+)
+├── infra/                 # Docker, AWS/IaC examples
+├── docs/                  # Architecture, roadmap, API, journals
+├── tests/                 # Unit & integration tests
 ├── Makefile               # Developer automation
 ├── docker-compose.yml     # Local runtime stack (API + Postgres + Redis)
 └── requirements.txt
 ```
 
-Each folder represents a functional boundary within the system. Backend execution centers on the **agents**, **pipeline**, and **api** layers.
+Backend execution centers on:
+
+* `agents/`
+* `api/`
+* `rag/`
+* `llm/`
+* `db/`
 
 ---
 
-## 2. FastAPI Service Architecture (`api/`)
+# 2. FastAPI Service Architecture (`api/`)
 
-The API layer exposes the healthcare pipeline to external clients.
+The API layer exposes the HealthcarePipeline to external clients while remaining thin and secure.
 
-### 2.1 Key Files
+## 2.1 Key Files
 
-| File                    | Purpose                                                             |
-| ----------------------- | ------------------------------------------------------------------- |
-| `api/main.py`           | FastAPI initialization, router registration, lifecycle events       |
-| `api/routers/ingest.py` | Defines `/api/ingest` endpoint and request/response models          |
-| `api/deps.py`           | Dependency injection (pipeline, DB session, future auth middleware) |
-| `api/config.py`         | Centralized environment configuration (Pydantic-based)              |
-| `api/middleware/`       | Reserved for audit, authentication, rate-limiting                   |
+| File                    | Purpose                                                       |
+| ----------------------- | ------------------------------------------------------------- |
+| `api/main.py`           | FastAPI initialization, router registration, lifecycle events |
+| `api/routers/ingest.py` | Defines `/api/ingest` endpoint and request/response models    |
+| `api/deps.py`           | Dependency injection (pipeline, DB session, runtime flags)    |
+| `api/config.py`         | Centralized environment configuration (Pydantic-based)        |
+| `api/middleware/`       | Reserved for auth, audit, rate-limiting                       |
 
 ---
 
-## 3. API Initialization (`api/main.py`)
+# 3. API Initialization (`api/main.py`)
 
-The main API entry point configures logging, registers routers, and provides basic system introspection.
+## Responsibilities
 
-### Responsibilities
-
-* Initialize the FastAPI application
-* Load environment config (`get_settings()`)
-* Register routers (`ingest`)
-* Provide `/health` and `/` endpoints
+* Initialize FastAPI application
+* Load environment config via `get_settings()`
+* Register routers
+* Provide `/health` endpoint
 * Log startup and shutdown events
 
-### Simplified Structure
+### Simplified Initialization
 
 ```python
 app = FastAPI(
     title=settings.app_name,
-    version="0.1.0",
+    version="0.2.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -87,13 +97,11 @@ def health_check():
 
 ---
 
-## 4. Ingest Endpoint (`/api/ingest`)
+# 4. Ingest Endpoint (`POST /api/ingest`)
 
-This is the core API entrypoint for the healthcare AI pipeline.
+This is the primary API entrypoint for healthcare AI processing.
 
-### 4.1 Request Schema
-
-Defined using Pydantic:
+## 4.1 Request Schema
 
 ```python
 class IngestRequest(BaseModel):
@@ -104,7 +112,7 @@ class IngestRequest(BaseModel):
     user_id: Optional[str] = None
 ```
 
-### 4.2 Response Schema
+## 4.2 Response Schema (Phase 2 Updated)
 
 ```python
 class IngestResponse(BaseModel):
@@ -112,17 +120,28 @@ class IngestResponse(BaseModel):
     intake: Optional[Dict[str, Any]]
     structured: Optional[Dict[str, Any]]
     report: Optional[Dict[str, Any]]
+    retrieval_trace: Optional[List[Dict[str, Any]]] = None
+    safety_trace: Optional[Dict[str, Any]] = None
     errors: List[Dict[str, Any]]
 ```
 
-### 4.3 Endpoint Logic
+### Field Notes
 
-Core logic inside `ingest.py`:
+* `retrieval_trace` is present when RAG is enabled.
+* `safety_trace` contains deterministic safety enforcement results.
+* `errors` contains structured domain errors.
+
+---
+
+## 4.3 Endpoint Logic
 
 ```python
 @router.post("/ingest")
-def ingest(payload: IngestRequest, pipeline: HealthcarePipeline = Depends(get_pipeline)):
-    trace = pipeline.run(
+def ingest(
+    payload: IngestRequest,
+    pipeline: HealthcarePipeline = Depends(get_pipeline),
+):
+    result = pipeline.run(
         raw_text=payload.text,
         meta={
             "source": payload.source,
@@ -131,87 +150,107 @@ def ingest(payload: IngestRequest, pipeline: HealthcarePipeline = Depends(get_pi
             "user_id": payload.user_id,
         },
     )
-    return trace
+    return result
 ```
 
-### 4.4 Error Handling
+The API layer:
 
-Mapped to consistent HTTP responses:
+* Does not call LLMs directly
+* Does not apply business logic
+* Delegates all execution to `HealthcarePipeline`
 
-| Error                 | HTTP Code |
+---
+
+# 5. Pipeline Integration (`agents/pipeline.py`)
+
+The API interacts exclusively with `HealthcarePipeline`.
+
+## 5.1 Current Phase 2 Execution Flow
+
+```text
+Raw Input
+   → IntakeAgent
+   → StructuringAgent
+   → RetrievalAgent (optional)
+   → OutputAgent
+   → Safety Guard
+   → Persistence (optional)
+```
+
+## 5.2 Responsibilities
+
+The pipeline:
+
+* Coordinates agent execution order
+* Applies feature flags (RAG, persistence)
+* Attaches retrieval trace
+* Attaches safety trace
+* Handles domain-level exceptions
+* Returns structured response object
+
+---
+
+# 6. Runtime Feature Flags
+
+Pipeline execution supports configuration toggles:
+
+* `enable_rag`
+* `enable_persistence`
+
+These are injected via dependency layer or environment configuration.
+
+This enables:
+
+* Deterministic CI mode
+* A/B evaluation
+* Controlled rollout of features
+
+---
+
+# 7. Deterministic Safety Enforcement
+
+All outputs pass through a deterministic safety guard before returning to clients.
+
+Safety includes:
+
+* PHI masking
+* No-diagnosis enforcement
+* No-prescription enforcement
+* Crisis detection
+
+No unsafe content is returned directly to API consumers.
+
+---
+
+# 8. Persistence Behavior
+
+When persistence is enabled:
+
+* Structured output and report are stored via `HealthRecord`
+* Idempotency enforced using `input_hash`
+* Transactions handled via `save_record()` helper
+
+Encryption at rest is assumed at infrastructure level (managed Postgres).
+
+---
+
+# 9. Error Handling
+
+| Error Type            | HTTP Code |
 | --------------------- | --------- |
-| Missing field / type  | 422       |
+| Validation error      | 422       |
 | IntakeValidationError | 400       |
 | StructuringError      | 422       |
+| SafetyViolation       | 422       |
 | Unexpected error      | 500       |
 
-This aligns with the **unified error model** documented in step5.
+Errors are returned in structured format under `errors` field.
 
 ---
 
-## 5. Pipeline Integration (`agents/pipeline.py`)
+# 10. Local Development Stack
 
-The API never talks directly to LLMs or validators.
-Instead, requests are forwarded to `HealthcarePipeline`.
-
-### Pipeline Responsibilities
-
-* Run Intake → Structuring → Output agents in order
-* Capture intermediate data for debugging
-* Catch and re-throw domain-specific exceptions
-* Produce final structured trace for API output
-
-### Output Structure
-
-Example trace:
-
-```json
-{
-  "success": true,
-  "intake": {...},
-  "structured": {...},
-  "report": {...},
-  "errors": []
-}
-```
-
-This design keeps the API thin, secure, and maintainable.
-
----
-
-## 6. Environment & Configuration (`api/config.py`)
-
-Environment variables (DB, Redis, API keys) are stored in:
-
-```
-.env
-.env.example
-```
-
-`get_settings()` loads configuration via Pydantic for reliability:
-
-```python
-class Settings(BaseSettings):
-    app_name: str = "Healthcare AI Platform"
-    app_env: str = "local"
-    openai_api_key: str | None = None
-```
-
-This ensures:
-
-* central config management
-* multiple environments (local, dev, prod)
-* reproducibility
-
----
-
-## 7. Local Development Stack
-
-Local environment is fully containerized.
-
-### 7.1 Makefile
-
-Key commands:
+## 10.1 Makefile
 
 | Command      | Description                  |
 | ------------ | ---------------------------- |
@@ -220,46 +259,47 @@ Key commands:
 | `make logs`  | Tail API logs                |
 | `make build` | Build services               |
 
-### 7.2 docker-compose.yml
+## 10.2 docker-compose.yml
 
-Starts three services:
+Services:
 
-```
-api → FastAPI backend
-postgres → structured data persistence
-redis → caching / async tasks (future)
-```
+* API (FastAPI)
+* PostgreSQL
+* Redis (reserved for async/caching)
 
 Ports:
 
-* API: `8000:8000`
-* Postgres: `5432:5432`
-* Redis: `6379:6379`
-
-This environment ensures the project runs identically on any machine.
+* API → `8000`
+* Postgres → `5432`
+* Redis → `6379`
 
 ---
 
-## 8. Deployment Considerations
+# 11. Deployment Readiness
 
-Although Phase 1 only covers local execution, the repo is structured for production:
+Repository is structured for future production use:
 
-* `infra/aws/` contains Terraform examples
-* Observability hooks exist for metrics + audit logs
-* API supports adding auth middleware easily
-* Modular architecture supports scaling agents independently
-
-This section becomes important for Upwork clients looking for **HIPAA-aligned**, **AWS-ready**, or **scalable SaaS** backend designs.
+* Terraform examples in `infra/`
+* Pluggable LLM provider interface
+* Deterministic CI-safe mode
+* Modular agents
+* Extensible API design
 
 ---
 
-## 9. Summary
+# 12. Architectural Status After Phase 2
 
-`docs/step4_repo_api.md` provides a comprehensive overview of:
+The API now exposes a healthcare AI backend that is:
 
-* how the repo is structured
-* how API requests are handled
-* how the ingest endpoint integrates with the agent pipeline
-* how configuration, Docker, and Makefile make the system reproducible
+* RAG-capable (deterministic mode)
+* Safety-enforced
+* Persistence-enabled
+* Feature-toggle controlled
+* Schema-validated end-to-end
 
-This document completes **Step 4** of the project blueprint and ensures technical reviewers can understand the backend at a glance.
+The API contract reflects retrieval and safety traces and is ready for Phase 3 evaluation expansion.
+
+---
+
+**Document Status:** Updated after Phase 2 completion
+Future revisions will incorporate Phase 3 evaluation endpoints and Phase 4 interoperability expansion.

@@ -1,45 +1,47 @@
-# Step 5 — Demo & Evaluation Guide
+# Step 5 — Demo & Evaluation Guide (Updated After Phase 2)
 
-Healthcare AI Platform — Phase 1 Evaluation Documentation
+Healthcare AI Platform — Phase 1–2 Evaluation Documentation
 
-This document presents **formal evaluation outputs** for all Phase‑1 modules, based entirely on deterministic mock behavior (no real OpenAI calls). It is written in a **portfolio‑ready, enterprise technical documentation format**.
+This document presents formal evaluation outputs for the system after:
 
----
+• Phase 1 — Core system spine
+• Phase 2 — RAG, Safety Guard, and Persistence
 
-# 1. Overview
-
-Phase 1 established the full system spine:
-
-```
-Raw Text → Intake Agent → Structuring Agent → Output Agent → API Response
-```
-
-All evaluations in this document are based on:
-
-* `agents/pipeline.py`
-* `tests/test_api.py`
-* `tests/test_pipeline.py`
-
-The goal is to demonstrate that:
-
-* validation works
-* pipeline executes end‑to‑end
-* API responds with stable, predictable formats
-* error models follow a consistent schema
-
-This document is linked from the repo’s main documentation set under `docs/`.
+All evaluations in this document are based on **deterministic mode** (mock LLM + mock embeddings), ensuring reproducibility and CI stability.
 
 ---
 
-# 2. Intake Agent Evaluation
+# 1. Evaluation Scope
 
-The Intake Agent validates and normalizes raw user input.
+Current deterministic execution flow:
 
-Evaluation results include: successful input, empty input, missing fields, and consent/PHI checks.
+```
+Raw Text
+   → IntakeAgent
+   → StructuringAgent
+   → RetrievalAgent (optional)
+   → OutputAgent
+   → Safety Guard
+   → Persistence (optional)
+   → API Response
+```
 
-## 2.1 Successful Intake
+Evaluation demonstrates:
 
-**Input:**
+• validation behavior
+• pipeline sequencing
+• RAG trace behavior
+• deterministic safety enforcement
+• persistence behavior
+• API contract stability
+
+---
+
+# 2. Phase 1 — Core Spine Evaluation
+
+## 2.1 Successful Intake → Structuring → Output
+
+Input:
 
 ```json
 {
@@ -50,7 +52,7 @@ Evaluation results include: successful input, empty input, missing fields, and c
 }
 ```
 
-**Output (from mock):**
+Response (deterministic mock):
 
 ```json
 {
@@ -58,56 +60,49 @@ Evaluation results include: successful input, empty input, missing fields, and c
   "intake": {"raw_text": "Feeling chest tightness and fatigue for 3 days."},
   "structured": {"symptoms": ["fatigue", "chest tightness"]},
   "report": {"summary": "dummy report"},
+  "retrieval_trace": null,
+  "safety_trace": {"violations": []},
   "errors": []
 }
 ```
 
-### Verified Behaviors
+Verified:
 
-* Input accepted.
-* Intake layer returns normalized dictionary.
-* Pipeline proceeds to structuring stage.
+• Intake validation works
+• Structuring schema enforced
+• Output schema valid
+• Safety guard executed (no violations)
 
 ---
 
 ## 2.2 Missing Required Field → FastAPI 422
 
-**Input:**
+Input missing `text`.
 
-```json
-{
-  "source": "web",
-  "input_type": "chat",
-  "consent_granted": true
-}
-```
-
-**Response:**
+Result:
 
 ```
 422 Unprocessable Entity
 ```
 
-### Verified Behaviors
+Verified:
 
-* FastAPI schema enforcement works before Intake Agent is invoked.
+• FastAPI schema validation blocks request before pipeline execution
 
 ---
 
 ## 2.3 Empty Text → IntakeValidationError (400)
 
-**Input:**
+Input:
 
 ```json
 {
   "text": "",
-  "source": "web",
-  "input_type": "chat",
   "consent_granted": true
 }
 ```
 
-**Response:**
+Response:
 
 ```json
 {
@@ -115,188 +110,214 @@ Evaluation results include: successful input, empty input, missing fields, and c
 }
 ```
 
-### Verified Behaviors
+Verified:
 
-* Intake agent validation triggers correctly.
-* API maps the error to HTTP 400.
+• Intake agent validation
+• Error mapped to HTTP 400
 
 ---
 
-# 3. Structuring Agent Evaluation
+# 3. Phase 2 — Retrieval (RAG) Evaluation
 
-Structuring Agent transforms intake JSON into schema‑compliant structured output.
+RAG operates in deterministic mode using mock embeddings and in-memory vector store.
 
-Mock behavior (from `test_api.py`):
+## 3.1 RAG Enabled Execution
+
+When `enable_rag = True`, pipeline attaches retrieval trace.
+
+Example response:
 
 ```json
-{"symptoms": ["fatigue", "chest tightness"]}
+{
+  "retrieval_trace": [
+    {
+      "doc_id": "doc_001",
+      "score": 0.92,
+      "snippet": "Chest tightness may relate to cardiac or anxiety causes."
+    }
+  ]
+}
 ```
 
-This demonstrates the expected schema shape and validates:
+Verified:
 
-* transformation format
-* required fields returned
-* compatibility with Output Agent
-
-## 3.1 Successful Structuring
-
-**Input:** intake dictionary
-
-**Output:**
-
-```json
-{"symptoms": ["fatigue", "chest tightness"]}
-```
-
-### Verified Behaviors
-
-* Structuring agent returns valid JSON.
-* Pipeline accepts and forwards output.
+• RetrievalAgent executed between Structuring and Output
+• Ranked documents returned
+• Deterministic ordering preserved
+• Retrieval failures are non-fatal
 
 ---
 
-## 3.2 Structuring Error
+## 3.2 RAG Disabled Execution
 
-From `tests/test_pipeline.py`:
+When `enable_rag = False`:
 
-```python
-raise StructuringError("struct fail")
-```
+• `retrieval_trace` is null or absent
+• Pipeline behavior remains stable
 
-### Verified Behaviors
+Verified:
 
-* Error is wrapped into unified `StructuringError`.
-* Pipeline propagates error to caller.
-
----
-
-# 4. Output Agent Evaluation
-
-Output Agent converts structured data into readable summary text.
-
-Mock output (from tests):
-
-```json
-{"summary": "dummy report"}
-```
-
-### Verified Behaviors
-
-* Output Agent integrates prompt template.
-* Returns schema‑compatible summary.
-* No external API calls required.
+• Feature toggle works
+• Backward compatibility maintained
 
 ---
 
-# 5. End‑to‑End Pipeline Evaluation
+# 4. Phase 2 — Safety Guard Evaluation
 
-Full pipeline (`agents/pipeline.py`):
+Safety Guard is deterministic and rule-based.
 
-## 5.1 Successful Pipeline Execution
+## 4.1 PHI Masking
 
-**Result:**
+Input containing email or phone:
+
+"Contact me at [john@example.com](mailto:john@example.com)"
+
+Output summary:
+
+• Email masked or removed
+
+Verified:
+
+• PHI patterns detected
+• Masking applied before API response
+
+---
+
+## 4.2 Diagnosis Enforcement
+
+If output attempts diagnosis-like language:
+
+Example trigger:
+
+"You likely have pneumonia."
+
+Result:
+
+• Safety guard flags violation
+• Response modified or blocked
+
+Verified:
+
+• No direct diagnosis allowed
+• GuardResult attached to `safety_trace`
+
+---
+
+## 4.3 Crisis Detection
+
+If input contains emergency language:
+
+"I cannot breathe and feel like collapsing."
+
+Verified:
+
+• Crisis flag detected
+• Trace includes safety indicator
+
+---
+
+# 5. Phase 2 — Persistence Evaluation
+
+When `enable_persistence = True`:
+
+• Structured output stored in `HealthRecord`
+• Report stored as JSON
+• `input_hash` enforces idempotency
+
+## 5.1 Successful Persistence
+
+Verified via:
+
+• Database record count increment
+• Reload of stored record matches structured payload
+
+---
+
+## 5.2 Idempotency Check
+
+Submitting identical input twice:
+
+• Second execution does not duplicate record
+• Unique constraint on `input_hash` enforced
+
+Verified:
+
+• Transaction boundary respected
+• No duplicate rows
+
+---
+
+# 6. End‑to‑End API Contract Evaluation
+
+## 6.1 Successful Response (Phase 2)
 
 ```json
 {
   "success": true,
-  "intake": {"raw_text": "Feeling chest tightness and fatigue for 3 days."},
-  "structured": {"symptoms": ["fatigue", "chest tightness"]},
-  "report": {"summary": "dummy report"},
+  "intake": {...},
+  "structured": {...},
+  "report": {...},
+  "retrieval_trace": [...],
+  "safety_trace": {"violations": []},
   "errors": []
 }
 ```
 
-### Verified Behaviors
+Verified:
 
-* All three agents connected in correct sequence.
-* Trace contains complete diagnostic information.
-* No unexpected exceptions surfaced.
-
----
-
-## 5.2 Pipeline Failure Modes
-
-### Intake Failure
-
-```python
-raise IntakeValidationError("bad input")
-```
-
-Outcome: pipeline aborts at intake stage.
-
-### Structuring Failure
-
-```python
-raise StructuringError("struct fail")
-```
-
-Outcome: pipeline aborts at structuring stage; error remapped to unified type.
+• Response schema stable
+• Safety always executed
+• Retrieval trace conditional
+• Errors consistently structured
 
 ---
 
-# 6. API Evaluation — `/api/ingest`
+# 7. Error Model Summary (Extended)
 
-The API layer wraps pipeline execution with proper validation and error mapping.
-
-## 6.1 Successful API Call
-
-**POST** `/api/ingest`
-
-Response:
-
-```json
-{
-  "success": true,
-  "intake": {"raw_text": "Feeling chest tightness and fatigue for 3 days."},
-  "structured": {"symptoms": ["fatigue", "chest tightness"]},
-  "report": {"summary": "dummy report"},
-  "errors": []
-}
-```
+| Stage       | Trigger Example   | Error Type               | HTTP |
+| ----------- | ----------------- | ------------------------ | ---- |
+| Intake      | Empty text        | IntakeValidationError    | 400  |
+| Intake      | Missing field     | FastAPI validation error | 422  |
+| Structuring | Schema failure    | StructuringError         | 422  |
+| Safety      | Hard violation    | SafetyViolation          | 422  |
+| Output      | Runtime exception | Exception                | 500  |
 
 ---
 
-## 6.2 API Validation Error (Missing Field)
+# 8. Deterministic Mode Guarantee
 
-Response: `422 Unprocessable Entity`
+Phase 2 evaluation is executed under deterministic mode:
 
----
+• Mock LLM
+• Mock embeddings
+• No external APIs
+• CI reproducible
 
-## 6.3 API Intake Error (Empty Text)
+This ensures:
 
-Response:
-
-```json
-{"detail": "raw_text cannot be empty."}
-```
-
----
-
-# 7. Error Model Summary
-
-| Stage       | Trigger Example      | Error Type               | API Status |
-| ----------- | -------------------- | ------------------------ | ---------- |
-| Intake      | Empty text           | IntakeValidationError    | 400        |
-| Intake      | Missing field        | FastAPI validation error | 422        |
-| Structuring | Schema/parse failure | StructuringError         | 422/500    |
-| Output      | Runtime exception    | Exception                | 500        |
+• Stable automated testing
+• Predictable portfolio demonstration
+• Controlled experimentation before real LLM integration
 
 ---
 
-# 8. Phase‑1 Evaluation Conclusion
+# 9. Phase 1–2 Evaluation Conclusion
 
-All Phase‑1 modules are:
+After Phase 2, the system is:
 
-* Fully implemented
-* Deterministically testable
-* Error‑stable
-* API‑exposed
-* Mock‑driven (no external API calls)
+• RAG-capable (deterministic)
+• Safety-enforced (rule-based)
+• Persistence-enabled (audit-ready)
+• API-exposed
+• Feature-toggle controlled
+• Fully testable in CI
 
-This completes Step 5 Demo & Evaluation for the Core System Spine.
+Phase 3 will introduce:
 
-Phase 2 will introduce:
+• Real LLM provider integration
+• Evaluation metrics harness
+• Observability expansion
 
-* Retrieval (FAISS/Chroma)
-* Safety Guard
-* Persistent storage
+---
+
+Document Status: Updated after Phase 2 completion
