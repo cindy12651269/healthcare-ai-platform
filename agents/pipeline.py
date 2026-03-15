@@ -1,8 +1,9 @@
 import logging
+import time
+import random
 from typing import Any, Dict, Optional, List
 import hashlib
 from uuid import uuid4
-
 from agents.intake_agent import process_raw_input, IntakeValidationError
 from agents.structuring_agent import (
     StructuringAgent,
@@ -12,10 +13,7 @@ from agents.structuring_agent import (
 )
 from agents.output_agent import OutputAgent
 from agents.retrieval_agent import RetrievalAgent
-
 from llm.safety_guard import GuardResult
-
-# Persistence imports (isolated)
 from api.config import get_settings
 from db.models import HealthRecord
 from db.session import SessionLocal
@@ -24,18 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 class HealthcarePipeline:
-    """
-    Production-grade multi-agent pipeline.
-
-    Phase 1–2:
-        - StructuringAgent: mock-only
-        - OutputAgent: mock-only
-        - RetrievalAgent optional (RAG mode)
-        - Fully testable & CI-safe
-
-    Phase 3+:
-        - Real LLM and embedding backends injected explicitly.
-    """
 
     def __init__(
         self,
@@ -44,29 +30,28 @@ class HealthcarePipeline:
         retrieval_agent: Optional[RetrievalAgent] = None,
         enable_retrieval: bool = False,
     ):
-        # Core agents
         self.struct = structuring_agent
         self.output = output_agent
         self.retrieval = retrieval_agent
-
-        # Default RAG mode (can be overridden at runtime)
         self.enable_retrieval = enable_retrieval
 
-    # Persistence Layer (Isolated Side Effect)
-
-    # Compute deterministic SHA256 hash for idempotency.
+    
+    # Deterministic Input Hash
     def _compute_input_hash(self, raw_text: str) -> str:
         return hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
 
-    # Save pipeline output into DB. 
-    # Completely isolated: Own DB session, safe rollback, and NEVER crashes pipeline
+    # Persistence (side-effect layer)
     def save_record(
         self,
         *,
         raw_text: str,
         trace: Dict[str, Any],
+        persistence_enabled: bool,
     ) -> None:
-       
+
+        if not persistence_enabled:
+            return
+
         settings = get_settings()
 
         if not settings.enable_persistence:
@@ -105,22 +90,21 @@ class HealthcarePipeline:
         *,
         enable_rag: Optional[bool] = None,
         rag_top_k: int = 3,
+        persistence_enabled: bool = True,
+        seed: Optional[int] = None,
+        run_id: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """
-        Flow (RAG disabled):
-            Intake → Structuring → Output
 
-        Flow (RAG enabled):
-            Intake → Structuring → Retrieval → Output
+        # Deterministic seed
+        if seed is not None:
+            random.seed(seed)
 
-        Retrieval is OPTIONAL and NON-FATAL:
-        - If retrieval fails, pipeline continues without context.
-        - Retrieval errors are recorded in trace.
-        """
+        start_time = time.perf_counter()
 
         rag_enabled = enable_rag if enable_rag is not None else self.enable_retrieval
 
         trace: Dict[str, Any] = {
+            "run_id": run_id or str(uuid4()),
             "success": False,
             "intake": None,
             "structured": None,
@@ -129,15 +113,20 @@ class HealthcarePipeline:
                 "used": False,
                 "query": None,
                 "top_k": rag_top_k,
-                "chunks": [],   # Always a list for deterministic contract
+                "chunks": [],
                 "error": None,
             },
             "report": None,
             "safety": None,
             "errors": [],
+            "telemetry": {
+                "latency_ms": None,
+                "retrieval_hits": 0,
+                "safety_violations": 0,
+            },
         }
 
-        # 1. Intake
+        # Step 1. Intake
         try:
             intake_model = process_raw_input(
                 raw_text=raw_text,
@@ -146,9 +135,11 @@ class HealthcarePipeline:
                 consent_granted=meta.get("consent_granted", False),
                 user_id=meta.get("user_id"),
             )
+
             trace["intake"] = intake_model.dict()
 
         except IntakeValidationError as e:
+
             trace["errors"].append(
                 {
                     "stage": "intake",
@@ -156,14 +147,18 @@ class HealthcarePipeline:
                     "message": str(e),
                 }
             )
+
             raise
 
-        # 2. Structuring
+        
+        # Step 2. Structuring
         try:
+
             structured = self.struct.run(trace["intake"])
             trace["structured"] = structured
 
         except (JSONParsingError, SchemaValidationError, StructuringError) as e:
+
             trace["errors"].append(
                 {
                     "stage": "structuring",
@@ -171,14 +166,16 @@ class HealthcarePipeline:
                     "message": str(e),
                 }
             )
+
             raise StructuringError(str(e))
 
-        # 3. Retrieval (Optional)
+        # Step 3. Retrieval (optional)
         retrieval_results: List[Any] = []
 
         if rag_enabled and self.retrieval:
+
             try:
-                # Unified RetrievalAgent interface
+
                 retrieval_payload = self.retrieval.run(
                     structured_data=structured,
                     top_k=rag_top_k,
@@ -195,7 +192,7 @@ class HealthcarePipeline:
                 )
 
             except Exception as e:
-                # NON-FATAL failure
+
                 logger.warning(
                     "Retrieval failed. Continuing without RAG context.",
                     exc_info=e,
@@ -211,8 +208,9 @@ class HealthcarePipeline:
                     }
                 )
 
-        # 4. Output + Safety
+        # Step 4. Output + Safety
         try:
+
             output_result = self.output.run(
                 structured_data=structured,
                 retrieval_context=retrieval_results,
@@ -234,6 +232,7 @@ class HealthcarePipeline:
                 ).to_dict()
 
         except Exception as e:
+
             trace["errors"].append(
                 {
                     "stage": "output",
@@ -241,18 +240,31 @@ class HealthcarePipeline:
                     "message": str(e),
                 }
             )
+
             raise
 
-        # 5. Mark Success
+        # Success
         trace["success"] = True
+       
+        # Telemetry
+        latency_ms = (time.perf_counter() - start_time) * 1000
 
-        # 6. Optional Persistence
+        trace["telemetry"]["latency_ms"] = latency_ms
+        trace["telemetry"]["retrieval_hits"] = len(trace["rag"]["chunks"])
+        trace["telemetry"]["safety_violations"] = len(trace["safety"]["actions"])
+
+        
+        # Optional persistence
         try:
+
             self.save_record(
                 raw_text=raw_text,
                 trace=trace,
+                persistence_enabled=persistence_enabled,
             )
+
         except Exception:
+
             logger.warning("Persistence hook failed but pipeline succeeded.")
 
         return trace

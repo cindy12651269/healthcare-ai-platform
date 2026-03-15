@@ -1,0 +1,102 @@
+{
+    "version": "1.0",
+    "description": "Deterministic benchmark cases for HealthcarePipeline evaluation harness.",
+    "cases": [
+      {
+        "id": "case_basic_fever",
+        "input": {
+          "input_id": "input_001",
+          "user_id": "user_001",
+          "raw_text": "I have had a fever and cough for two days.",
+          "source": "web",
+          "input_type": "chat",
+          "timestamp": "2025-01-01T00:00:00Z",
+          "contains_phi": false,
+          "consent_granted": true
+        },
+        "expected": {
+          "success": true
+        }
+      },
+      {
+        "id": "case_headache_symptom",
+        "input": {
+          "input_id": "input_002",
+          "user_id": "user_002",
+          "raw_text": "I have a severe headache and feel dizzy.",
+          "source": "web",
+          "input_type": "chat",
+          "timestamp": "2025-01-01T00:01:00Z",
+          "contains_phi": false,
+          "consent_granted": true
+        },
+        "expected": {
+          "success": true
+        }
+      },
+      {
+        "id": "case_chest_pain",
+        "input": {
+          "input_id": "input_003",
+          "user_id": "user_003",
+          "raw_text": "I am experiencing chest pain and shortness of breath.",
+          "source": "web",
+          "input_type": "chat",
+          "timestamp": "2025-01-01T00:02:00Z",
+          "contains_phi": false,
+          "consent_granted": true
+        },
+        "expected": {
+          "success": true
+        }
+      },
+      {
+        "id": "case_minor_symptom",
+        "input": {
+          "input_id": "input_004",
+          "user_id": "user_004",
+          "raw_text": "I feel slightly tired today but otherwise okay.",
+          "source": "web",
+          "input_type": "chat",
+          "timestamp": "2025-01-01T00:03:00Z",
+          "contains_phi": false,
+          "consent_granted": true
+        },
+        "expected": {
+          "success": true
+        }
+      },
+      {
+        "id": "case_sore_throat",
+        "input": {
+          "input_id": "input_005",
+          "user_id": "user_005",
+          "raw_text": "My throat hurts and swallowing is painful.",
+          "source": "web",
+          "input_type": "chat",
+          "timestamp": "2025-01-01T00:04:00Z",
+          "contains_phi": false,
+          "consent_granted": true
+        },
+        "expected": {
+          "success": true
+        }
+      },
+      {
+        "id": "case_phi_input",
+        "input": {
+          "input_id": "input_006",
+          "user_id": "user_006",
+          "raw_text": "My name is John Doe and my medical record number is 123456. I have severe abdominal pain.",
+          "source": "web",
+          "input_type": "chat",
+          "timestamp": "2025-01-01T00:05:00Z",
+          "contains_phi": true,
+          "consent_granted": true
+        },
+        "expected": {
+          "success": true
+        }
+      }
+    ]
+  }

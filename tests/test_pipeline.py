@@ -9,13 +9,14 @@ class MockStructuringAgent:
     def run(self, intake_dict):
         return {"structured": True}
 
+
 class MockOutputAgent:
     def run(self, structured_data, retrieval_context=None):
-        # Ensure retrieval_context is always safely consumable
         return {
             "report": {"summary": "ok"},
             "_safety": None,
         }
+
 
 class MockRetrievalAgent:
     def run(self, structured_data, top_k=5):
@@ -24,14 +25,15 @@ class MockRetrievalAgent:
             "metadata": {}
         }
 
+
 class FailingRetrievalAgent:
     def run(self, structured_data, top_k=5):
         raise RuntimeError("retrieval exploded")
 
-# Full pipeline (RAG disabled)
-# Pipeline should execute normally when RAG is disabled. No retrieval should be executed.
+
+# Pipeline without RAG
 def test_pipeline_success_without_rag(monkeypatch):
-    # Disable persistence
+
     monkeypatch.setattr(get_settings(), "enable_persistence", False)
 
     class MockIntake:
@@ -50,18 +52,28 @@ def test_pipeline_success_without_rag(monkeypatch):
         enable_retrieval=False,
     )
 
-    result = pipeline.run("hello world", meta={})
+    result = pipeline.run(
+        "hello world",
+        meta={},
+        persistence_enabled=False,
+        seed=42,
+        run_id="test_no_rag",
+    )
 
     assert result["success"] is True
 
-    # RAG trace must indicate disabled
     assert result["rag"]["enabled"] is False
     assert result["rag"]["used"] is False
     assert result["rag"]["chunks"] == []
 
-# RAG enabled: When enable_retrieval=True and RetrievalAgent exists,
-# retrieval should execute and attach context to trace.
+    # telemetry must exist
+    assert "telemetry" in result
+    assert result["telemetry"]["retrieval_hits"] == 0
+
+
+# Pipeline with RAG
 def test_pipeline_success_with_rag(monkeypatch):
+
     monkeypatch.setattr(get_settings(), "enable_persistence", False)
 
     class MockIntake:
@@ -80,18 +92,26 @@ def test_pipeline_success_with_rag(monkeypatch):
         enable_retrieval=True,
     )
 
-    result = pipeline.run("hello world", meta={})
+    result = pipeline.run(
+        "hello world",
+        meta={},
+        persistence_enabled=False,
+        seed=42,
+        run_id="test_with_rag",
+    )
 
     assert result["success"] is True
 
-    # Retrieval must have been used
     assert result["rag"]["enabled"] is True
     assert result["rag"]["used"] is True
     assert result["rag"]["chunks"] == ["chunk-1", "chunk-2"]
 
-# Retrieval failure should be NON-FATAL, and must NOT crash pipeline.
-# Policy: Retrieval is best-effort. Pipeline should continue without context.
+    assert result["telemetry"]["retrieval_hits"] == 2
+
+
+# Retrieval failure should be non-fatal
 def test_pipeline_rag_failure_non_fatal(monkeypatch):
+
     monkeypatch.setattr(get_settings(), "enable_persistence", False)
 
     class MockIntake:
@@ -110,23 +130,27 @@ def test_pipeline_rag_failure_non_fatal(monkeypatch):
         enable_retrieval=True,
     )
 
-    result = pipeline.run("hello world", meta={})
+    result = pipeline.run(
+        "hello world",
+        meta={},
+        persistence_enabled=False,
+        seed=42,
+        run_id="test_rag_fail",
+    )
 
-    # Pipeline must still succeed
     assert result["success"] is True
 
-    # Retrieval marked as enabled but NOT used
     assert result["rag"]["enabled"] is True
     assert result["rag"]["used"] is False
     assert result["rag"]["chunks"] == []
 
-    # Error must be recorded in RAG trace
     assert result["rag"]["error"] is not None
 
-    # Report must still be generated
     assert result["report"] == {"summary": "ok"}
 
-# Intake failure: Intake validation error must propagate immediately.
+    assert result["telemetry"]["retrieval_hits"] == 0
+
+# Intake failure
 def test_pipeline_intake_fail(monkeypatch):
 
     monkeypatch.setattr(get_settings(), "enable_persistence", False)
@@ -145,14 +169,20 @@ def test_pipeline_intake_fail(monkeypatch):
     )
 
     with pytest.raises(IntakeValidationError):
-        pipeline.run("", meta={})
+        pipeline.run(
+            "",
+            meta={},
+            persistence_enabled=False,
+            seed=42,
+            run_id="test_intake_fail",
+        )
 
 # Structuring failure
 class FailingStructuringAgent:
     def run(self, intake_dict):
         raise StructuringError("struct fail")
 
-# Structuring failure is fatal and must raise.
+
 def test_pipeline_structuring_fail(monkeypatch):
 
     monkeypatch.setattr(get_settings(), "enable_persistence", False)
@@ -172,4 +202,10 @@ def test_pipeline_structuring_fail(monkeypatch):
     )
 
     with pytest.raises(StructuringError):
-        pipeline.run("valid text", meta={})
+        pipeline.run(
+            "valid text",
+            meta={},
+            persistence_enabled=False,
+            seed=42,
+            run_id="test_struct_fail",
+        )
