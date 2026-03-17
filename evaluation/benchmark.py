@@ -6,28 +6,55 @@ from typing import Any, Dict, List
 from agents.pipeline import HealthcarePipeline
 from evaluation.metrics import compute_run_metrics, compute_aggregate_metrics
 
-# Mock agents for deterministic benchmark mode
-# Deterministic structuring stub for CI-safe benchmark runs
+
+# Mock Agents (Deterministic): Deterministic structuring agent.
+# Must match StructuredHealthOutput schema to support Issue 13 evaluation metrics.
 class MockStructuringAgent:
-    
+
     def run(self, intake_dict):
+
         return {
-            "chief_complaint": "general symptoms",
-            "symptoms": ["fatigue"],
-            "clinical_summary": "mock summary",
-            "confidence_level": 0.9,
+            "trace": {
+                "input_id": intake_dict.get("input_id"),
+                "user_id": intake_dict.get("user_id"),
+                "timestamp": intake_dict.get("timestamp"),
+                "source": intake_dict.get("source"),
+                "input_type": intake_dict.get("input_type"),
+            },
+
+            "compliance": {
+                "contains_phi": intake_dict.get("contains_phi", False),
+                "consent_granted": intake_dict.get("consent_granted", True),
+                "data_zone": "public_zone",
+            },
+
+            "clinical_structuring": {
+                "chief_complaint": "general symptoms",
+                "symptoms": ["fatigue"],
+                "clinical_summary": "mock summary",
+                "confidence_level": 0.9,
+            },
+
+            "agent_decisioning": {},
+
+            "ehr_interoperability": {},
+
+            "output_metadata": {
+                "model_version": "mock",
+                "prompt_version": "v1",
+            },
         }
 
-# Deterministic output stub for CI-safe benchmark runs.
+# Deterministic output agent.
 class MockOutputAgent:
-    
+
     def run(self, structured_data, retrieval_context=None):
         return {
             "report": {"summary": "mock report"},
             "_safety": None,
         }
 
-# Deterministic retrieval stub that always returns two chunks.
+# Always returns 2 chunks → deterministic retrieval hits.
 class MockRetrievalAgent:
 
     def run(self, structured_data, top_k=3):
@@ -39,46 +66,34 @@ class MockRetrievalAgent:
             ],
         }
 
-
-
-# File system paths
+# Paths
 ROOT = Path(__file__).resolve().parent
 TEST_CASES_FILE = ROOT / "test_cases.json"
 RESULT_DIR = ROOT / "results"
 
-
-# Case loading
-# Load deterministic benchmark cases from JSON.
+# Load deterministic test cases.
 def load_cases() -> List[Dict[str, Any]]:
     with open(TEST_CASES_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     return data["cases"]
 
 
-
-# Pipeline factory
-# Create a pipeline instance for benchmark execution.
-
+# Pipeline Factory
 def create_pipeline(mode: str, rag_enabled: bool) -> HealthcarePipeline:
-    if mode != "mock":
-        raise NotImplementedError("live mode is not implemented yet")
 
-    struct_agent = MockStructuringAgent()
-    output_agent = MockOutputAgent()
-    retrieval_agent = MockRetrievalAgent() if rag_enabled else None
+    if mode != "mock":
+        raise NotImplementedError("live mode not implemented")
 
     return HealthcarePipeline(
-        structuring_agent=struct_agent,
-        output_agent=output_agent,
-        retrieval_agent=retrieval_agent,
+        structuring_agent=MockStructuringAgent(),
+        output_agent=MockOutputAgent(),
+        retrieval_agent=MockRetrievalAgent() if rag_enabled else None,
         enable_retrieval=rag_enabled,
     )
 
-
-
-# Benchmark runner: Run all benchmark cases sequentially and return deterministic results.
-# Determinism guarantees:fixed seed per case, stable run_id, stable case order from test_cases.json, fixed latency in mock mode
+# Benchmark Runner
 def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
+
     cases = load_cases()
     pipeline = create_pipeline(mode=mode, rag_enabled=rag)
 
@@ -86,16 +101,17 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
     run_metrics: List[Dict[str, Any]] = []
 
     for idx, case in enumerate(cases):
+
         case_id = case["id"]
         case_input = case["input"]
 
         raw_text = case_input["raw_text"]
         meta = case_input
 
-        # Stable run_id for deterministic CI output
+        # Stable deterministic run_id
         run_id = f"{case_id}:{mode}:{'rag' if rag else 'norag'}"
 
-        # Fixed seed per case for deterministic execution
+        # Fixed seed per case
         seed = 42 + idx
 
         trace = pipeline.run(
@@ -107,10 +123,11 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
             run_id=run_id,
         )
 
-        # In mock mode, latency must be deterministic for CI reproducibility.
-        latency_ms = 0.0 if mode == "mock" else trace["telemetry"]["latency_ms"]
+        # Deterministic latency (CI-safe)
+        latency_ms = 0.0
 
         metrics = compute_run_metrics(trace, latency_ms)
+
         run_metrics.append(metrics)
 
         run_results.append(
@@ -128,8 +145,9 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
         "aggregated": aggregated,
     }
 
-# Console output: Print a compact human-readable benchmark summary.
-def print_summary(results: Dict[str, Any]) -> None:
+
+# Output
+def print_summary(results: Dict[str, Any]):
 
     agg = results["aggregated"]
 
@@ -143,8 +161,7 @@ def print_summary(results: Dict[str, Any]) -> None:
     print("----------------------------\n")
 
 
-# JSON output: Save benchmark results as sorted JSON under evaluation/results/.
-def save_results(results: Dict[str, Any], output_file: str) -> None:
+def save_results(results: Dict[str, Any], output_file: str):
 
     RESULT_DIR.mkdir(exist_ok=True)
 
@@ -155,39 +172,22 @@ def save_results(results: Dict[str, Any], output_file: str) -> None:
 
     print(f"Results saved to {path}")
 
+# CLI
+def main():
 
-# CLI entry point for running deterministic benchmark harness.
-def main() -> None:
     parser = argparse.ArgumentParser(
         description="HealthcarePipeline benchmark harness"
     )
 
-    parser.add_argument(
-        "--mode",
-        choices=["mock", "live"],
-        default="mock",
-        help="Execution mode (default: mock)",
-    )
-
-    parser.add_argument(
-        "--rag",
-        choices=["on", "off"],
-        default="off",
-        help="Enable RAG retrieval",
-    )
-
-    parser.add_argument(
-        "--out",
-        default="benchmark_results.json",
-        help="Output JSON file name",
-    )
+    parser.add_argument("--mode", choices=["mock", "live"], default="mock")
+    parser.add_argument("--rag", choices=["on", "off"], default="off")
+    parser.add_argument("--out", default="benchmark_results.json")
 
     args = parser.parse_args()
-    rag_enabled = args.rag == "on"
 
     results = run_benchmark(
         mode=args.mode,
-        rag=rag_enabled,
+        rag=(args.rag == "on"),
     )
 
     print_summary(results)

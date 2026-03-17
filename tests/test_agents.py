@@ -3,9 +3,12 @@ import pytest
 from agents.output_agent import OutputAgent
 
 
-# Synthetic OpenAI mock
+# Synthetic OpenAI Mock: Simulates OpenAI ChatCompletion API response.
+# Returns deterministic JSON to ensure: CI stability, no external API dependency, and fully reproducible tests
 class SyntheticCompletions:
+
     def create(self, *args, **kwargs):
+
         synthetic_json = {
             "source_struct_id": "test1",
             "report_sections": {
@@ -41,15 +44,20 @@ class SyntheticChat:
 
 
 class SyntheticOpenAI:
+# Mock replacement for OpenAI client. Ensures OutputAgent does not call real API.
     def __init__(self, *args, **kwargs):
         self.chat = SyntheticChat()
 
 
+# Pytest Fixture
 @pytest.fixture
+# Replace OpenAI client with deterministic mock.
 def patch_openai(monkeypatch):
     monkeypatch.setattr("agents.output_agent.OpenAI", SyntheticOpenAI)
 
 
+# Test 1: Minimal Structured Input: Validate OutputAgent with minimal structured input.
+# Ensures schema compatibility is with StructuredHealthOutput, report structure is generated, and safety guard is enforced.
 def test_output_agent_minimal(patch_openai):
     agent = OutputAgent(model="gpt-4o-mini")
 
@@ -68,18 +76,19 @@ def test_output_agent_minimal(patch_openai):
 
     result = agent.run(fake_structured, retrieval_context=None)
 
-    # Core structure
+    # Report Structure 
     assert "report_sections" in result
     assert isinstance(result["report_sections"]["overview"], str)
 
-    # Safety layer must exist
+    # Safety Layer
     assert "safety_checks" in result
     assert result["safety_checks"]["guard_passed"] is True
     assert isinstance(result["safety_checks"]["events"], list)
 
+    # Safety Content Check 
     overview_text = result["report_sections"]["overview"].lower()
 
-    # Ensure no direct diagnostic language
+    # Ensure no direct diagnosis or unsafe medical claims
     forbidden_phrases = [
         "you have",
         "diagnosed",
@@ -88,13 +97,25 @@ def test_output_agent_minimal(patch_openai):
         "prescribed",
         "take 10mg",
     ]
+
     assert not any(p in overview_text for p in forbidden_phrases)
 
 
+# Test 2: With Retrieval Context (RAG): Validate OutputAgent with RAG context. 
+# Ensures retrieval context does not break output schema and safety layer is still enforced.
 def test_output_agent_with_retrieval_context(patch_openai):
+
     agent = OutputAgent(model="gpt-4o-mini")
 
-    fake_structured = {"trace": {"input_id": "test2"}}
+    # Minimal valid structured input
+    fake_structured = {
+        "trace": {"input_id": "test2"},
+        "compliance": {"consent_granted": True},
+        "clinical_structuring": {},
+        "agent_decisioning": {},
+        "ehr_interoperability": {},
+        "output_metadata": {}
+    }
 
     retrieval_context = [
         {
@@ -106,7 +127,9 @@ def test_output_agent_with_retrieval_context(patch_openai):
 
     result = agent.run(fake_structured, retrieval_context=retrieval_context)
 
+    # Core Output 
     assert "report_sections" in result
+
+    # Safety Layer 
     assert "safety_checks" in result
     assert result["safety_checks"]["guard_passed"] is True
-
