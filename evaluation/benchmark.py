@@ -6,7 +6,6 @@ from typing import Any, Dict, List
 from agents.pipeline import HealthcarePipeline
 from evaluation.metrics import compute_run_metrics, compute_aggregate_metrics
 
-
 # Mock Agents (Deterministic): Deterministic structuring agent.
 # Must match StructuredHealthOutput schema to support Issue 13 evaluation metrics.
 class MockStructuringAgent:
@@ -106,6 +105,9 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
         case_id = case["id"]
         case_input = case["input"]
 
+        # Expected output for structured scoring (Issue 13)
+        expected = case.get("expected", {})
+
         raw_text = case_input["raw_text"]
         meta = case_input
 
@@ -127,7 +129,12 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
         # Deterministic latency (CI-safe)
         latency_ms = 0.0
 
-        metrics = compute_run_metrics(trace, latency_ms)
+        # Compute metrics (Issue 12 + Issue 13)
+        metrics = compute_run_metrics(
+            trace,
+            latency_ms,
+            expected=expected,
+        )
 
         run_metrics.append(metrics)
 
@@ -146,7 +153,6 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
         "aggregated": aggregated,
     }
 
-
 # Output
 def print_summary(results: Dict[str, Any]):
 
@@ -159,6 +165,13 @@ def print_summary(results: Dict[str, Any]):
     print(f"Avg latency (ms): {agg['avg_latency_ms']:.2f}")
     print(f"Safety violations: {agg['total_safety_violations']}")
     print(f"Retrieval hits: {agg['total_retrieval_hits']}")
+
+    # Issue 13 metrics
+    print(f"Avg coverage: {agg.get('avg_coverage', 0.0):.2f}")
+    print(f"Required field pass rate: {agg.get('required_field_pass_rate', 0.0):.2f}")
+    print(f"Schema valid rate: {agg.get('schema_valid_rate', 0.0):.2f}")
+    print(f"Avg symptom consistency: {agg.get('avg_symptom_consistency', 0.0):.2f}")
+
     print("----------------------------\n")
 
 
@@ -172,6 +185,7 @@ def save_results(results: Dict[str, Any], output_file: str):
         json.dump(results, f, indent=2, sort_keys=True)
 
     print(f"Results saved to {path}")
+
 
 # CLI
 def main():
