@@ -132,6 +132,7 @@ class StructuringAgent:
                 "contains_phi": health_input.get("contains_phi", False),
                 "consent_granted": health_input.get("consent_granted", True),
                 "data_zone": "public_zone",
+                "audit_required": False,
             },
 
             # Clinical Layer 

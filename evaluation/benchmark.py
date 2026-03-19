@@ -26,6 +26,7 @@ class MockStructuringAgent:
                 "contains_phi": intake_dict.get("contains_phi", False),
                 "consent_granted": intake_dict.get("consent_granted", True),
                 "data_zone": "public_zone",
+                "audit_required": False,
             },
 
             "clinical_structuring": {
