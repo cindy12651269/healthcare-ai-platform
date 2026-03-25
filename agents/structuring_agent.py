@@ -151,6 +151,7 @@ class StructuringAgent:
 
             # Metadata Layer 
             "output_metadata": {
+                "generated_at": "2025-01-01T00:00:00Z",
                 "model_version": "mock",
                 "prompt_version": "v1",
             },

@@ -67,8 +67,13 @@ def symptom_consistency(output: Dict[str, Any]) -> float:
 
 
 # Per-Run Metrics
-def compute_run_metrics(trace: Dict[str, Any], latency_ms: float) -> Dict[str, Any]:
-
+# Compute metrics for a single pipeline execution.
+def compute_run_metrics(
+    trace: Dict[str, Any],
+    latency_ms: float,
+    expected: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    
     success = bool(trace.get("success", False))
 
     # Safety violations
@@ -81,26 +86,11 @@ def compute_run_metrics(trace: Dict[str, Any], latency_ms: float) -> Dict[str, A
     chunks = rag.get("chunks", [])
     retrieval_hit_count = len(chunks)
 
-    # Structured Output Extraction
-    structured = trace.get("structured", {})
-
-    # Structured Metrics (Issue 13)
-    required_field_presence = required_field_presence_rate(structured)
-    coverage = compute_coverage(structured)
-    schema_valid = is_schema_valid(structured)
-    symptom_score = symptom_consistency(structured)
-
     return {
-        # Existing metrics
         "success": success,
         "safety_violation_count": safety_violation_count,
         "retrieval_hit_count": retrieval_hit_count,
         "latency_ms": latency_ms,
-        # New Issue 13 metrics
-        "required_field_presence": required_field_presence,
-        "coverage": coverage,
-        "schema_valid": schema_valid,
-        "symptom_consistency": symptom_score,
     }
 
 # Aggregated Metrics
@@ -128,7 +118,7 @@ def compute_aggregate_metrics(run_metrics: List[Dict[str, Any]]) -> Dict[str, An
     total_safety = sum(r.get("safety_violation_count", 0) for r in run_metrics)
     total_retrieval = sum(r.get("retrieval_hit_count", 0) for r in run_metrics)
 
-    # Issue 13 Aggregation
+    # Aggregation
     total_coverage = sum(r.get("coverage", 0.0) for r in run_metrics)
     total_required = sum(r.get("required_field_presence", 0.0) for r in run_metrics)
     total_schema_valid = sum(1 for r in run_metrics if r.get("schema_valid"))
