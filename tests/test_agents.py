@@ -133,3 +133,37 @@ def test_output_agent_with_retrieval_context(patch_openai):
     # Safety Layer 
     assert "safety_checks" in result
     assert result["safety_checks"]["guard_passed"] is True
+
+# Structured Output Schema Test 
+def test_structured_output_schema_basic():
+
+    from agents.structuring_agent import StructuringAgent
+
+    agent = StructuringAgent(mode="mock")
+
+    fake_input = {
+        "input_id": "test_schema",
+        "user_id": "user_x",
+        "raw_text": "I have a headache",
+        "source": "web",
+        "input_type": "chat",
+        "timestamp": "2025-01-01T00:00:00Z",
+        "contains_phi": False,
+        "consent_granted": True,
+    }
+
+    result = agent.run(fake_input)
+
+    # Top-level fields (Issue 13 A)
+    assert "trace" in result
+    assert "compliance" in result
+    assert "clinical_structuring" in result
+    assert "agent_decisioning" in result
+    assert "ehr_interoperability" in result
+    assert "output_metadata" in result
+
+    # Nested required fields (partial sanity check)
+    clinical = result["clinical_structuring"]
+    assert "symptoms" in clinical
+    assert "clinical_summary" in clinical
+    assert "confidence_level" in clinical

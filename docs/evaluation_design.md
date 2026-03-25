@@ -201,6 +201,52 @@ Add:
 
 ---
 
+## 9. Issue 13 — Structured Accuracy Scoring
+
+This phase introduces structured evaluation metrics to approximate output quality without requiring clinical ground truth.
+
+### Metrics Introduced
+
+#### 1. Required Field Presence Rate
+Measures whether top-level schema fields exist:
+- trace
+- compliance
+- clinical_structuring
+- agent_decisioning
+- ehr_interoperability
+- output_metadata
+
+#### 2. Schema Validity Rate
+Validates output against `StructuredHealthOutput` JSON schema.
+
+#### 3. Structured Coverage
+Measures percentage of non-empty fields across the structured output.
+
+#### 4. Symptom Consistency (Proxy)
+Compares extracted symptoms against expected symptoms from test cases.
+
+- Deterministic matching (string-based)
+- No NLP or embedding dependency
+- CI-safe and reproducible
+
+### RAG Comparison
+
+All metrics support comparison between:
+- RAG disabled (baseline)
+- RAG enabled (augmented context)
+
+### Design Notes
+
+- Metrics are deterministic and reproducible
+- No external APIs or LLM calls required
+- Designed for CI benchmarking and regression tracking
+
+### Future Work (Issue 13.2+)
+
+- Nested field validation
+- Semantic similarity scoring
+- LLM-based evaluation (judge model)
+
 ## Summary
 
 This phase establishes the evaluation foundation:
