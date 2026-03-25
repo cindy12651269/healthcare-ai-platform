@@ -73,24 +73,36 @@ def compute_run_metrics(
     latency_ms: float,
     expected: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
-    
+
     success = bool(trace.get("success", False))
 
-    # Safety violations
+    # Safety
     safety = trace.get("safety") or {}
     actions = safety.get("actions", [])
     safety_violation_count = len(actions)
 
-    # Retrieval hits
+    # Retrieval
     rag = trace.get("rag") or {}
     chunks = rag.get("chunks", [])
     retrieval_hit_count = len(chunks)
+
+    # Structured output
+    structured = trace.get("structured") or {}
+
+    required_field_presence = required_field_presence_rate(structured)
+    coverage = compute_coverage(structured)
+    schema_valid = is_schema_valid(structured)
+    symptom_score = symptom_consistency(structured)
 
     return {
         "success": success,
         "safety_violation_count": safety_violation_count,
         "retrieval_hit_count": retrieval_hit_count,
         "latency_ms": latency_ms,
+        "required_field_presence": required_field_presence,
+        "coverage": coverage,
+        "schema_valid": schema_valid,
+        "symptom_consistency": symptom_score,
     }
 
 # Aggregated Metrics
