@@ -4,6 +4,7 @@ import random
 from typing import Any, Dict, Optional, List
 import hashlib
 from uuid import uuid4
+
 from agents.intake_agent import process_raw_input, IntakeValidationError
 from agents.structuring_agent import (
     StructuringAgent,
@@ -17,6 +18,9 @@ from llm.safety_guard import GuardResult
 from api.config import get_settings
 from db.models import HealthRecord
 from db.session import SessionLocal
+
+# Audit Logger
+from observability.audit_logger import build_event, log_run
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +39,9 @@ class HealthcarePipeline:
         self.retrieval = retrieval_agent
         self.enable_retrieval = enable_retrieval
 
-    
-    # Deterministic Input Hash
     def _compute_input_hash(self, raw_text: str) -> str:
         return hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
 
-    # Persistence (side-effect layer)
     def save_record(
         self,
         *,
@@ -82,7 +83,6 @@ class HealthcarePipeline:
         finally:
             session.close()
 
-    # Main Pipeline
     def run(
         self,
         raw_text: str,
@@ -95,11 +95,12 @@ class HealthcarePipeline:
         run_id: Optional[str] = None,
     ) -> Dict[str, Any]:
 
-        # Deterministic seed
         if seed is not None:
             random.seed(seed)
 
         start_time = time.perf_counter()
+        final_status = "failure"
+        error_message = None
 
         rag_enabled = enable_rag if enable_rag is not None else self.enable_retrieval
 
@@ -126,8 +127,9 @@ class HealthcarePipeline:
             },
         }
 
-        # Step 1. Intake
         try:
+
+            # Step 1. Intake
             intake_model = process_raw_input(
                 raw_text=raw_text,
                 source=meta.get("source", "web"),
@@ -138,79 +140,34 @@ class HealthcarePipeline:
 
             trace["intake"] = intake_model.dict()
 
-        except IntakeValidationError as e:
-
-            trace["errors"].append(
-                {
-                    "stage": "intake",
-                    "error_type": "IntakeValidationError",
-                    "message": str(e),
-                }
-            )
-
-            raise
-
-        
-        # Step 2. Structuring
-        try:
-
+            # Step 2. Structuring
             structured = self.struct.run(trace["intake"])
             trace["structured"] = structured
 
-        except (JSONParsingError, SchemaValidationError, StructuringError) as e:
+            # Step 3. Retrieval
+            retrieval_results: List[Any] = []
 
-            trace["errors"].append(
-                {
-                    "stage": "structuring",
-                    "error_type": type(e).__name__,
-                    "message": str(e),
-                }
-            )
+            if rag_enabled and self.retrieval:
+                try:
+                    retrieval_payload = self.retrieval.run(
+                        structured_data=structured,
+                        top_k=rag_top_k,
+                    )
 
-            raise StructuringError(str(e))
+                    retrieval_results = retrieval_payload.get("chunks", [])
 
-        # Step 3. Retrieval (optional)
-        retrieval_results: List[Any] = []
+                    trace["rag"].update(
+                        {
+                            "used": True,
+                            "query": retrieval_payload.get("query"),
+                            "chunks": retrieval_results,
+                        }
+                    )
 
-        if rag_enabled and self.retrieval:
+                except Exception as e:
+                    trace["rag"]["error"] = str(e)
 
-            try:
-
-                retrieval_payload = self.retrieval.run(
-                    structured_data=structured,
-                    top_k=rag_top_k,
-                )
-
-                retrieval_results = retrieval_payload.get("chunks", [])
-
-                trace["rag"].update(
-                    {
-                        "used": True,
-                        "query": retrieval_payload.get("query"),
-                        "chunks": retrieval_results,
-                    }
-                )
-
-            except Exception as e:
-
-                logger.warning(
-                    "Retrieval failed. Continuing without RAG context.",
-                    exc_info=e,
-                )
-
-                trace["rag"].update(
-                    {
-                        "used": False,
-                        "error": {
-                            "type": type(e).__name__,
-                            "message": str(e),
-                        },
-                    }
-                )
-
-        # Step 4. Output + Safety
-        try:
-
+            # Step 4. Output
             output_result = self.output.run(
                 structured_data=structured,
                 retrieval_context=retrieval_results,
@@ -231,40 +188,46 @@ class HealthcarePipeline:
                     severity="low",
                 ).to_dict()
 
+            trace["success"] = True
+            final_status = "success"
+
         except Exception as e:
-
-            trace["errors"].append(
-                {
-                    "stage": "output",
-                    "error_type": type(e).__name__,
-                    "message": str(e),
-                }
-            )
-
+            error_message = str(e)
+            trace["errors"].append(error_message)
             raise
 
-        # Success
-        trace["success"] = True
-       
-        # Telemetry
-        latency_ms = (time.perf_counter() - start_time) * 1000
+        finally:
 
-        trace["telemetry"]["latency_ms"] = latency_ms
-        trace["telemetry"]["retrieval_hits"] = len(trace["rag"]["chunks"])
-        trace["telemetry"]["safety_violations"] = len(trace["safety"]["actions"])
+            latency_ms = int((time.perf_counter() - start_time) * 1000)
 
-        
-        # Optional persistence
+            trace["telemetry"]["latency_ms"] = latency_ms
+            trace["telemetry"]["retrieval_hits"] = len(trace["rag"]["chunks"])
+            if isinstance(trace.get("safety"), dict):
+                safety_actions = trace["safety"].get("actions", [])
+            else:
+                safety_actions = []
+            trace["telemetry"]["safety_violations"] = len(safety_actions)
+
+            event = build_event(
+                run_id=trace["run_id"],
+                status=final_status,
+                latency_ms=latency_ms,
+                safety_violation_count=trace["telemetry"]["safety_violations"],
+                retrieval_hit_count=trace["telemetry"]["retrieval_hits"],
+                flags={"rag_enabled": rag_enabled},
+                error=error_message,
+            )
+
+            log_run(event)
+
+        # persistence
         try:
-
             self.save_record(
                 raw_text=raw_text,
                 trace=trace,
                 persistence_enabled=persistence_enabled,
             )
-
         except Exception:
-
             logger.warning("Persistence hook failed but pipeline succeeded.")
 
         return trace
