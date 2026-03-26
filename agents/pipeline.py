@@ -13,7 +13,7 @@ from agents.structuring_agent import (
     SchemaValidationError,
 )
 from agents.output_agent import OutputAgent
-from agents.retrieval_agent import RetrievalAgent
+from agents.retrieval_agent import RetrievalAgent, RetrievalResult
 from llm.safety_guard import GuardResult
 from api.config import get_settings
 from db.models import HealthRecord
@@ -29,13 +29,14 @@ class HealthcarePipeline:
 
     def __init__(
         self,
-        structuring_agent: StructuringAgent,
-        output_agent: OutputAgent,
+        structuring_agent: Optional[StructuringAgent] = None,
+        output_agent: Optional[OutputAgent] = None,
         retrieval_agent: Optional[RetrievalAgent] = None,
         enable_retrieval: bool = False,
     ):
-        self.struct = structuring_agent
-        self.output = output_agent
+        # Allow default initialization for backward compatibility (e.g., API tests)
+        self.struct = structuring_agent or StructuringAgent()
+        self.output = output_agent or OutputAgent()
         self.retrieval = retrieval_agent
         self.enable_retrieval = enable_retrieval
 
@@ -102,6 +103,10 @@ class HealthcarePipeline:
         final_status = "failure"
         error_message = None
 
+        # ✅ ① Initialize metrics to avoid UnboundLocalError
+        safety_violation_count = 0
+        retrieval_hit_count = 0
+
         rag_enabled = enable_rag if enable_rag is not None else self.enable_retrieval
 
         trace: Dict[str, Any] = {
@@ -144,29 +149,43 @@ class HealthcarePipeline:
             structured = self.struct.run(trace["intake"])
             trace["structured"] = structured
 
+            # Extract safety metric directly from structuring agent
+            safety_violation_count = structured.get("safety_violation_count", 0)
+
             # Step 3. Retrieval
             retrieval_results: List[Any] = []
 
-            if rag_enabled and self.retrieval:
+            if rag_enabled and self.retrieval is not None:
                 try:
-                    retrieval_payload = self.retrieval.run(
-                        structured_data=structured,
-                        top_k=rag_top_k,
-                    )
+                    try:
+                        retrieval_payload = self.retrieval.run(
+                            structured,
+                            top_k=rag_top_k,
+                        )
+                    except TypeError:
+                        retrieval_payload = self.retrieval.run(
+                            structured_data=structured,
+                            top_k=rag_top_k,
+                        )
 
-                    retrieval_results = retrieval_payload.get("chunks", [])
+                    # Use text list for compatibility with tests
+                    retrieval_results = [c.text for c in retrieval_payload.chunks]
+
+                    # Safe fallback for hit_count
+                    retrieval_hit_count = getattr(
+                        retrieval_payload, "hit_count", len(retrieval_results)
+                    )
 
                     trace["rag"].update(
                         {
                             "used": True,
-                            "query": retrieval_payload.get("query"),
+                            "query": retrieval_payload.query,
                             "chunks": retrieval_results,
                         }
                     )
 
                 except Exception as e:
                     trace["rag"]["error"] = str(e)
-
             # Step 4. Output
             output_result = self.output.run(
                 structured_data=structured,
@@ -201,19 +220,15 @@ class HealthcarePipeline:
             latency_ms = int((time.perf_counter() - start_time) * 1000)
 
             trace["telemetry"]["latency_ms"] = latency_ms
-            trace["telemetry"]["retrieval_hits"] = len(trace["rag"]["chunks"])
-            if isinstance(trace.get("safety"), dict):
-                safety_actions = trace["safety"].get("actions", [])
-            else:
-                safety_actions = []
-            trace["telemetry"]["safety_violations"] = len(safety_actions)
+            trace["telemetry"]["retrieval_hits"] = retrieval_hit_count
+            trace["telemetry"]["safety_violations"] = safety_violation_count
 
             event = build_event(
                 run_id=trace["run_id"],
                 status=final_status,
                 latency_ms=latency_ms,
-                safety_violation_count=trace["telemetry"]["safety_violations"],
-                retrieval_hit_count=trace["telemetry"]["retrieval_hits"],
+                safety_violation_count=safety_violation_count,
+                retrieval_hit_count=retrieval_hit_count,
                 flags={"rag_enabled": rag_enabled},
                 error=error_message,
             )

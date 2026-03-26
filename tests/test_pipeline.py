@@ -3,6 +3,7 @@ from agents.pipeline import HealthcarePipeline
 from agents.intake_agent import IntakeValidationError
 from agents.structuring_agent import StructuringError
 from api.config import get_settings
+from agents.retrieval_agent import RetrievalResult, RetrievalChunk
 
 
 # Mock Agents (Test Doubles)
@@ -19,13 +20,19 @@ class MockOutputAgent:
             "_safety": None,
         }
 
+
 class MockRetrievalAgent:
-    # Simulates successful retrieval with 2 chunks
     def run(self, structured_data, top_k=5):
-        return {
-            "chunks": ["chunk-1", "chunk-2"],
-            "metadata": {}
-        }
+        chunks = [
+            RetrievalChunk(text="chunk-1", source=None, score=None),
+            RetrievalChunk(text="chunk-2", source=None, score=None),
+        ]
+        return RetrievalResult(
+            query="test-query",
+            chunks=chunks,
+            k=top_k,
+            hit_count=2,
+        )
 
 
 class FailingRetrievalAgent:

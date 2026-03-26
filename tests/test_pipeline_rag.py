@@ -1,6 +1,7 @@
 import pytest
 from agents.pipeline import HealthcarePipeline
 from api.config import get_settings
+from agents.retrieval_agent import RetrievalResult, RetrievalChunk
 
 # Mock / Stub Agents
 class MockStructuringAgent:
@@ -18,15 +19,17 @@ class MockOutputAgent:
 
 # Deterministic retrieval stub
 class StubRetrievalAgent:
-
-    def run(self, structured_data, top_k=3):
-        return {
-            "query": "chest pain shortness of breath",
-            "chunks": [
-                {"text": "doc1", "score": 0.91, "source": "kb"},
-                {"text": "doc2", "score": 0.88, "source": "kb"},
-            ],
-        }
+    def run(self, structured_data, top_k=5):
+        chunks = [
+            RetrievalChunk(text="stub-1", source=None, score=None),
+            RetrievalChunk(text="stub-2", source=None, score=None),
+        ]
+        return RetrievalResult(
+            query="stub-query",
+            chunks=chunks,
+            k=top_k,
+            hit_count=2,
+        )
 
 
 class FailingRetrievalAgent:

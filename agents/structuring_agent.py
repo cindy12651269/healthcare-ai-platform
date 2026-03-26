@@ -40,9 +40,8 @@ def load_structuring_prompt() -> str:
 
 # Utilities
 # Extract the first valid JSON object from text. Deterministic and test-safe.
-
 def extract_json_block(text: str) -> str:
-   
+
     text = text.strip()
 
     try:
@@ -64,6 +63,7 @@ def extract_json_block(text: str) -> str:
         return candidate
     except Exception as exc:
         raise JSONParsingError(f"Invalid JSON block: {exc}") from exc
+
 
 # Core Agent
 class StructuringAgent:
@@ -105,11 +105,17 @@ class StructuringAgent:
 
         Returns:
             StructuredHealthOutput (schema-compliant)
+            + safety_violation_count (for observability)
         """
         if self.mode == "mock":
             structured = self._mock_structuring(health_input)
             self._validate_schema(structured)
-            return structured
+
+            # Add safety metric (mock = no violations)
+            return {
+                **structured,
+                "safety_violation_count": 0,
+            }
 
         raise StructuringError("Unsupported structuring mode.")
 
@@ -118,7 +124,7 @@ class StructuringAgent:
     def _mock_structuring(self, health_input: Dict[str, Any]) -> Dict[str, Any]:
 
         return {
-            # Trace Layer 
+            # Trace Layer
             "trace": {
                 "input_id": health_input.get("input_id"),
                 "user_id": health_input.get("user_id"),
@@ -135,7 +141,7 @@ class StructuringAgent:
                 "audit_required": False,
             },
 
-            # Clinical Layer 
+            # Clinical Layer
             "clinical_structuring": {
                 "chief_complaint": health_input.get("raw_text", "")[:200],
                 "symptoms": [],
@@ -143,13 +149,13 @@ class StructuringAgent:
                 "confidence_level": 0.9,
             },
 
-            # Decision Layer 
+            # Decision Layer
             "agent_decisioning": {},
 
-            # Interoperability Layer 
+            # Interoperability Layer
             "ehr_interoperability": {},
 
-            # Metadata Layer 
+            # Metadata Layer
             "output_metadata": {
                 "generated_at": "2025-01-01T00:00:00Z",
                 "model_version": "mock",

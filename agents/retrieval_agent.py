@@ -3,44 +3,48 @@ from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 from rag.retriever import Retriever
 
-
+# Data Contracts
 @dataclass
-# Represents a single retrieved context chunk.
 class RetrievalChunk:
-    text: str # Retrieved content text
-    source: Optional[str]  # Origin of the document (file, URL, KB id, etc.)
-    score: Optional[float] # Similarity score (higher = more relevant)
+    """Represents a single retrieved context chunk."""
+    text: str  # Retrieved content text
+    source: Optional[str]  # Origin of the document
+    score: Optional[float]  # Similarity score
+
 
 @dataclass
-#  Stable retrieval result contract used by the pipeline.
 class RetrievalResult:
-    query: str # Final semantic query used for embedding search
-    chunks: List[RetrievalChunk] # List of structured retrieval chunks
-    k: int # Number of top results requested
+    """
+    Stable retrieval result contract used by the pipeline.
+    Includes hit_count for observability metrics.
+    """
+    query: str  # Final semantic query used
+    chunks: List[RetrievalChunk]  # Retrieved chunks
+    k: int  # requested top_k
+    hit_count: int  # number of retrieved results (for observability)
 
 
-# Agent responsible for deterministic interface for tests, 
-# clear traceability (query is exposed), and compatibility with RAG-aware pipeline execution
+# Retrieval Agent responsible for deterministic interface for tests, clear traceability (query is exposed), and Observability (hit_count metric)
 class RetrievalAgent:
-  
+
     def __init__(self, retriever: Retriever, enabled: bool = True):
         self.retriever = retriever
         self.enabled = enabled
 
-    # Step 1 — Build semantic query from structured + optional intake
+    # Step 1 — Build semantic query
     def build_query(
         self,
         structured: Dict[str, Any],
         intake: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
-        Construct a clinically meaningful semantic query.
+        Construct a semantic query from structured + optional intake data.
 
-        Priority order:
-            1. chief_complaint
-            2. symptoms
-            3. contextual fields (duration, onset, notes)
-            4. raw intake fallback (if structured is sparse)
+        Priority:
+        1. chief_complaint
+        2. symptoms
+        3. contextual fields
+        4. intake fallback
         """
 
         parts: List[str] = []
@@ -50,7 +54,7 @@ class RetrievalAgent:
         if isinstance(cc, str) and cc.strip():
             parts.append(cc.strip())
 
-        # Symptoms list
+        # Symptoms
         symptoms = structured.get("symptoms")
         if isinstance(symptoms, list):
             parts.extend([str(s).strip() for s in symptoms if s])
@@ -61,7 +65,7 @@ class RetrievalAgent:
             if isinstance(val, str) and val.strip():
                 parts.append(val.strip())
 
-        # Fallback to intake raw text if structured insufficient
+        # Fallback to intake raw text
         if not parts and intake:
             raw = intake.get("raw_text") or intake.get("text")
             if isinstance(raw, str) and raw.strip():
@@ -69,7 +73,7 @@ class RetrievalAgent:
 
         return " ".join(parts).strip()
 
-    # Step 2 — Stable retrieve interface for pipeline
+    # Step 2 — Retrieval execution
     def retrieve(
         self,
         structured: Dict[str, Any],
@@ -78,22 +82,29 @@ class RetrievalAgent:
         top_k: int = 3,
     ) -> RetrievalResult:
         """
-        Execute retrieval and return structured RetrievalResult.
+        Execute retrieval and return structured result.
 
         Failure policy:
-            - If disabled → empty result
-            - If query empty → empty result
-            - Retriever exceptions propagate to pipeline (pipeline decides fatal/non-fatal)
+        - If disabled → empty result
+        - If query empty → empty result
+        - Retriever errors propagate to pipeline
         """
+
+        # Disabled → return empty result
         if not self.enabled:
-            return RetrievalResult(query="", chunks=[], k=0)
+            return RetrievalResult(query="", chunks=[], k=0, hit_count=0)
 
+        # Build query
         query = self.build_query(structured, intake)
-        if not query:
-            return RetrievalResult(query="", chunks=[], k=top_k)
 
+        # Empty query → no retrieval
+        if not query:
+            return RetrievalResult(query="", chunks=[], k=top_k, hit_count=0)
+
+        # Call underlying retriever
         raw_results = self.retriever.retrieve(query, top_k=top_k)
 
+        # Normalize into RetrievalChunk
         chunks: List[RetrievalChunk] = []
         for item in raw_results:
             chunks.append(
@@ -104,13 +115,15 @@ class RetrievalAgent:
                 )
             )
 
+        # Return structured result + observability metric
         return RetrievalResult(
             query=query,
             chunks=chunks,
             k=top_k,
+            hit_count=len(chunks),  # key metric for observability
         )
 
-    # Backward compatibility shim for older pipeline calls
+    # Backward compatibility for pipeline
     def run(
         self,
         structured: Dict[str, Any],

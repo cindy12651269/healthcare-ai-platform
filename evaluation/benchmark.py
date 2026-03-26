@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 from agents.pipeline import HealthcarePipeline
 from evaluation.metrics import compute_run_metrics, compute_aggregate_metrics
+from agents.retrieval_agent import RetrievalResult, RetrievalChunk
 
 # Mock Agents (Deterministic): Deterministic structuring agent.
 # Must match StructuredHealthOutput schema to support Issue 13 evaluation metrics.
@@ -55,17 +56,23 @@ class MockOutputAgent:
             "_safety": None,
         }
 
+
+
 # Always returns 2 chunks → deterministic retrieval hits.
 class MockRetrievalAgent:
 
     def run(self, structured_data, top_k=3):
-        return {
-            "query": "mock query",
-            "chunks": [
-                {"text": "doc1", "score": 0.9, "source": "kb"},
-                {"text": "doc2", "score": 0.8, "source": "kb"},
-            ],
-        }
+        chunks = [
+            RetrievalChunk(text="doc1", source="kb", score=0.9),
+            RetrievalChunk(text="doc2", source="kb", score=0.8),
+        ]
+
+        return RetrievalResult(
+            query="mock query",
+            chunks=chunks,
+            k=top_k,
+            hit_count=2,
+        )
 
 # Paths
 ROOT = Path(__file__).resolve().parent
