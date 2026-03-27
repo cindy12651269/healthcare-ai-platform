@@ -1,8 +1,12 @@
 import logging
 from fastapi import FastAPI
 from api.config import get_settings
+
 # Routers
 from api.routers import ingest
+
+# Middleware
+from api.middleware.audit import AuditMiddleware
 
 # Load centralized settings
 settings = get_settings()
@@ -21,6 +25,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Enable Audit Middleware (request-level observability)
+app.add_middleware(AuditMiddleware)
+
 # Router Registration
 app.include_router(
     ingest.router,

@@ -469,3 +469,4 @@
 {"run_id": "rag_enabled", "timestamp": "2026-03-26T10:12:02.624972+00:00", "status": "success", "flags": {"rag_enabled": true}, "latency_ms": 0, "safety_violation_count": 0, "retrieval_hit_count": 2, "error": null}
 {"run_id": "rag_fail", "timestamp": "2026-03-26T10:12:02.625278+00:00", "status": "success", "flags": {"rag_enabled": true}, "latency_ms": 0, "safety_violation_count": 0, "retrieval_hit_count": 0, "error": null}
 {"run_id": "rag_schema", "timestamp": "2026-03-26T10:12:02.625600+00:00", "status": "success", "flags": {"rag_enabled": true}, "latency_ms": 0, "safety_violation_count": 0, "retrieval_hit_count": 2, "error": null}
+{"run_id": "api_request", "timestamp": "2026-03-27T07:00:29.690882+00:00", "status": "success", "flags": {"path": "/health"}, "latency_ms": 0, "safety_violation_count": 0, "retrieval_hit_count": 0, "error": null}
