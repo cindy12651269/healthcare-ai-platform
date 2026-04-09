@@ -22,6 +22,10 @@ from db.session import SessionLocal
 # Audit Logger
 from observability.audit_logger import build_event, log_run
 
+# Metrics
+from observability.tracing import TraceContext
+from observability.metrics import build_run_metrics
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +38,6 @@ class HealthcarePipeline:
         retrieval_agent: Optional[RetrievalAgent] = None,
         enable_retrieval: bool = False,
     ):
-        # Allow default initialization for backward compatibility (e.g., API tests)
         self.struct = structuring_agent or StructuringAgent()
         self.output = output_agent or OutputAgent()
         self.retrieval = retrieval_agent
@@ -99,11 +102,12 @@ class HealthcarePipeline:
         if seed is not None:
             random.seed(seed)
 
+        ctx = TraceContext(run_id=run_id)
+
         start_time = time.perf_counter()
         final_status = "failure"
         error_message = None
 
-        # ✅ ① Initialize metrics to avoid UnboundLocalError
         safety_violation_count = 0
         retrieval_hit_count = 0
 
@@ -134,7 +138,8 @@ class HealthcarePipeline:
 
         try:
 
-            # Step 1. Intake
+            # Intake 
+            t = time.perf_counter()
             intake_model = process_raw_input(
                 raw_text=raw_text,
                 source=meta.get("source", "web"),
@@ -142,20 +147,22 @@ class HealthcarePipeline:
                 consent_granted=meta.get("consent_granted", False),
                 user_id=meta.get("user_id"),
             )
-
+            ctx.intake_ms = (time.perf_counter() - t) * 1000
             trace["intake"] = intake_model.dict()
 
-            # Step 2. Structuring
+            # Structuring 
+            t = time.perf_counter()
             structured = self.struct.run(trace["intake"])
+            ctx.structuring_ms = (time.perf_counter() - t) * 1000
             trace["structured"] = structured
 
-            # Extract safety metric directly from structuring agent
             safety_violation_count = structured.get("safety_violation_count", 0)
 
-            # Step 3. Retrieval
+            # Retrieval 
             retrieval_results: List[Any] = []
 
             if rag_enabled and self.retrieval is not None:
+                t = time.perf_counter()
                 try:
                     try:
                         retrieval_payload = self.retrieval.run(
@@ -168,10 +175,8 @@ class HealthcarePipeline:
                             top_k=rag_top_k,
                         )
 
-                    # Use text list for compatibility with tests
                     retrieval_results = [c.text for c in retrieval_payload.chunks]
 
-                    # Safe fallback for hit_count
                     retrieval_hit_count = getattr(
                         retrieval_payload, "hit_count", len(retrieval_results)
                     )
@@ -186,14 +191,23 @@ class HealthcarePipeline:
 
                 except Exception as e:
                     trace["rag"]["error"] = str(e)
-            # Step 4. Output
+
+                ctx.retrieval_ms = (time.perf_counter() - t) * 1000
+            else:
+                ctx.retrieval_ms = 0.0
+
+            # Output 
+            t = time.perf_counter()
             output_result = self.output.run(
                 structured_data=structured,
                 retrieval_context=retrieval_results,
             )
+            ctx.output_ms = (time.perf_counter() - t) * 1000
 
             trace["report"] = output_result.get("report")
 
+            # Safety 
+            t = time.perf_counter()
             safety: Optional[GuardResult] = output_result.get("_safety")
 
             if safety:
@@ -207,6 +221,8 @@ class HealthcarePipeline:
                     severity="low",
                 ).to_dict()
 
+            ctx.safety_ms = (time.perf_counter() - t) * 1000
+
             trace["success"] = True
             final_status = "success"
 
@@ -217,11 +233,39 @@ class HealthcarePipeline:
 
         finally:
 
-            latency_ms = int((time.perf_counter() - start_time) * 1000)
+            # Persistence 
+            t = time.perf_counter()
+            try:
+                self.save_record(
+                    raw_text=raw_text,
+                    trace=trace,
+                    persistence_enabled=persistence_enabled,
+                )
+            except Exception:
+                logger.warning("Persistence hook failed but pipeline succeeded.")
+            ctx.persistence_ms = (time.perf_counter() - t) * 1000
 
+            # Total 
+            latency_ms = int((time.perf_counter() - start_time) * 1000)
+            ctx.latency_ms = latency_ms
+
+            # Existing telemetry
             trace["telemetry"]["latency_ms"] = latency_ms
             trace["telemetry"]["retrieval_hits"] = retrieval_hit_count
             trace["telemetry"]["safety_violations"] = safety_violation_count
+
+            # NEW metrics
+            trace["metrics"] = build_run_metrics(
+                intake_ms=ctx.intake_ms,
+                structuring_ms=ctx.structuring_ms,
+                retrieval_ms=ctx.retrieval_ms,
+                output_ms=ctx.output_ms,
+                safety_ms=ctx.safety_ms,
+                persistence_ms=ctx.persistence_ms,
+                latency_ms=ctx.latency_ms,
+                safety_violation_count=safety_violation_count,
+                retrieval_hit_count=retrieval_hit_count,
+            )
 
             event = build_event(
                 run_id=trace["run_id"],
@@ -234,15 +278,5 @@ class HealthcarePipeline:
             )
 
             log_run(event)
-
-        # persistence
-        try:
-            self.save_record(
-                raw_text=raw_text,
-                trace=trace,
-                persistence_enabled=persistence_enabled,
-            )
-        except Exception:
-            logger.warning("Persistence hook failed but pipeline succeeded.")
 
         return trace

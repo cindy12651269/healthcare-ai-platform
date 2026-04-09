@@ -82,6 +82,8 @@ def test_pipeline_success_without_rag(monkeypatch):
     # Validate telemetry
     assert "telemetry" in result
     assert result["telemetry"]["retrieval_hits"] == 0
+    assert "metrics" in result
+    assert "latency_ms" in result["metrics"]   
 
 
 # Success with RAG
@@ -123,7 +125,8 @@ def test_pipeline_success_with_rag(monkeypatch):
 
     # Validate telemetry
     assert result["telemetry"]["retrieval_hits"] == 2
-
+    assert "metrics" in result
+    assert "latency_ms" in result["metrics"]
 
 # Retrieval failure (non-fatal)
 def test_pipeline_rag_failure_non_fatal(monkeypatch):
@@ -170,6 +173,8 @@ def test_pipeline_rag_failure_non_fatal(monkeypatch):
 
     # Telemetry should still be correct
     assert result["telemetry"]["retrieval_hits"] == 0
+    assert "metrics" in result
+    assert "latency_ms" in result["metrics"]
 
 
 # Intake failure

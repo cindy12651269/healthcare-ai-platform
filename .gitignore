@@ -29,3 +29,4 @@ build/
 # Secrets 
 .env
 .env.*
+audit.jsonl
