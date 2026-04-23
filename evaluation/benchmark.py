@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 from agents.pipeline import HealthcarePipeline
 from evaluation.metrics import compute_run_metrics, compute_aggregate_metrics
 from agents.retrieval_agent import RetrievalResult, RetrievalChunk
+from observability.metrics import compute_aggregate_latency
 
 # Mock Agents (Deterministic): Deterministic structuring agent.
 # Must match StructuredHealthOutput schema to support Issue 13 evaluation metrics.
@@ -47,6 +48,7 @@ class MockStructuringAgent:
             },
         }
 
+
 # Deterministic output agent.
 class MockOutputAgent:
 
@@ -55,7 +57,6 @@ class MockOutputAgent:
             "report": {"summary": "mock report"},
             "_safety": None,
         }
-
 
 
 # Always returns 2 chunks → deterministic retrieval hits.
@@ -74,10 +75,12 @@ class MockRetrievalAgent:
             hit_count=2,
         )
 
+
 # Paths
 ROOT = Path(__file__).resolve().parent
 TEST_CASES_FILE = ROOT / "test_cases.json"
 RESULT_DIR = ROOT / "results"
+
 
 # Load deterministic test cases.
 def load_cases() -> List[Dict[str, Any]]:
@@ -99,6 +102,42 @@ def create_pipeline(mode: str, rag_enabled: bool) -> HealthcarePipeline:
         enable_retrieval=rag_enabled,
     )
 
+def _standardize_pipeline_metrics(
+    trace: Dict[str, Any],
+    *,
+    mode: str,
+) -> Dict[str, Any]:
+    """
+    Normalize pipeline metrics for benchmark output.
+
+    In mock mode, all latency values are forced to 0.0 to preserve
+    deterministic benchmark behavior across runs.
+    """
+    raw_metrics = trace.get("metrics", {})
+
+    metrics = {
+        "intake_ms": float(raw_metrics.get("intake_ms", 0.0)),
+        "structuring_ms": float(raw_metrics.get("structuring_ms", 0.0)),
+        "retrieval_ms": float(raw_metrics.get("retrieval_ms", 0.0)),
+        "output_ms": float(raw_metrics.get("output_ms", 0.0)),
+        "safety_ms": float(raw_metrics.get("safety_ms", 0.0)),
+        "persistence_ms": float(raw_metrics.get("persistence_ms", 0.0)),
+        "latency_ms": float(raw_metrics.get("latency_ms", 0.0)),
+        "safety_violation_count": int(raw_metrics.get("safety_violation_count", 0)),
+        "retrieval_hit_count": int(raw_metrics.get("retrieval_hit_count", 0)),
+    }
+
+    if mode == "mock":
+        metrics["intake_ms"] = 0.0
+        metrics["structuring_ms"] = 0.0
+        metrics["retrieval_ms"] = 0.0
+        metrics["output_ms"] = 0.0
+        metrics["safety_ms"] = 0.0
+        metrics["persistence_ms"] = 0.0
+        metrics["latency_ms"] = 0.0
+
+    return metrics
+
 # Benchmark Runner
 def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
 
@@ -106,7 +145,8 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
     pipeline = create_pipeline(mode=mode, rag_enabled=rag)
 
     run_results: List[Dict[str, Any]] = []
-    run_metrics: List[Dict[str, Any]] = []
+    evaluation_run_metrics: List[Dict[str, Any]] = []
+    pipeline_run_metrics: List[Dict[str, Any]] = []
 
     for idx, case in enumerate(cases):
 
@@ -134,32 +174,42 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
             run_id=run_id,
         )
 
-        # Deterministic latency (CI-safe)
-        latency_ms = 0.0
-
-        # Compute metrics (Issue 12 + Issue 13)
-        metrics = compute_run_metrics(
+        # Benchmark-facing pipeline metrics (Issue 15)
+        standardized_metrics = _standardize_pipeline_metrics(
             trace,
-            latency_ms,
+            mode=mode,
+        )
+        pipeline_run_metrics.append(standardized_metrics)
+
+        # Keep Issue 12 + Issue 13 evaluation metrics deterministic
+        evaluation_latency_ms = standardized_metrics["latency_ms"]
+
+        evaluation_metrics = compute_run_metrics(
+            trace,
+            evaluation_latency_ms,
             expected=expected,
         )
-
-        run_metrics.append(metrics)
+        evaluation_run_metrics.append(evaluation_metrics)
 
         run_results.append(
             {
                 "run_id": run_id,
                 "case_id": case_id,
-                "metrics": metrics,
+                "metrics": standardized_metrics,
+                "evaluation_metrics": evaluation_metrics,
             }
         )
 
-    aggregated = compute_aggregate_metrics(run_metrics)
+    aggregated = compute_aggregate_metrics(evaluation_run_metrics)
+
+    latency_aggregated = compute_aggregate_latency(pipeline_run_metrics)
+    aggregated.update(latency_aggregated)
 
     return {
         "runs": run_results,
         "aggregated": aggregated,
     }
+
 
 # Output
 def print_summary(results: Dict[str, Any]):
@@ -171,6 +221,8 @@ def print_summary(results: Dict[str, Any]):
     print(f"Total runs: {agg['total_runs']}")
     print(f"Success rate: {agg['success_rate']:.2f}")
     print(f"Avg latency (ms): {agg['avg_latency_ms']:.2f}")
+    print(f"P50 latency (ms): {agg.get('p50_latency_ms', 0.0):.2f}")
+    print(f"P95 latency (ms): {agg.get('p95_latency_ms', 0.0):.2f}")
     print(f"Safety violations: {agg['total_safety_violations']}")
     print(f"Retrieval hits: {agg['total_retrieval_hits']}")
 

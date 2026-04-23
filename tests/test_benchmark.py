@@ -14,6 +14,9 @@ def test_benchmark_without_rag():
     assert agg["total_retrieval_hits"] == 0
     assert agg["total_safety_violations"] == 0
     assert agg["avg_latency_ms"] == 0.0
+    assert agg["p50_latency_ms"] == 0.0
+    assert agg["p95_latency_ms"] == 0.0
+    assert agg["num_runs"] == 6
 
 # Benchmark should count deterministic retrieval hits when RAG is enabled.
 def test_benchmark_with_rag():
@@ -30,8 +33,11 @@ def test_benchmark_with_rag():
     # MockRetrievalAgent returns 2 chunks per case, 6 cases total.
     assert agg["total_retrieval_hits"] == 12
     assert agg["avg_latency_ms"] == 0.0
+    assert agg["p50_latency_ms"] == 0.0
+    assert agg["p95_latency_ms"] == 0.0
+    assert agg["num_runs"] == 6
 
-# Each benchmark run record should expose stable run metadata and metrics."
+# Each benchmark run record should expose stable run metadata and pipeline metrics.
 def test_benchmark_run_structure():
     results = run_benchmark(
         mode="mock",
@@ -48,13 +54,26 @@ def test_benchmark_run_structure():
     assert "run_id" in first
     assert "case_id" in first
     assert "metrics" in first
+    assert "evaluation_metrics" in first
 
     metrics = first["metrics"]
 
-    assert "success" in metrics
+    assert "intake_ms" in metrics
+    assert "structuring_ms" in metrics
+    assert "retrieval_ms" in metrics
+    assert "output_ms" in metrics
+    assert "safety_ms" in metrics
+    assert "persistence_ms" in metrics
     assert "latency_ms" in metrics
     assert "retrieval_hit_count" in metrics
     assert "safety_violation_count" in metrics
+
+    evaluation_metrics = first["evaluation_metrics"]
+
+    assert "success" in evaluation_metrics
+    assert "latency_ms" in evaluation_metrics
+    assert "retrieval_hit_count" in evaluation_metrics
+    assert "safety_violation_count" in evaluation_metrics
 
 # Two mock benchmark runs without RAG should produce identical results.
 def test_benchmark_is_deterministic_without_rag():
@@ -68,6 +87,7 @@ def test_benchmark_is_deterministic_without_rag():
     )
 
     assert results_1 == results_2
+
 
 # Two mock benchmark runs with RAG should produce identical results.
 def test_benchmark_is_deterministic_with_rag():
