@@ -13,7 +13,7 @@ It serves as the authoritative architectural reference for implementation and po
 > * Mock embeddings are hash-derived and carry no semantic meaning.
 > * The "Interoperability Layer" and cloud infrastructure files are empty placeholders.
 >
-> These are scheduled in Phase 3. Current status: [`project_status.md`](project_status.md). Roadmap: [`step3_roadmap.md`](step3_roadmap.md).
+> The first two are proposed Phase 3 work. Retrieval quality is an optional enhancement; FHIR/HL7 interoperability and multi-service cloud infrastructure are optional or out of scope. Current status: [`project_status.md`](project_status.md). Roadmap: [`step3_roadmap.md`](step3_roadmap.md).
 
 ---
 

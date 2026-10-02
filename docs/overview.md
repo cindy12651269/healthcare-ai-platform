@@ -27,12 +27,12 @@ Full evidence: [`project_status.md`](project_status.md).
 * Retrieval agent and vector store abstraction (mock embeddings)
 * Deterministic benchmark harness, per-run audit events, stage-level latency metrics
 
-**In progress (Phase 3)**
+**Remaining in Phase 3 (not started)**
 
 * Making the default API path run end-to-end without an LLM key
 * CI pipeline
-* Real LLM provider behind a configuration flag
-* Patient intake UI
+* Real LLM provider behind a configuration flag (open Issue #17)
+* Patient intake UI (open Issue #16)
 
 **Planned (Phase 4)**
 

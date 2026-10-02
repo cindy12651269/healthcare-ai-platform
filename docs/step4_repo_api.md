@@ -11,7 +11,7 @@ This document reflects the **current repository structure and API behavior after
 > * Without an OpenAI API key the endpoint returns 500 (see [`project_status.md`](project_status.md)).
 > * `api/middleware/auth.py` and `rate_limit.py` are empty; Redis is started but unused; Terraform files in `infra/` are empty.
 >
-> Fixes are scheduled in Phase 3 ([`step3_roadmap.md`](step3_roadmap.md)).
+> Response contract, error mapping and the no-key path are proposed Phase 3 work; authentication is Phase 4; rate limiting is optional; Terraform beyond a single demo deployment is out of scope ([`step3_roadmap.md`](step3_roadmap.md)).
 
 It serves as a technical reference for:
 

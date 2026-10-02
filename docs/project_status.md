@@ -83,6 +83,6 @@ These were created during the initial scaffold and contain no content. They shou
 | Phase 1 — Core Foundation | #1–#6 | Closed | [`phase1_core_foundation.md.md`](project_journal/phase1_core_foundation.md.md) |
 | Phase 2 — RAG + Safety + Persistence | #7–#11 | Closed | [`phase2_rag_safety_persistence.md`](project_journal/phase2_rag_safety_persistence.md) |
 | Phase 3 — evaluation & observability portion | #12–#15 | Closed | Journal to be written when Phase 3 closes |
-| Phase 3 — remaining | #16, #17 | Open | See roadmap |
+| Phase 3 — remaining | #16, #17 open; further items proposed, not yet issues | Open | See roadmap |
 
 The journals are historical records written at the time each phase closed. Where this audit qualifies a journal statement (for example, mock-mode retrieval "improving grounding"), the qualification is recorded here rather than by editing the journal.

@@ -27,7 +27,7 @@ This uses the components built in Phases 1–2 (intake, structuring, safety guar
 
 ### Why narrow the scope
 
-A September 2026 review of requirements in healthcare software engagements consistently emphasised whole-workflow delivery, backend APIs and integrations, data model and access boundaries, security appropriate to health data, testing and deployment, and — for patient-facing AI — explicit escalation to humans. Named AI techniques (RAG, LLM evaluation frameworks, FHIR, AI scribe) were requested far less often. The roadmap therefore prioritises a working, secured, deployed workflow over additional AI components. This review was a small sample and is used only as a prioritisation input.
+In a September 2026 review of a small sample of healthcare software engagement requirements, most emphasised whole-workflow delivery, backend APIs and integrations, data model and access boundaries, security appropriate to health data, testing and deployment, and — for patient-facing AI — explicit escalation to humans. Named AI techniques (RAG, LLM evaluation frameworks, FHIR, AI scribe) were requested far less often. The roadmap therefore prioritises a working, secured, deployed workflow over additional AI components. This review was a small sample and is used only as a prioritisation input.
 
 ---
 
@@ -37,9 +37,11 @@ A September 2026 review of requirements in healthcare software engagements consi
 | --- | --- | --- |
 | 1 | Core Foundation (System Spine) | **COMPLETE** — Issues #1–#6 |
 | 2 | RAG + Safety + Persistence | **COMPLETE** — Issues #7–#11 |
-| 3 | Working Demo Baseline (evaluation, observability, runnable path, CI, LLM provider, UI) | **CURRENT** — #12–#15 closed; remaining work below |
-| 4 | Clinic Workflow, Access Control & Delivery | **PLANNED** |
+| 3 | Working Demo Baseline (evaluation, observability, runnable path, CI, LLM provider, UI) | **CURRENT** — #12–#15 closed; #16, #17 open; further work proposed below |
+| 4 | Clinic Workflow, Access Control & Delivery | **PLANNED** — proposed; no GitHub Project or issues yet |
 | — | Optional enhancements | Not required for portfolio completion |
+
+Phase 3 is tracked in the GitHub Project **"Phase 3 — UI + Evaluation + Observability"**; "Working Demo Baseline" describes its proposed remaining focus, not a renamed project. Until the issue/project reconciliation is done, GitHub Issues remain authoritative wherever this document and an issue differ.
 
 The original Phase 4 ("Interoperability + Portfolio Hardening": FHIR mock, consent flow, diagrams, demo video) has been replaced. Documentation and demo work are retained in the new Phase 4; FHIR moves to optional enhancements.
 
@@ -72,13 +74,15 @@ Known limitations carried forward (see `project_status.md`): mock embeddings car
 
 ### Remaining in Phase 3
 
+Only #16 and #17 exist as issues today. The other items below are proposed and will be created as separate issues. The changes described for #16 and #17 are **proposed re-scopes**: neither issue has been edited yet, and both still contain their original scope.
+
 | Work item | Why it exists |
 | --- | --- |
 | Deterministic end-to-end path through the real API | The default `/api/ingest` path currently fails without an OpenAI key, and agent output contracts do not match the pipeline and persistence model. Nothing downstream is credible until the unmocked path works and is tested. |
 | CI pipeline and complete dependency manifest | Demonstrates that tests and the benchmark run on every change; starts the Issue → branch → PR → review → merge workflow with an automated gate. |
 | Repository hygiene | Empty placeholder files and a tracked runtime log make the repository look larger than it is. Remove or explicitly mark them. |
-| Real LLM provider behind a configuration flag (#17, narrowed) | Shows a production-style third-party integration: timeouts, retries, schema validation, safe failure. Mock mode stays the default for CI. |
-| Patient intake UI (#16, re-scoped) | Makes the workflow demonstrable in a browser. Pipeline trace remains viewable as a collapsible developer panel rather than the primary purpose of the page. |
+| Real LLM provider behind a configuration flag (#17; proposed narrowing) | Shows a production-style third-party integration: timeouts, retries, schema validation, safe failure. Mock mode stays the default for CI. #17 as written also includes nested field scoring and UI mode display; the proposal moves nested scoring to optional enhancements. |
+| Patient intake UI (#16; proposed re-scope) | Makes the workflow demonstrable in a browser. #16 as written is a trace + metrics viewer with browser-side feature-flag toggles; the proposal makes intake submission the primary purpose, keeps the trace as a collapsible developer panel, and leaves feature flags as server configuration. |
 
 **Phase 3 exit criteria**
 
@@ -118,7 +122,7 @@ Known limitations carried forward (see `project_status.md`): mock embeddings car
 Pursue only after Phase 4, and only if they support the intake workflow:
 
 * **Meaningful retrieval with provenance** — replace hash-based mock embeddings with a deterministic lexical baseline or real embeddings, cite sources in staff-facing summaries, and measure hit rate on labelled cases. Until this is done, documentation should not claim retrieval improves output quality.
-* **Real-mode extraction evaluation** — nested field scoring and symptom precision/recall against labelled synthetic cases (originally bundled into #17).
+* **Real-mode extraction evaluation** — nested field scoring and symptom precision/recall against labelled synthetic cases (currently part of #17's scope; proposed to move here).
 * **FHIR R4 export** of a reviewed intake (e.g. `QuestionnaireResponse`) to a public sandbox server.
 * **Application-level encryption** of stored raw intake text.
 * **Rate limiting** on the public intake endpoint.
