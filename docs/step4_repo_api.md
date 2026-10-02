@@ -4,6 +4,15 @@ Healthcare AI Platform — Repository Structure and API Specification
 
 This document reflects the **current repository structure and API behavior after Phase 2 (RAG, Safety, Persistence)**.
 
+> **Accuracy note (2026-10-02 audit).** Known differences from the code at `e12c923`:
+>
+> * `/api/ingest` returns the raw pipeline trace (keys `run_id`, `success`, `intake`, `structured`, `rag`, `report`, `safety`, `errors`, `telemetry`, `metrics`), not the `IngestResponse` shape in §4.2. App version is `0.1.0`.
+> * There is no `SafetyViolation` → 422 mapping; a blocked output surfaces as a 500.
+> * Without an OpenAI API key the endpoint returns 500 (see [`project_status.md`](project_status.md)).
+> * `api/middleware/auth.py` and `rate_limit.py` are empty; Redis is started but unused; Terraform files in `infra/` are empty.
+>
+> Fixes are scheduled in Phase 3 ([`step3_roadmap.md`](step3_roadmap.md)).
+
 It serves as a technical reference for:
 
 * Developers contributing to the codebase

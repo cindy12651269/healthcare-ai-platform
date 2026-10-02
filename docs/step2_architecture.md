@@ -6,6 +6,15 @@ Target: Healthcare LLM + Agent Platform with Deterministic RAG, Safety Enforceme
 This document reflects the **current implemented architecture after Phase 2**.
 It serves as the authoritative architectural reference for implementation and portfolio review.
 
+> **Accuracy note (2026-10-02 audit).** This document describes the Phase 2 design intent. Known differences from the code at `e12c923`:
+>
+> * `OutputAgent` always calls the OpenAI API; only `StructuringAgent` has a deterministic mock mode. The default API path fails without an API key.
+> * The API's pipeline (`api/deps.py`) is built without a `RetrievalAgent`, so RAG is not active through the API.
+> * Mock embeddings are hash-derived and carry no semantic meaning.
+> * The "Interoperability Layer" and cloud infrastructure files are empty placeholders.
+>
+> These are scheduled in Phase 3. Current status: [`project_status.md`](project_status.md). Roadmap: [`step3_roadmap.md`](step3_roadmap.md).
+
 ---
 
 # 1. High-Level Architecture Overview

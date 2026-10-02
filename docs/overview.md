@@ -1,86 +1,87 @@
-# Healthcare AI Platform — Agentic Health LLM Infrastructure
+# Healthcare AI Platform — Overview
 
-## 1. Project Vision
+## 1. What This Project Is
 
-This project is a production-grade Healthcare AI Platform powered by:
-- Structured Health LLM pipelines
-- Multi-agent orchestration
-- HIPAA-aligned compliance design
-- Interoperability-ready EHR architecture
+A portfolio project demonstrating production-style engineering of a patient-facing healthcare AI workflow:
 
-The goal is to demonstrate a full-stack, real-world deployable healthcare AI system suitable for:
-- Clinical NLP
-- Patient intake automation
-- Decision support (non-diagnostic)
-- Interoperability with EMR/EHR systems
+> **AI-assisted pre-visit symptom intake for an outpatient clinic.**
+> Patients describe symptoms in free text. The system validates and structures the input, produces a non-diagnostic summary for clinic staff, applies deterministic safety rules, and routes risky or uncertain submissions to a human reviewer.
 
-This repository is designed specifically for:
-- Healthcare AI contracts
-- Enterprise Health AI & EHR Integration projects
+The emphasis is on engineering practice — explicit contracts, deterministic testing, safety boundaries, observability, and an issue-driven delivery workflow — rather than on the number of AI components.
+
+All data is synthetic. This project does not provide medical diagnosis or treatment advice and makes no HIPAA compliance claim.
 
 ---
 
-## 2. Core Capabilities
+## 2. Current State (Summary)
 
-- Healthcare text structuring (LLM-based)
-- Mini AI Agent orchestration
-- RAG-based medical knowledge retrieval
-- Secure PHI handling design
-- HIPAA-aligned audit logging
-- FHIR / HL7 interoperability-ready router
-- Full demo UI + API + evaluation harness
+Full evidence: [`project_status.md`](project_status.md).
 
----
+**Implemented and tested**
 
-## 3. Target Use Cases
+* FastAPI service with `POST /api/ingest`
+* Intake validation, PHI keyword detection and consent gate
+* Schema-validated structuring (deterministic mock mode)
+* Deterministic safety guard: diagnosis/prescription blocking, PHI masking, emergency guidance
+* PostgreSQL `HealthRecord` model with idempotency
+* Retrieval agent and vector store abstraction (mock embeddings)
+* Deterministic benchmark harness, per-run audit events, stage-level latency metrics
 
-- AI Clinical Intake & Structuring
-- Healthcare NLP & Ontology Coding
-- AI Health Summarization & Reporting
-- AI Agent-based Health Workflow Automation
-- Secure AI Pipelines for PHI data
+**In progress (Phase 3)**
 
----
+* Making the default API path run end-to-end without an LLM key
+* CI pipeline
+* Real LLM provider behind a configuration flag
+* Patient intake UI
 
-## 4. Target Market Alignment
+**Planned (Phase 4)**
 
-This platform directly aligns with:
-- Healthcare SaaS startups
-- Medical NLP & Ontology projects
-- AI-powered clinical automation products
-- EMR / EHR interoperability startups
-- HIPAA-compliant AI automation tooling
+* Authentication, roles and clinic-level data isolation
+* Human review queue and escalation rules
+* Signed escalation webhook to an external system
+* Deployed demo environment and handover documentation
 
 ---
 
-## 5. Repository Structure Philosophy
+## 3. Design Principles
 
-This repository is organized as a **true production monorepo**:
-
-- `agents/` → AI orchestration layer  
-- `llm/` → Prompt engineering + safety guard  
-- `rag/` → Retrieval & Vector DB  
-- `api/` → Secure FastAPI / Node backend  
-- `interoperability/` → FHIR / HL7 / EHR router  
-- `observability/` → HIPAA audit & metrics  
-- `compliance/` → Threat model & PHI flow  
-- `evaluation/` → LLM & Agent benchmarking  
-- `app/` → Frontend demo UI  
-- `docs/` → Full solution blueprint  
+* **Deterministic by default.** Mock LLM and mock embeddings keep CI reproducible; real providers are opt-in.
+* **Safety outside the model.** Rule-based guards run on every output regardless of provider.
+* **Humans own clinical decisions.** The system summarises and routes; it does not diagnose.
+* **Traceable runs.** Each run carries an ID, stage timings, retrieval trace and safety reasons.
+* **Honest documentation.** Docs distinguish implemented, partial and planned work.
 
 ---
 
-## 6. Compliance & Safety Positioning
+## 4. Repository Layout
 
-This project:
-- Does NOT provide medical diagnosis
-- Enforces strict PHI zoning
-- Implements audit logging & RBAC
-- Aligns with HIPAA technical safeguards
-- Uses safety boundaries in LLM prompts
+| Path | Contents | State |
+| --- | --- | --- |
+| `agents/` | Intake, structuring, retrieval, output agents; pipeline orchestrator | Implemented (`reasoning_agent.py` empty) |
+| `api/` | FastAPI app, routers, middleware | `ingest` + audit middleware implemented; auth, rate limit and other routers empty |
+| `llm/` | Prompts, JSON schemas, safety guard | Implemented |
+| `rag/` | Embeddings, vector store, retriever, document loader | Implemented with mock embeddings |
+| `db/` | ORM model, session, SQL migration | Implemented |
+| `observability/` | Audit logger, tracing context, metrics | Implemented (local) |
+| `evaluation/` | Benchmark runner, metrics, test cases | Implemented (mock mode) |
+| `tests/` | Unit and contract tests | 39 passing at last audit |
+| `app/` | Frontend | Empty placeholders — Phase 3 |
+| `interoperability/`, `infra/aws/`, `compliance/` | Early scaffold | Empty placeholders — see roadmap |
+| `docs/` | Product, architecture, API, evaluation, roadmap, journals | — |
 
 ---
 
-## 7. Roadmap & Delivery Strategy
+## 5. Documentation Map
 
-Detailed roadmap lives in: `docs/step3_roadmap.md`
+| Document | Purpose |
+| --- | --- |
+| [`step1_product.md`](step1_product.md) | Product definition and target workflow |
+| [`step2_architecture.md`](step2_architecture.md) | Architecture as of Phase 2 |
+| [`step3_roadmap.md`](step3_roadmap.md) | Roadmap, remaining scope and rationale |
+| [`step4_repo_api.md`](step4_repo_api.md) | Repository and API reference as of Phase 2 |
+| [`step5_demo_eval.md`](step5_demo_eval.md) | Phase 1–2 behaviour walkthrough |
+| [`evaluation_design.md`](evaluation_design.md), [`evaluation_benchmark.md`](evaluation_benchmark.md) | Evaluation harness design and usage |
+| [`project_status.md`](project_status.md) | Evidence-based capability audit |
+| [`project_journal/`](project_journal/) | Historical records of completed phases |
+
+Implementation progress is tracked in GitHub Issues and Projects.
