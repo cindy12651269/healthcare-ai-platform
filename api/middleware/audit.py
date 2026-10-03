@@ -15,6 +15,12 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
         try:
             response = await call_next(request)
+
+            # Handled errors come back as responses, not exceptions
+            if response.status_code >= 400:
+                status = "failure"
+                error_message = f"HTTP {response.status_code}"
+
             return response
 
         except Exception as e:
