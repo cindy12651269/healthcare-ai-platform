@@ -242,11 +242,21 @@ Make the local application stack reproducible from a clean environment and make 
 * Fresh Python 3.11 venv: `pip install -r requirements.txt` then `import api.main` succeeded
 * Backend: 64 passed, 3 skipped (PostgreSQL tests skip without `TEST_DATABASE_URL`); the PostgreSQL tests passed against the Compose database
 * Frontend: 23 tests passed; image builds
-* `docker compose build` / `up`: migration applied automatically; `api`, `frontend`, `db`, `redis` up
+* `docker compose build --no-cache --pull api frontend` / `up` (PR #23 validation, existing local volume): migration applied automatically; `api`, `frontend`, `db`, `redis` up
 * Browser (Chrome) → Compose frontend → real `/api/ingest`, no OpenAI key: intake summary, all five report sections, and the developer trace (including the persistence outcome) rendered; a `health_records` row was saved
 * Identical input submitted twice: second request returns 200 with a full report and `persistence.status = "duplicate"`
 * JSON columns round-trip as `JSONB`; no credentials found in the frontend container
-* The PR #23 record notes its Compose run used an existing local volume. The fresh-clone Compose startup (new volume, automatic migration) was run as part of the final close-out acceptance on `main`
+
+**Final Pre-Merge Acceptance (fresh clone)**
+
+The PR #23 validation above used an existing local volume. A separate fresh-clone acceptance run was performed afterwards, before the final merge review. It is not recorded in the PR #23 description or comments.
+
+* Separate clone of branch `fix/issue-17-local-runtime-compose-persistence` at `8c5f7bc`, separate Compose project, new PostgreSQL volume
+* `.env.example` copied to `.env`; `LLM_MODE=mock`; no real OpenAI key
+* Database started empty; `001_init_health_records.sql` applied automatically, creating `health_records` and `schema_migrations`
+* Chrome → Next.js → real `/api/ingest`: `persistence.status = "saved"`, one PostgreSQL row confirmed, developer trace rendered
+* Identical resubmission from the browser: `persistence.status = "duplicate"`, table still at one row
+* **Build caveat:** a `--no-cache` rebuild in the fresh clone did not finish within the available 10-minute window (slow apt download of the `build-essential` toolchain). The documented `docker compose up --build` then succeeded using cached layers from the branch's earlier clean build, not the older December 2025 images
 
 **Design Notes**
 
