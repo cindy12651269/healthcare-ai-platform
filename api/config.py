@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     enable_safety_guard: bool = True
     enable_persistence: bool = True
 
+    # CORS: comma-separated browser origins allowed to call the API (local Next.js UI by default)
+    cors_allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [o.strip() for o in self.cors_allowed_origins.split(",") if o.strip()]
+
     class Config:
         env_file = ".env"
         case_sensitive = False

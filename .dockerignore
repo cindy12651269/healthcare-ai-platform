@@ -1,0 +1,3 @@
+# Keep the backend image free of frontend build artifacts
+app/node_modules
+app/.next

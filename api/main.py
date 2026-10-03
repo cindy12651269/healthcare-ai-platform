@@ -1,5 +1,6 @@
 import logging
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from api.config import get_settings
 
 # Routers
@@ -28,6 +29,15 @@ app = FastAPI(
 
 # Enable Audit Middleware (request-level observability)
 app.add_middleware(AuditMiddleware)
+
+# CORS for the browser UI: explicit origin allowlist, no credentials, only the methods/headers the UI uses
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
 
 # Router Registration
 app.include_router(
