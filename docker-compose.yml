@@ -18,6 +18,19 @@ services:
       - redis
     restart: unless-stopped
 
+  frontend:
+    container_name: healthcare_frontend
+    build:
+      context: ./app
+      args:
+        # Browser-visible API URL (the browser runs on the host, so this is the host port, not the service name)
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
   db:
     container_name: healthcare_postgres
     image: postgres:15
