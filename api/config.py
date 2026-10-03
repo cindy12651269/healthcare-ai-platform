@@ -15,8 +15,10 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
 
     # Database Config
+    # Default targets a host-run API with the Compose `db` port published on localhost.
+    # docker-compose.yml overrides DATABASE_URL for the api container (host `db`).
     database_url: str = Field(
-        default="postgresql+psycopg2://postgres:postgres@localhost:5432/healthcare_ai"
+        default="postgresql+psycopg2://healthcare_ai:healthcare_ai@localhost:5432/healthcare_ai"
     )
     db_echo: bool = False
 
