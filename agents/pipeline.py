@@ -18,6 +18,7 @@ from llm.safety_guard import GuardResult
 from api.config import get_settings
 from db.models import HealthRecord
 from db.session import SessionLocal
+from sqlalchemy.exc import IntegrityError
 
 # Audit Logger
 from observability.audit_logger import build_event, log_run
@@ -46,21 +47,29 @@ class HealthcarePipeline:
     def _compute_input_hash(self, raw_text: str) -> str:
         return hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
 
+    # Best-effort persistence: a DB problem never fails the patient's request,
+    # but every outcome is returned (and recorded in trace["persistence"]) and
+    # unexpected failures are logged with a traceback.
+    #   disabled  — turned off by the caller or ENABLE_PERSISTENCE
+    #   skipped   — the run did not succeed, so there is no report to store
+    #   saved     — record inserted (record_id set)
+    #   duplicate — identical input text already stored (input_hash unique constraint)
+    #   failed    — any other error
     def save_record(
         self,
         *,
         raw_text: str,
         trace: Dict[str, Any],
         persistence_enabled: bool,
-    ) -> None:
-
-        if not persistence_enabled:
-            return
+    ) -> Dict[str, Any]:
 
         settings = get_settings()
 
-        if not settings.enable_persistence:
-            return
+        if not persistence_enabled or not settings.enable_persistence:
+            return {"status": "disabled", "record_id": None}
+
+        if not trace.get("success"):
+            return {"status": "skipped", "record_id": None}
 
         session = SessionLocal()
 
@@ -68,7 +77,7 @@ class HealthcarePipeline:
             input_hash = self._compute_input_hash(raw_text)
 
             record = HealthRecord.from_pipeline_trace(
-                trace_id=str(uuid4()),
+                trace_id=trace["run_id"],
                 pipeline_version=settings.pipeline_version,
                 intake=trace["intake"],
                 structured_output=trace["structured"],
@@ -79,10 +88,21 @@ class HealthcarePipeline:
 
             session.add(record)
             session.commit()
+            logger.info(f"Persisted health record | record_id={record.id} | run_id={trace['run_id']}")
+            return {"status": "saved", "record_id": record.id}
 
-        except Exception as e:
+        except IntegrityError as e:
             session.rollback()
-            logger.error("Persistence failed", exc_info=e)
+            if "input_hash" in str(e.orig):
+                logger.warning(f"Persistence skipped: identical input already stored | run_id={trace['run_id']}")
+                return {"status": "duplicate", "record_id": None}
+            logger.exception("Persistence failed")
+            return {"status": "failed", "record_id": None}
+
+        except Exception:
+            session.rollback()
+            logger.exception("Persistence failed")
+            return {"status": "failed", "record_id": None}
 
         finally:
             session.close()
@@ -236,13 +256,14 @@ class HealthcarePipeline:
             # Persistence 
             t = time.perf_counter()
             try:
-                self.save_record(
+                trace["persistence"] = self.save_record(
                     raw_text=raw_text,
                     trace=trace,
                     persistence_enabled=persistence_enabled,
                 )
             except Exception:
-                logger.warning("Persistence hook failed but pipeline succeeded.")
+                logger.exception("Persistence hook failed")
+                trace["persistence"] = {"status": "failed", "record_id": None}
             ctx.persistence_ms = (time.perf_counter() - t) * 1000
 
             # Total 

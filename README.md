@@ -14,13 +14,30 @@ Work is tracked in GitHub Issues and Projects and delivered as Issue → branch 
 ## Running tests
 
 ```bash
-pip install -r requirements.txt   # note: manifest is incomplete; fixed in Phase 3
+pip install -r requirements-dev.txt   # runtime (requirements.txt) + pytest/httpx; Python 3.11
 pytest
 ```
+
+`tests/test_persistence_postgres.py` runs only when `TEST_DATABASE_URL` points at a PostgreSQL database (for example the Compose `db` service: `postgresql+psycopg2://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5432/<POSTGRES_DB>`); otherwise it is skipped.
 
 ## Running the patient intake demo UI
 
 The Next.js intake UI (`app/`) submits to the FastAPI `POST /api/ingest` endpoint. Pipeline settings (RAG, persistence, LLM mode) are backend configuration and are not exposed in the browser.
+
+The default `LLM_MODE=mock` runs the deterministic pipeline and needs no OpenAI API key. `LLM_MODE=real` calls OpenAI with `OPENAI_API_KEY` (real-provider hardening is tracked separately). The key is only read by the backend; the browser only receives `NEXT_PUBLIC_API_BASE_URL`.
+
+### With Docker Compose
+
+```bash
+cp .env.example .env
+docker compose up --build    # api :8000, frontend http://localhost:3000, db (PostgreSQL 15), redis
+```
+
+On start, the `api` container waits for `db` to be healthy, applies pending SQL migrations from `db/migrations/` (`python -m db.migrate`, recorded in `schema_migrations`; works on a new or an existing volume), then starts uvicorn. Inside Compose the API connects to Postgres through the `db` service (`DATABASE_URL` is set in `docker-compose.yml` from the `POSTGRES_*` values).
+
+Each successful `/api/ingest` run is stored as one row in `health_records`, and the response's `persistence` field reports the outcome (`saved`, `duplicate`, `skipped`, `disabled`, `failed`). Persistence is best-effort: a database error does not fail the request, but it is logged and reported as `failed`. Rows are unique per input text (`input_hash`), so submitting identical text again returns `duplicate` and is not stored twice.
+
+### Without Docker
 
 ```bash
 # 1. Backend (port 8000). Allowed browser origins: CORS_ALLOWED_ORIGINS (default http://localhost:3000,http://127.0.0.1:3000)
@@ -32,10 +49,8 @@ npm install
 npm run dev        # open http://localhost:3000
 ```
 
-Or with Docker Compose: `docker compose up --build` starts `api`, `frontend` (http://localhost:3000), `db` and `redis`. Compose reads a root `.env` (copy `.env.example`).
+For persistence in this mode, start Postgres with `docker compose up -d db`, then run `python -m db.migrate` before uvicorn; `.env.example`'s `DATABASE_URL` targets the published `localhost:5432` port.
 
 Frontend checks: `cd app && npm run lint && npm run typecheck && npm test && npm run build`.
-
-**Known limitation:** `/api/ingest` does not yet complete without an OpenAI key. Report generation always calls OpenAI, so without a key every request returns HTTP 500, and the UI shows its service-failure state. A deterministic no-key path is separate Phase 3 work (see [`docs/step3_roadmap.md`](docs/step3_roadmap.md)).
 
 A full README (setup, demo walkthrough, architecture diagram) is part of Phase 4.

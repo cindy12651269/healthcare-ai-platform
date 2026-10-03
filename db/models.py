@@ -16,6 +16,15 @@ from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
+# Required report sections (llm/schemas/report_output.json)
+REPORT_SECTION_KEYS = (
+    "overview",
+    "symptom_analysis",
+    "clinical_insights",
+    "risk_summary",
+    "recommendations",
+)
+
 
 class HealthRecord(Base):
     """
@@ -45,8 +54,7 @@ class HealthRecord(Base):
     # Final output
     report_json = Column(JSON, nullable=False)
     
-    # Human-readable summary extracted from:
-    # report_json["clinical_structuring"]["clinical_summary"]
+    # Human-readable report text built from report_json["report_sections"]
     report_text = Column(Text, nullable=False)
 
     # Safety / compliance audit
@@ -97,13 +105,16 @@ class HealthRecord(Base):
     ) -> "HealthRecord":
    
         # Deterministic extraction of human-readable report text
+        # (section order follows llm/schemas/report_output.json)
         try:
-            report_text = (
-                report_json["clinical_structuring"]["clinical_summary"]
+            sections = report_json["report_sections"]
+            report_text = "\n\n".join(
+                f"{key}: {sections[key]}" for key in REPORT_SECTION_KEYS
             )
-        except KeyError as e:
+        except (KeyError, TypeError) as e:
             raise ValueError(
-                "report_json missing clinical_structuring.clinical_summary"
+                "report_json missing report_sections "
+                f"({', '.join(REPORT_SECTION_KEYS)})"
             ) from e
 
         return cls(
