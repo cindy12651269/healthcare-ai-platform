@@ -59,7 +59,7 @@ def patch_openai(monkeypatch):
 # Test 1: Minimal Structured Input: Validate OutputAgent with minimal structured input.
 # Ensures schema compatibility is with StructuredHealthOutput, report structure is generated, and safety guard is enforced.
 def test_output_agent_minimal(patch_openai):
-    agent = OutputAgent(model="gpt-4o-mini")
+    agent = OutputAgent(model="gpt-4o-mini", mode="real")
 
     fake_structured = {
         "trace": {"input_id": "test1"},
@@ -74,7 +74,9 @@ def test_output_agent_minimal(patch_openai):
         "output_metadata": {}
     }
 
-    result = agent.run(fake_structured, retrieval_context=None)
+    output = agent.run(fake_structured, retrieval_context=None)
+    result = output["report"]
+    assert output["_safety"].allowed is True
 
     # Report Structure 
     assert "report_sections" in result
@@ -105,7 +107,7 @@ def test_output_agent_minimal(patch_openai):
 # Ensures retrieval context does not break output schema and safety layer is still enforced.
 def test_output_agent_with_retrieval_context(patch_openai):
 
-    agent = OutputAgent(model="gpt-4o-mini")
+    agent = OutputAgent(model="gpt-4o-mini", mode="real")
 
     # Minimal valid structured input
     fake_structured = {
@@ -125,7 +127,7 @@ def test_output_agent_with_retrieval_context(patch_openai):
         }
     ]
 
-    result = agent.run(fake_structured, retrieval_context=retrieval_context)
+    result = agent.run(fake_structured, retrieval_context=retrieval_context)["report"]
 
     # Core Output 
     assert "report_sections" in result
