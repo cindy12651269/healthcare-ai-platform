@@ -53,7 +53,8 @@ class SyntheticOpenAI:
 @pytest.fixture
 # Replace OpenAI client with deterministic mock.
 def patch_openai(monkeypatch):
-    monkeypatch.setattr("agents.output_agent.OpenAI", SyntheticOpenAI)
+    monkeypatch.setattr("llm.providers.openai_client.OpenAI", SyntheticOpenAI)
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
 
 
 # Test 1: Minimal Structured Input: Validate OutputAgent with minimal structured input.

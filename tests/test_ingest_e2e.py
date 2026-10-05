@@ -18,7 +18,7 @@ def client(monkeypatch):
     def _boom(*args, **kwargs):
         raise AssertionError("OpenAI client must not be constructed in default mode")
 
-    monkeypatch.setattr("agents.output_agent.OpenAI", _boom)
+    monkeypatch.setattr("llm.providers.openai_client.OpenAI", _boom)
     # Postgres persistence is out of scope here; keep the test hermetic
     monkeypatch.setattr(get_settings(), "enable_persistence", False)
 

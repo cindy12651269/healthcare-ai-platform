@@ -30,3 +30,6 @@ build/
 .env
 .env.*
 audit.jsonl
+
+# Real-provider benchmark output (opt-in, non-deterministic; not committed)
+evaluation/results/benchmark_results_real.json

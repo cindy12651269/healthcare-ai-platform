@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import InputForm from "../components/InputForm";
 import ReportView from "../components/ReportView";
 import DeveloperTracePanel from "../components/DeveloperTracePanel";
@@ -7,7 +7,9 @@ import {
   FailureDiagnostics,
   IngestOutcome,
   IngestRequest,
+  LlmMode,
   PipelineResult,
+  fetchLlmMode,
   submitIntake,
 } from "../services/api";
 
@@ -36,11 +38,27 @@ function toPageState(outcome: IngestOutcome): PageState {
 
 interface IntakePageProps {
   submit?: typeof submitIntake; // injectable for tests
+  loadLlmMode?: () => Promise<LlmMode | null>; // injectable for tests
 }
 
-export default function IntakePage({ submit = submitIntake }: IntakePageProps) {
+export default function IntakePage({
+  submit = submitIntake,
+  loadLlmMode = fetchLlmMode,
+}: IntakePageProps) {
   const [state, setState] = useState<PageState>({ status: "idle" });
+  const [llmMode, setLlmMode] = useState<LlmMode | null>(null);
   const inFlight = useRef(false);
+
+  // Display-only: the mode is configured on the server (LLM_MODE) and cannot be changed here
+  useEffect(() => {
+    let active = true;
+    loadLlmMode().then((mode) => {
+      if (active) setLlmMode(mode);
+    });
+    return () => {
+      active = false;
+    };
+  }, [loadLlmMode]);
 
   async function handleSubmit(req: IngestRequest) {
     // Guard against double submission even if the click lands before re-render
@@ -66,7 +84,14 @@ export default function IntakePage({ submit = submitIntake }: IntakePageProps) {
       <header className="site-header">
         <div className="container">
           <span className="brand">Healthcare AI Platform</span>
-          <span className="badge">Demo · synthetic data only</span>
+          <span className="badges">
+            {llmMode && (
+              <span className="badge" data-testid="llm-mode">
+                LLM Mode: {llmMode === "real" ? "Real" : "Mock"}
+              </span>
+            )}
+            <span className="badge">Demo · synthetic data only</span>
+          </span>
         </div>
       </header>
 

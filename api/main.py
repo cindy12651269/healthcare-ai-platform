@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import get_settings
+from llm.provider import check_llm_config
 
 # Routers
 from api.routers import ingest
@@ -51,19 +52,23 @@ app.include_router(
 def on_startup():
     logger.info(f"🚀 {settings.app_name} starting up...")
     logger.info(f"Environment: {settings.app_env}")
+    # Refuse to start in real mode without provider configuration (never fall back to mock)
+    check_llm_config(settings)
+    logger.info(f"LLM mode: {settings.llm_mode}")
 
 
 @app.on_event("shutdown")
 def on_shutdown():
     logger.info(f"🛑 {settings.app_name} shutting down...")
 
-# Basic system health check.
+# Basic system health check. Exposes only the execution mode, never provider configuration.
 @app.get("/health", tags=["System"])
 def health_check():
     return {
         "status": "ok",
         "app": settings.app_name,
         "environment": settings.app_env,
+        "llm_mode": settings.llm_mode,
     }
 
 # Root

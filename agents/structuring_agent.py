@@ -1,10 +1,10 @@
 from __future__ import annotations
 import json
-import os
 from pathlib import Path
 from typing import Any, Dict
 import jsonschema
 from jsonschema import ValidationError
+from llm.provider import LLMProvider, build_provider, resolve_llm_mode
 
 # Paths
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +26,7 @@ class SchemaValidationError(StructuringError):
 
 
 class LLMCallError(StructuringError):
-    """Reserved for Phase 3 real LLM failures."""
+    """Reserved for real LLM failures (provider errors are raised as llm.provider.LLMProviderError)."""
 
 # Load StructuredHealthOutput schema from disk.
 def load_structured_schema() -> Dict[str, Any]:
@@ -70,33 +70,38 @@ class StructuringAgent:
     """
     Enterprise-grade structuring agent.
 
-    Phase 1–2:
-    - Deterministic mock output
-    - CI-safe / offline-safe
-    - No external API calls
-
-    Phase 3:
-    - Real LLM integration (disabled for now)
+    - mock (default): deterministic output, CI-safe / offline-safe
+    - real: OpenAI through the shared provider interface (llm/provider.py)
+    Both modes go through provider.generate_json and the same schema validation.
     """
 
     def __init__(
         self,
-        model: str = "gpt-4o-mini",
+        model: str | None = None,
         mode: str | None = None,
+        provider: LLMProvider | None = None,
     ) -> None:
 
-        self.model = model
-        self.mode = mode or os.getenv("LLM_MODE", "mock")
+        self.mode = resolve_llm_mode(mode)
 
         # Load schema and prompt
         self._schema = load_structured_schema()
         self._base_prompt = load_structuring_prompt()
 
-        if self.mode not in {"mock", "real"}:
-            raise ValueError(f"Invalid LLM mode: {self.mode}")
+        self.provider = provider or build_provider(
+            self.mode, mock_builder=self._mock_structuring, model=model
+        )
+        self.model = getattr(self.provider, "model", None) or model or "mock"
 
-        if self.mode == "real":
-            raise NotImplementedError("Real LLM calls disabled until Phase 3")
+    def _build_prompt(self, health_input: Dict[str, Any]) -> str:
+        return "".join([
+            self._base_prompt,
+            "\n\n----- StructuredHealthOutput JSON SCHEMA -----\n",
+            json.dumps(self._schema),
+            "\n\n----- HealthInput -----\n",
+            json.dumps(health_input, default=str),
+            "\n----- END INPUT -----",
+        ])
 
     # Public API
     def run(self, health_input: Dict[str, Any]) -> Dict[str, Any]:
@@ -107,17 +112,22 @@ class StructuringAgent:
             StructuredHealthOutput (schema-compliant)
             + safety_violation_count (for observability)
         """
-        if self.mode == "mock":
-            structured = self._mock_structuring(health_input)
-            self._validate_schema(structured)
+        structured = self.provider.generate_json(
+            system="Return ONLY a valid JSON object matching the StructuredHealthOutput schema. No explanations.",
+            prompt=self._build_prompt(health_input) if self.mode == "real" else "",
+            context=health_input,
+        )
+        if self.mode == "real" and isinstance(structured.get("output_metadata"), dict):
+            # Record what actually produced the output, regardless of what the model claims
+            structured["output_metadata"]["model_version"] = self.model
 
-            # Add safety metric (mock = no violations)
-            return {
-                **structured,
-                "safety_violation_count": 0,
-            }
+        # Mandatory in both modes
+        self._validate_schema(structured)
 
-        raise StructuringError("Unsupported structuring mode.")
+        return {
+            **structured,
+            "safety_violation_count": 0,
+        }
 
     # Mock Implementation: Deterministic structured output.
     # Must match StructuredHealthOutput schema for Issue 13 evaluation metrics.

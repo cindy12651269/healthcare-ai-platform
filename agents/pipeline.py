@@ -136,6 +136,8 @@ class HealthcarePipeline:
         trace: Dict[str, Any] = {
             "run_id": run_id or str(uuid4()),
             "success": False,
+            # Execution mode of the structuring agent (None for injected test doubles)
+            "llm_mode": getattr(self.struct, "mode", None),
             "intake": None,
             "structured": None,
             "rag": {

@@ -1,9 +1,18 @@
 from __future__ import annotations
 import argparse
 import json
+import sys
 from pathlib import Path
+
+# Allow `python evaluation/benchmark.py` as well as `python -m evaluation.benchmark`
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from typing import Any, Dict, List
 from agents.pipeline import HealthcarePipeline
+from agents.structuring_agent import StructuringAgent
+from agents.output_agent import OutputAgent
+from api.config import get_settings
+from llm.provider import LLMConfigurationError, check_llm_config
 from evaluation.metrics import compute_run_metrics, compute_aggregate_metrics
 from agents.retrieval_agent import RetrievalResult, RetrievalChunk
 from observability.metrics import compute_aggregate_latency
@@ -90,14 +99,21 @@ def load_cases() -> List[Dict[str, Any]]:
 
 
 # Pipeline Factory
+# mock: deterministic benchmark doubles (CI). real: the production agents on the OpenAI provider;
+# refuses to start without valid provider configuration (opt-in, never part of CI).
 def create_pipeline(mode: str, rag_enabled: bool) -> HealthcarePipeline:
 
-    if mode != "mock":
-        raise NotImplementedError("live mode not implemented")
+    if mode == "mock":
+        structuring_agent, output_agent = MockStructuringAgent(), MockOutputAgent()
+    elif mode == "real":
+        check_llm_config(get_settings().model_copy(update={"llm_mode": "real"}))
+        structuring_agent, output_agent = StructuringAgent(mode="real"), OutputAgent(mode="real")
+    else:
+        raise LLMConfigurationError(f"Unsupported benchmark mode {mode!r}; expected mock or real")
 
     return HealthcarePipeline(
-        structuring_agent=MockStructuringAgent(),
-        output_agent=MockOutputAgent(),
+        structuring_agent=structuring_agent,
+        output_agent=output_agent,
         retrieval_agent=MockRetrievalAgent() if rag_enabled else None,
         enable_retrieval=rag_enabled,
     )
@@ -139,10 +155,10 @@ def _standardize_pipeline_metrics(
     return metrics
 
 # Benchmark Runner
-def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
+def run_benchmark(mode: str, rag: bool, limit: int | None = None) -> Dict[str, Any]:
 
-    cases = load_cases()
     pipeline = create_pipeline(mode=mode, rag_enabled=rag)
+    cases = load_cases()[:limit] if limit else load_cases()
 
     run_results: List[Dict[str, Any]] = []
     evaluation_run_metrics: List[Dict[str, Any]] = []
@@ -206,6 +222,7 @@ def run_benchmark(mode: str, rag: bool) -> Dict[str, Any]:
     aggregated.update(latency_aggregated)
 
     return {
+        "mode": mode,
         "runs": run_results,
         "aggregated": aggregated,
     }
@@ -218,6 +235,7 @@ def print_summary(results: Dict[str, Any]):
 
     print("\nBenchmark Summary")
     print("----------------------------")
+    print(f"mode: {results.get('mode', 'mock')}")
     print(f"Total runs: {agg['total_runs']}")
     print(f"Success rate: {agg['success_rate']:.2f}")
     print(f"Avg latency (ms): {agg['avg_latency_ms']:.2f}")
@@ -254,19 +272,24 @@ def main():
         description="HealthcarePipeline benchmark harness"
     )
 
-    parser.add_argument("--mode", choices=["mock", "live"], default="mock")
+    parser.add_argument("--mode", choices=["mock", "real"], default="mock")
     parser.add_argument("--rag", choices=["on", "off"], default="off")
-    parser.add_argument("--out", default="benchmark_results.json")
+    parser.add_argument("--limit", type=int, default=None, help="run only the first N cases (keeps real-mode API usage small)")
+    parser.add_argument("--out", default=None, help="default: benchmark_results.json (mock) / benchmark_results_real.json (real)")
 
     args = parser.parse_args()
 
-    results = run_benchmark(
-        mode=args.mode,
-        rag=(args.rag == "on"),
-    )
+    try:
+        results = run_benchmark(
+            mode=args.mode,
+            rag=(args.rag == "on"),
+            limit=args.limit,
+        )
+    except LLMConfigurationError as e:
+        raise SystemExit(f"mode: {args.mode}\nBenchmark refused to start: {e}")
 
     print_summary(results)
-    save_results(results, args.out)
+    save_results(results, args.out or ("benchmark_results.json" if args.mode == "mock" else "benchmark_results_real.json"))
 
 
 if __name__ == "__main__":
