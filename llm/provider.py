@@ -33,8 +33,15 @@ class LLMMalformedOutputError(LLMProviderError):
 class LLMProvider(Protocol):
     name: str
 
+    # `schema` is the JSON Schema the output must satisfy; providers may use it to constrain generation.
+    # Callers still validate the result against it (a provider is never trusted to have done so).
     def generate_json(
-        self, *, system: str, prompt: str, context: Dict[str, Any]
+        self,
+        *,
+        system: str,
+        prompt: str,
+        context: Dict[str, Any],
+        schema: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]: ...
 
 
@@ -45,7 +52,14 @@ class MockLLMProvider:
     def __init__(self, builder: Callable[[Dict[str, Any]], Dict[str, Any]]):
         self._builder = builder
 
-    def generate_json(self, *, system: str, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_json(
+        self,
+        *,
+        system: str,
+        prompt: str,
+        context: Dict[str, Any],
+        schema: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         return self._builder(context)
 
 

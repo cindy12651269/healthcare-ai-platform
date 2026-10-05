@@ -116,6 +116,7 @@ class StructuringAgent:
             system="Return ONLY a valid JSON object matching the StructuredHealthOutput schema. No explanations.",
             prompt=self._build_prompt(health_input) if self.mode == "real" else "",
             context=health_input,
+            schema=self._schema,
         )
         if self.mode == "real" and isinstance(structured.get("output_metadata"), dict):
             # Record what actually produced the output, regardless of what the model claims
@@ -179,6 +180,7 @@ class StructuringAgent:
         try:
             jsonschema.validate(instance=structured, schema=self._schema)
         except ValidationError as exc:
+            path = "/".join(str(p) for p in exc.absolute_path) or "<root>"
             raise SchemaValidationError(
-                f"Schema validation error: {exc.message}"
+                f"Schema validation error at {path}: {exc.message}"
             ) from exc

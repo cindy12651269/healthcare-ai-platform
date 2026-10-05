@@ -6,6 +6,11 @@ from llm.schemas.report_output import ReportOutput
 from llm.safety_guard import GuardResult, guard_text, max_severity
 from llm.provider import LLMProvider, build_provider, resolve_llm_mode
 
+# Report failed report_output.json validation. Subclasses ValueError, which callers already expect.
+class ReportSchemaValidationError(ValueError):
+    pass
+
+
 # Report fields that carry human-readable content and therefore go through the safety guard
 GUARDED_FIELDS = ("report_sections", "input_context")
 
@@ -235,6 +240,7 @@ class OutputAgent:
                 else ""
             ),
             context={"structured_data": structured_data, "retrieval_context": retrieval_context},
+            schema=self.schema,
         )
         if self.mode == "real" and isinstance(report_json.get("report_metadata"), dict):
             # Record what actually produced the report, regardless of what the model claims
@@ -247,6 +253,10 @@ class OutputAgent:
         try:
             validate(instance=report_json, schema=self.schema)
         except ValidationError as e:
-            raise ValueError(f"[OutputAgent] JSON schema validation failed: {e}")
+            # e.message only: str(e) embeds the whole rejected report (model output) in logs and audit
+            path = "/".join(str(p) for p in e.absolute_path) or "<root>"
+            raise ReportSchemaValidationError(
+                f"[OutputAgent] JSON schema validation failed at {path}: {e.message}"
+            ) from None
 
         return {"report": report_json, "_safety": guard}
