@@ -33,3 +33,6 @@ audit.jsonl
 
 # Real-provider benchmark output (opt-in, non-deterministic; not committed)
 evaluation/results/benchmark_results_real.json
+
+# CI benchmark outputs (.github/workflows/ci.yml)
+evaluation/results/ci_benchmark_*.json

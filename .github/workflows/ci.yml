@@ -1,0 +1,119 @@
+# Issue #25: backend tests (incl. PostgreSQL integration), frontend checks/build, deterministic benchmark.
+# Mock mode only: no secrets, no provider keys, no real LLM calls. Real-provider runs are excluded on purpose.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LLM_MODE: mock
+  PYTHONUNBUFFERED: "1"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  backend:
+    name: Backend tests (pytest + PostgreSQL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      # Matches the Compose db service (postgres:15, healthcare_ai user/password/db)
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: healthcare_ai
+          POSTGRES_PASSWORD: healthcare_ai
+          POSTGRES_DB: healthcare_ai
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U healthcare_ai -d healthcare_ai"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg2://healthcare_ai:healthcare_ai@localhost:5432/healthcare_ai
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      - name: Run pytest
+        run: python -m pytest -v -rs | tee pytest.log
+      - name: Verify PostgreSQL integration tests executed (not skipped)
+        run: |
+          passed=$(grep -cE '^tests/test_persistence_postgres\.py::\S+ PASSED' pytest.log || true)
+          echo "PostgreSQL integration tests passed: $passed"
+          if grep -qE 'test_persistence_postgres\.py.*SKIPPED|SKIPPED.*test_persistence_postgres\.py' pytest.log; then
+            echo "::error::PostgreSQL integration tests were skipped"; exit 1
+          fi
+          [ "$passed" -ge 1 ] || { echo "::error::No PostgreSQL integration test executed"; exit 1; }
+
+  benchmark:
+    name: Deterministic benchmark (mock, RAG off/on)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      - name: Benchmark (mock, RAG off)
+        run: |
+          python -m evaluation.benchmark --mode mock --rag off --out ci_benchmark_rag_off.json
+          python -c "import json,sys; r=json.load(open('evaluation/results/ci_benchmark_rag_off.json')); a=r['aggregated']; print(r['mode'], a['success_rate'], a['schema_valid_rate']); sys.exit(not (r['mode']=='mock' and a['success_rate']==1.0))"
+      - name: Benchmark (mock, RAG on)
+        run: |
+          python -m evaluation.benchmark --mode mock --rag on --out ci_benchmark_rag_on.json
+          python -c "import json,sys; r=json.load(open('evaluation/results/ci_benchmark_rag_on.json')); a=r['aggregated']; print(r['mode'], a['success_rate'], a['total_retrieval_hits']); sys.exit(not (r['mode']=='mock' and a['success_rate']==1.0 and a['total_retrieval_hits']>0))"
+
+  frontend:
+    name: Frontend (lint, typecheck, test, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v5
+      # Node 22 LTS: satisfies next (>=20.9), jsdom and vitest 5 (^22.12 || ^24)
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
