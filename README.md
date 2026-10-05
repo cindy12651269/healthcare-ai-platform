@@ -20,6 +20,16 @@ pytest
 
 `tests/test_persistence_postgres.py` runs only when `TEST_DATABASE_URL` points at a PostgreSQL database (for example the Compose `db` service: `postgresql+psycopg2://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5432/<POSTGRES_DB>`); otherwise it is skipped.
 
+## Continuous integration
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request to `main` and every push to `main`:
+
+- **Backend:** Python 3.11, `pytest` (full suite) against a `postgres:15` service container with `TEST_DATABASE_URL` set, so the PostgreSQL integration tests execute; the job fails if they are skipped.
+- **Benchmark:** `python -m evaluation.benchmark --mode mock` with `--rag off` and `--rag on` (deterministic).
+- **Frontend (`app/`):** `npm ci`, then `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` (Node 22).
+
+CI sets `LLM_MODE=mock` and needs no secrets: no OpenAI or other provider credentials are used, and no real LLM call is made. Real-provider runs (`--mode real`) are intentionally excluded from default CI.
+
 ## Running the patient intake demo UI
 
 The Next.js intake UI (`app/`) submits to the FastAPI `POST /api/ingest` endpoint. Pipeline settings (RAG, persistence, LLM mode) are backend configuration and are not exposed in the browser.
