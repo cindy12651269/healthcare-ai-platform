@@ -1,0 +1,220 @@
+# Issue #22: configurable LLM mode, shared provider interface, OpenAI wrapper failure handling.
+# No test here makes a real network call: the OpenAI client is always a fake.
+import json
+
+import httpx
+import pytest
+from fastapi.testclient import TestClient
+from openai import APITimeoutError, AuthenticationError, InternalServerError
+from pydantic import ValidationError
+
+from agents.output_agent import OutputAgent
+from agents.structuring_agent import SchemaValidationError, StructuringAgent
+from api.config import Settings, get_settings
+from evaluation.benchmark import create_pipeline, run_benchmark
+from llm.provider import (
+    LLMConfigurationError,
+    LLMMalformedOutputError,
+    LLMProviderError,
+    LLMTimeoutError,
+    check_llm_config,
+)
+from llm.providers.openai_client import OpenAIProvider
+
+REQ = httpx.Request("POST", "https://api.openai.com/v1/chat/completions")
+SECRET = "sk-test-SECRET-should-never-leak"
+
+
+def _response(content):
+    msg = type("M", (), {"content": content})()
+    choice = type("C", (), {"message": msg})()
+    return type("R", (), {"choices": [choice]})()
+
+
+class FakeClient:
+    """Plays back a script of exceptions / response contents and records calls."""
+
+    def __init__(self, script):
+        self.script = list(script)
+        self.calls = []
+        self.chat = type("Chat", (), {"completions": self})()
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        item = self.script.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return _response(item)
+
+
+def _provider(script, max_retries=2):
+    client = FakeClient(script)
+    provider = OpenAIProvider(
+        api_key=SECRET, model="gpt-test", timeout=5, max_retries=max_retries,
+        client=client, sleep=lambda s: None,
+    )
+    return provider, client
+
+
+def _call(provider):
+    return provider.generate_json(system="s", prompt="p", context={})
+
+
+# Mode configuration
+
+def test_default_mode_is_mock():
+    assert Settings().llm_mode == "mock"
+    assert StructuringAgent().provider.name == "mock"
+    assert OutputAgent().provider.name == "mock"
+
+
+def test_invalid_mode_fails_explicitly(monkeypatch):
+    monkeypatch.setenv("LLM_MODE", "bogus")
+    with pytest.raises(ValidationError, match="Unsupported LLM_MODE"):
+        Settings()
+    with pytest.raises(LLMConfigurationError):
+        StructuringAgent(mode="bogus")
+
+
+def test_mock_mode_needs_no_key(monkeypatch):
+    monkeypatch.setenv("LLM_MODE", "mock")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    check_llm_config(Settings())  # does not raise
+
+
+def test_real_mode_without_key_fails_without_fallback(monkeypatch):
+    monkeypatch.setenv("LLM_MODE", "real")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    with pytest.raises(LLMConfigurationError, match="OPENAI_API_KEY"):
+        check_llm_config(Settings())
+    with pytest.raises(LLMConfigurationError):
+        StructuringAgent()
+    with pytest.raises(LLMConfigurationError):
+        OutputAgent()
+
+
+def test_real_benchmark_refuses_without_key(monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    with pytest.raises(LLMConfigurationError):
+        create_pipeline(mode="real", rag_enabled=False)
+
+
+def test_mock_benchmark_is_deterministic_and_labelled():
+    a, b = run_benchmark(mode="mock", rag=False), run_benchmark(mode="mock", rag=False)
+    assert a["mode"] == "mock"
+    assert a == b
+
+
+# OpenAI provider wrapper
+
+def test_provider_returns_json_object_and_sets_timeout():
+    provider, client = _provider(['{"ok": true}'])
+    assert _call(provider) == {"ok": True}
+    assert client.calls[0]["timeout"] == 5
+    assert client.calls[0]["response_format"] == {"type": "json_object"}
+
+
+def test_transient_failure_is_retried_then_succeeds():
+    err = InternalServerError("boom", response=httpx.Response(500, request=REQ), body=None)
+    provider, client = _provider([err, '{"ok": 1}'])
+    assert _call(provider) == {"ok": 1}
+    assert len(client.calls) == 2
+
+
+def test_timeout_retries_are_bounded():
+    provider, client = _provider([APITimeoutError(request=REQ)] * 3, max_retries=2)
+    with pytest.raises(LLMTimeoutError):
+        _call(provider)
+    assert len(client.calls) == 3
+
+
+def test_provider_error_is_not_retried_and_sanitized():
+    err = AuthenticationError(
+        f"Incorrect API key provided: {SECRET}",
+        response=httpx.Response(401, request=REQ),
+        body={"error": {"message": SECRET}},
+    )
+    provider, client = _provider([err])
+    with pytest.raises(LLMProviderError) as exc_info:
+        _call(provider)
+    assert len(client.calls) == 1
+    assert "401" in str(exc_info.value)
+    assert SECRET not in str(exc_info.value)
+    assert exc_info.value.__cause__ is None
+
+
+@pytest.mark.parametrize("content", ["not json", "[1, 2]", None])
+def test_malformed_output_is_controlled_failure(content):
+    provider, client = _provider([content])
+    with pytest.raises(LLMMalformedOutputError):
+        _call(provider)
+    assert len(client.calls) == 1
+
+
+# Agents keep their interfaces and validate schemas in real mode
+
+def test_structuring_agent_real_mode_rejects_schema_invalid_output():
+    provider, _ = _provider([json.dumps({"trace": {}})])
+    agent = StructuringAgent(mode="real", provider=provider)
+    with pytest.raises(SchemaValidationError):
+        agent.run({"input_id": "x", "raw_text": "headache"})
+
+
+def test_output_agent_real_mode_rejects_schema_invalid_output():
+    provider, _ = _provider([json.dumps({"report_sections": {}})])
+    agent = OutputAgent(mode="real", provider=provider)
+    with pytest.raises(ValueError, match="schema validation failed"):
+        agent.run(structured_data={"trace": {}}, retrieval_context=None)
+
+
+def test_agents_real_mode_through_shared_interface():
+    intake = {
+        "input_id": "id-1", "user_id": "u", "timestamp": "2025-01-01T00:00:00Z",
+        "source": "web", "input_type": "intake", "raw_text": "Mild headache for two days.",
+        "contains_phi": False, "consent_granted": True,
+    }
+    mock_structured = StructuringAgent(mode="mock").run(intake)
+    mock_structured.pop("safety_violation_count")
+    s_provider, s_client = _provider([json.dumps(mock_structured)])
+    structured = StructuringAgent(mode="real", provider=s_provider).run(intake)
+    assert structured["output_metadata"]["model_version"] == "gpt-test"
+    assert "Mild headache" in s_client.calls[0]["messages"][1]["content"]
+
+    mock_report = OutputAgent(mode="mock").run(structured)["report"]
+    mock_report.pop("safety_checks")
+    o_provider, _ = _provider([json.dumps(mock_report)])
+    result = OutputAgent(mode="real", provider=o_provider).run(structured_data=structured, retrieval_context=None)
+    assert set(result) == {"report", "_safety"}
+    assert result["report"]["report_metadata"]["model_version"] == "gpt-test"
+
+
+# Health endpoint
+
+def test_health_reports_only_execution_mode():
+    from api.main import app
+
+    body = TestClient(app).get("/health").json()
+    assert body["llm_mode"] == get_settings().llm_mode == "mock"
+    assert not any("key" in k.lower() or "openai" in k.lower() for k in body)
+
+
+def test_ingest_maps_provider_failure_to_502_without_fallback(monkeypatch):
+    from agents.pipeline import HealthcarePipeline
+    from api.deps import get_pipeline
+    from api.main import app
+
+    monkeypatch.setattr(get_settings(), "enable_persistence", False)
+    monkeypatch.setattr("api.middleware.audit.log_run", lambda e: None)
+    monkeypatch.setattr("agents.pipeline.log_run", lambda e: None)
+    provider, _ = _provider([APITimeoutError(request=REQ)] * 3)
+    pipeline = HealthcarePipeline(structuring_agent=StructuringAgent(mode="real", provider=provider))
+    app.dependency_overrides[get_pipeline] = lambda: pipeline
+    try:
+        resp = TestClient(app).post(
+            "/api/ingest", json={"text": "Mild headache for two days.", "consent_granted": True}
+        )
+    finally:
+        app.dependency_overrides.clear()
+    assert resp.status_code == 502
+    assert "timed out" in resp.json()["detail"]
+    assert SECRET not in resp.text

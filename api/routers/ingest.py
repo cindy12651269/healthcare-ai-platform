@@ -5,6 +5,7 @@ import logging
 from agents.pipeline import HealthcarePipeline
 from agents.intake_agent import IntakeValidationError
 from agents.structuring_agent import StructuringError
+from llm.provider import LLMConfigurationError, LLMError
 from api.deps import get_pipeline
 
 router = APIRouter()
@@ -50,6 +51,15 @@ def ingest(
     except IntakeValidationError as e:
         logger.warning(f"Intake error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
+
+    # Controlled real-provider failures: sanitized message, no fallback to mock
+    except LLMConfigurationError as e:
+        logger.error(f"LLM configuration error: {e}")
+        raise HTTPException(status_code=503, detail=f"LLM configuration error: {e}")
+
+    except LLMError as e:
+        logger.error(f"LLM provider failure: {e}")
+        raise HTTPException(status_code=502, detail=f"LLM provider error: {e}")
 
     except StructuringError as e:
         logger.error(f"Structuring failed: {e}")

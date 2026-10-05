@@ -43,7 +43,7 @@ def client(engine, monkeypatch):
     def _boom(*args, **kwargs):
         raise AssertionError("OpenAI client must not be constructed in default mode")
 
-    monkeypatch.setattr("agents.output_agent.OpenAI", _boom)
+    monkeypatch.setattr("llm.providers.openai_client.OpenAI", _boom)
     monkeypatch.setattr("api.middleware.audit.log_run", lambda event: None)
 
     get_pipeline.cache_clear()

@@ -161,4 +161,16 @@ describe("IntakePage", () => {
     expect(details).not.toHaveAttribute("open");
     expect(within(details).getByTestId("raw-json")).toHaveTextContent("Traceback");
   });
+
+  it.each([
+    ["mock", "LLM Mode: Mock"],
+    ["real", "LLM Mode: Real"],
+  ] as const)("shows the backend %s mode read-only", async (mode, label) => {
+    render(<IntakePage submit={vi.fn()} loadLlmMode={() => Promise.resolve(mode)} />);
+    expect(await screen.findByTestId("llm-mode")).toHaveTextContent(label);
+    expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /mock|real/i })).not.toBeInTheDocument();
+  });
 });

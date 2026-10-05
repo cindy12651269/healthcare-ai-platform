@@ -1,11 +1,10 @@
 import json
-import os
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from jsonschema import validate, ValidationError
-from openai import OpenAI
 from llm.schemas.report_output import ReportOutput
 from llm.safety_guard import GuardResult, guard_text, max_severity
+from llm.provider import LLMProvider, build_provider, resolve_llm_mode
 
 # Report fields that carry human-readable content and therefore go through the safety guard
 GUARDED_FIELDS = ("report_sections", "input_context")
@@ -14,17 +13,24 @@ GUARDED_FIELDS = ("report_sections", "input_context")
 # If retrieval_context is provided, it will be injected into the prompt 
 # under a dedicated "Retrieved Context" section.
 # Mode mirrors StructuringAgent: "mock" (default) is deterministic and offline; "real" calls OpenAI.
+# Both modes go through the shared provider interface (llm/provider.py), safety guard and schema validation.
 class OutputAgent:
 
-    def __init__(self, model: str = "gpt-4o-mini", mode: Optional[str] = None):
-        self.model = model
-        self.mode = mode or os.getenv("LLM_MODE", "mock")
+    def __init__(
+        self,
+        model: Optional[str] = None,
+        mode: Optional[str] = None,
+        provider: Optional[LLMProvider] = None,
+    ):
+        self.mode = resolve_llm_mode(mode)
 
-        if self.mode not in {"mock", "real"}:
-            raise ValueError(f"Invalid LLM mode: {self.mode}")
-
-        # Provider client only exists in real mode, so mock mode never needs a key or makes a network call
-        self.client = OpenAI() if self.mode == "real" else None
+        # The OpenAI client only exists in real mode, so mock mode never needs a key or makes a network call
+        self.provider = provider or build_provider(
+            self.mode,
+            mock_builder=lambda ctx: self._mock_report(ctx["structured_data"], ctx["retrieval_context"]),
+            model=model,
+        )
+        self.model = getattr(self.provider, "model", None) or model or "mock"
 
         prompt_path = Path("llm/prompts/report.txt")
         self.prompt_template = prompt_path.read_text()
@@ -221,10 +227,18 @@ class OutputAgent:
         Returns the pipeline contract: {"report": <HealthReportOutput>, "_safety": <GuardResult>}
         """
 
-        if self.mode == "mock":
-            report_json = self._mock_report(structured_data, retrieval_context)
-        else:
-            report_json = self._generate_with_llm(structured_data, retrieval_context)
+        report_json = self.provider.generate_json(
+            system="Return ONLY valid JSON. No explanations.",
+            prompt=(
+                self._build_prompt(structured_data=structured_data, retrieval_context=retrieval_context)
+                if self.mode == "real"
+                else ""
+            ),
+            context={"structured_data": structured_data, "retrieval_context": retrieval_context},
+        )
+        if self.mode == "real" and isinstance(report_json.get("report_metadata"), dict):
+            # Record what actually produced the report, regardless of what the model claims
+            report_json["report_metadata"]["model_version"] = self.model
 
         # Safety enforcement
         report_json, guard = self._apply_safety_guard(report_json)
@@ -236,31 +250,3 @@ class OutputAgent:
             raise ValueError(f"[OutputAgent] JSON schema validation failed: {e}")
 
         return {"report": report_json, "_safety": guard}
-
-    # Real mode: existing OpenAI call (unchanged)
-    def _generate_with_llm(
-        self,
-        structured_data: Dict[str, Any],
-        retrieval_context: Optional[List[Dict[str, Any]]] = None,
-    ) -> Dict[str, Any]:
-
-        prompt = self._build_prompt(
-            structured_data=structured_data,
-            retrieval_context=retrieval_context,
-        )
-
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": "Return ONLY valid JSON. No explanations."},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.2,
-        )
-
-        raw_text = response.choices[0].message.content
-
-        try:
-            return json.loads(raw_text)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"[OutputAgent] Invalid JSON from LLM: {e}")

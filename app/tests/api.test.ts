@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { MESSAGES, submitIntake, validateIntake } from "../services/api";
+import { MESSAGES, fetchLlmMode, submitIntake, validateIntake } from "../services/api";
 import { jsonResponse, pipelineResult } from "./fixtures";
 
 const req = { text: "  Sore throat and mild fever for two days.  ", consent_granted: true };
@@ -132,5 +132,20 @@ describe("validateIntake", () => {
 
   it("accepts valid text", () => {
     expect(validateIntake({ text: "I have had a headache since Monday.", consent_granted: false })).toBeNull();
+  });
+});
+
+describe("fetchLlmMode", () => {
+  it("reads only the execution mode from /health", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(200, { status: "ok", llm_mode: "real" }));
+    await expect(fetchLlmMode({ baseUrl: "http://api.test/", fetchImpl })).resolves.toBe("real");
+    expect(fetchImpl).toHaveBeenCalledWith("http://api.test/health");
+  });
+
+  it("returns null for unknown modes or an unreachable API", async () => {
+    const bad = vi.fn().mockResolvedValue(jsonResponse(200, { llm_mode: "other" }));
+    await expect(fetchLlmMode({ fetchImpl: bad })).resolves.toBeNull();
+    const down = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    await expect(fetchLlmMode({ fetchImpl: down })).resolves.toBeNull();
   });
 });

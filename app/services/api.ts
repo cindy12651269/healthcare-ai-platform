@@ -170,3 +170,21 @@ export async function submitIntake(
 
   return { kind: "success", status: response.status, data: body as PipelineResult };
 }
+
+// Backend execution mode (Issue #22). Read-only: the browser displays it but can never change it,
+// and only the mode is read from /health — no provider configuration reaches the browser.
+export type LlmMode = "mock" | "real";
+
+export async function fetchLlmMode(
+  options: Pick<SubmitOptions, "baseUrl" | "fetchImpl"> = {},
+): Promise<LlmMode | null> {
+  const { baseUrl = API_BASE_URL, fetchImpl = fetch } = options;
+  try {
+    const response = await fetchImpl(`${baseUrl.replace(/\/$/, "")}/health`);
+    if (!response.ok) return null;
+    const mode = ((await response.json()) as JsonObject).llm_mode;
+    return mode === "mock" || mode === "real" ? mode : null;
+  } catch {
+    return null;
+  }
+}

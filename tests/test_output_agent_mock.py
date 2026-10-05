@@ -9,7 +9,7 @@ def forbid_openai(monkeypatch):
     def _boom(*args, **kwargs):
         raise AssertionError("OpenAI client must not be constructed in mock mode")
 
-    monkeypatch.setattr("agents.output_agent.OpenAI", _boom)
+    monkeypatch.setattr("llm.providers.openai_client.OpenAI", _boom)
     monkeypatch.delenv("LLM_MODE", raising=False)
 
 
@@ -33,7 +33,7 @@ def _structured(chief_complaint: str, input_id: str = "3f2a1b9c-8935-5138-8867-0
 def test_default_mode_is_mock_without_client():
     agent = OutputAgent()
     assert agent.mode == "mock"
-    assert agent.client is None
+    assert agent.provider.name == "mock"
 
 
 def test_invalid_mode_rejected():

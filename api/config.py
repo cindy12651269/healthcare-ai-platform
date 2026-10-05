@@ -1,7 +1,7 @@
 from __future__ import annotations
 from functools import lru_cache
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 
 class Settings(BaseSettings):
     # App Info
@@ -10,9 +10,13 @@ class Settings(BaseSettings):
     pipeline_version: str = "v0.1.0"
 
     # LLM Config 
+    # LLM_MODE=mock (default, deterministic, no key) | real (OpenAI). Anything else fails at startup.
     llm_provider: str = "openai"
     llm_mode: str = Field(default="mock", description="mock | real")
     openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
+    llm_timeout_seconds: float = Field(default=30.0, gt=0)
+    llm_max_retries: int = Field(default=2, ge=0, le=5)
 
     # Database Config
     # Default targets a host-run API with the Compose `db` port published on localhost.
@@ -29,6 +33,16 @@ class Settings(BaseSettings):
 
     # CORS: comma-separated browser origins allowed to call the API (local Next.js UI by default)
     cors_allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    @field_validator("llm_mode", mode="before")
+    @classmethod
+    def _check_llm_mode(cls, value):
+        from llm.provider import validate_llm_mode
+
+        try:
+            return validate_llm_mode(value)
+        except Exception as exc:
+            raise ValueError(str(exc)) from None
 
     @property
     def cors_origins(self) -> list[str]:

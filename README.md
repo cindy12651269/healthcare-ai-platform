@@ -51,6 +51,18 @@ npm run dev        # open http://localhost:3000
 
 For persistence in this mode, start Postgres with `docker compose up -d db`, then run `python -m db.migrate` before uvicorn; `.env.example`'s `DATABASE_URL` targets the published `localhost:5432` port.
 
+### LLM mode (mock / real)
+
+`LLM_MODE` in `.env` selects the execution mode for `StructuringAgent` and `OutputAgent` (shared provider interface in `llm/provider.py`, OpenAI wrapper in `llm/providers/openai_client.py`):
+
+- `mock` (default): deterministic, offline, no API key. Used by all tests and CI.
+- `real`: OpenAI with `OPENAI_API_KEY` (server-side only). The API refuses to start without a key; provider timeouts, failures and malformed output return a controlled error (HTTP 502). There is no fallback to mock.
+- Any other value fails at startup.
+
+Both modes go through the same `structured_output.json` / `report_output.json` validation. `GET /health` reports `llm_mode`, and the UI shows it read-only (`LLM Mode: Mock` / `LLM Mode: Real`).
+
+Benchmark: `python evaluation/benchmark.py --mode mock` (deterministic) or `python evaluation/benchmark.py --mode real --limit 1` (opt-in, needs `OPENAI_API_KEY`, never run in CI; output in `evaluation/results/benchmark_results_real.json`, not committed).
+
 Frontend checks: `cd app && npm run lint && npm run typecheck && npm test && npm run build`.
 
 A full README (setup, demo walkthrough, architecture diagram) is part of Phase 4.
