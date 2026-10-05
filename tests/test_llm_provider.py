@@ -218,3 +218,133 @@ def test_ingest_maps_provider_failure_to_502_without_fallback(monkeypatch):
     assert resp.status_code == 502
     assert "timed out" in resp.json()["detail"]
     assert SECRET not in resp.text
+
+
+# Real-mode schema contract (post-merge fix): strict JSON-schema output, optional nulls, controlled failures
+
+from pathlib import Path
+
+from agents.output_agent import ReportSchemaValidationError
+from agents.structuring_agent import load_structured_schema
+
+
+def load_report_schema():
+    return json.loads((Path(__file__).resolve().parent.parent / "llm/schemas/report_output.json").read_text())
+from llm.providers.openai_client import strip_optional_nulls, to_strict_schema
+
+INTAKE = {
+    "input_id": "id-1", "user_id": "u", "timestamp": "2025-01-01T00:00:00Z",
+    "source": "web", "input_type": "intake", "raw_text": "Mild headache for two days.",
+    "contains_phi": False, "consent_granted": True,
+}
+
+
+def _walk_objects(node):
+    for alt in node.get("anyOf", []):
+        yield from _walk_objects(alt)
+    if node.get("type") == "object":
+        yield node
+        for sub in node["properties"].values():
+            yield from _walk_objects(sub)
+    if isinstance(node.get("items"), dict):
+        yield from _walk_objects(node["items"])
+
+
+@pytest.mark.parametrize("loader", [load_structured_schema, load_report_schema])
+def test_strict_schema_meets_openai_strict_rules(loader):
+    strict = to_strict_schema(loader())
+    assert "$schema" not in strict
+    assert "maxLength" not in json.dumps(strict)
+    objects = list(_walk_objects(strict))
+    assert objects
+    for obj in objects:
+        assert obj["additionalProperties"] is False
+        assert sorted(obj["required"]) == sorted(obj["properties"])
+
+
+def test_strict_schema_makes_only_optional_fields_nullable():
+    clinical = to_strict_schema(load_structured_schema())["properties"]["clinical_structuring"]["properties"]
+    assert clinical["severity"]["type"] == ["string", "null"]
+    assert clinical["symptoms"]["type"] == "array"  # required in the domain schema: stays non-null
+    assert {"type": "null"} in clinical["red_flags"]["anyOf"]  # optional array
+    sync = to_strict_schema(load_structured_schema())["properties"]["ehr_interoperability"]["properties"]["sync_status"]
+    assert None in sync["enum"]
+
+
+def test_both_agents_send_their_schema_as_strict_response_format():
+    structured = StructuringAgent(mode="mock").run(INTAKE)
+    structured.pop("safety_violation_count")
+    s_provider, s_client = _provider([json.dumps(structured)])
+    StructuringAgent(mode="real", provider=s_provider).run(INTAKE)
+    fmt = s_client.calls[0]["response_format"]
+    assert fmt["type"] == "json_schema" and fmt["json_schema"]["strict"] is True
+    assert fmt["json_schema"]["schema"] == to_strict_schema(load_structured_schema())
+
+    report = OutputAgent(mode="mock").run(structured)["report"]
+    o_provider, o_client = _provider([json.dumps(report)])
+    OutputAgent(mode="real", provider=o_provider).run(structured_data=structured)
+    fmt = o_client.calls[0]["response_format"]
+    assert fmt["json_schema"]["strict"] is True
+    assert fmt["json_schema"]["schema"] == to_strict_schema(load_report_schema())
+
+
+def test_severity_null_from_provider_is_treated_as_absent():
+    # Reproduces the smoke-test failure: the model returned clinical_structuring.severity = null
+    structured = StructuringAgent(mode="mock").run(INTAKE)
+    structured.pop("safety_violation_count")
+    structured["clinical_structuring"].update(severity=None, duration=None, onset=None, red_flags=None)
+    structured["ehr_interoperability"] = {"patient_id": None, "sync_status": None}
+    provider, _ = _provider([json.dumps(structured)])
+    result = StructuringAgent(mode="real", provider=provider).run(INTAKE)
+    assert "severity" not in result["clinical_structuring"]
+    assert "red_flags" not in result["clinical_structuring"]
+    assert result["ehr_interoperability"] == {}
+
+
+def test_null_in_required_field_still_fails_validation():
+    structured = StructuringAgent(mode="mock").run(INTAKE)
+    structured.pop("safety_violation_count")
+    structured["clinical_structuring"]["clinical_summary"] = None
+    provider, _ = _provider([json.dumps(structured)])
+    with pytest.raises(SchemaValidationError, match="clinical_structuring/clinical_summary"):
+        StructuringAgent(mode="real", provider=provider).run(INTAKE)
+
+
+def test_strip_optional_nulls_recurses_into_arrays():
+    schema = {"type": "object", "properties": {"xs": {"type": "array", "items": {
+        "type": "object", "properties": {"a": {"type": "string"}, "b": {"type": "string"}}, "required": ["a"]}}}}
+    assert strip_optional_nulls({"xs": [{"a": None, "b": None}]}, schema) == {"xs": [{"a": None}]}
+
+
+def test_report_schema_failure_is_controlled_and_does_not_echo_output():
+    provider, _ = _provider([json.dumps({"report_sections": {"overview": "SENSITIVE-TEXT"}})])
+    with pytest.raises(ReportSchemaValidationError) as exc_info:
+        OutputAgent(mode="real", provider=provider).run(structured_data={"trace": {}})
+    assert "SENSITIVE-TEXT" not in str(exc_info.value)
+
+
+def test_ingest_maps_structuring_and_report_schema_failures_to_422(monkeypatch):
+    from agents.pipeline import HealthcarePipeline
+    from api.deps import get_pipeline
+    from api.main import app
+
+    monkeypatch.setattr(get_settings(), "enable_persistence", False)
+    monkeypatch.setattr("api.middleware.audit.log_run", lambda e: None)
+    monkeypatch.setattr("agents.pipeline.log_run", lambda e: None)
+
+    bad_struct, _ = _provider([json.dumps({"trace": {}})])
+    bad_report, _ = _provider([json.dumps({"report_sections": {}})])
+    pipelines = [
+        HealthcarePipeline(structuring_agent=StructuringAgent(mode="real", provider=bad_struct)),
+        HealthcarePipeline(output_agent=OutputAgent(mode="real", provider=bad_report)),
+    ]
+    try:
+        for pipeline, prefix in zip(pipelines, ["LLM structuring error", "LLM report error"]):
+            app.dependency_overrides[get_pipeline] = lambda p=pipeline: p
+            resp = TestClient(app).post(
+                "/api/ingest", json={"text": "Mild headache for two days.", "consent_granted": True}
+            )
+            assert resp.status_code == 422
+            assert resp.json()["detail"].startswith(prefix)
+    finally:
+        app.dependency_overrides.clear()

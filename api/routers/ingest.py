@@ -5,6 +5,7 @@ import logging
 from agents.pipeline import HealthcarePipeline
 from agents.intake_agent import IntakeValidationError
 from agents.structuring_agent import StructuringError
+from agents.output_agent import ReportSchemaValidationError
 from llm.provider import LLMConfigurationError, LLMError
 from api.deps import get_pipeline
 
@@ -64,6 +65,10 @@ def ingest(
     except StructuringError as e:
         logger.error(f"Structuring failed: {e}")
         raise HTTPException(status_code=422, detail=f"LLM structuring error: {e}")
+
+    except ReportSchemaValidationError as e:
+        logger.error(f"Report generation failed: {e}")
+        raise HTTPException(status_code=422, detail=f"LLM report error: {e}")
 
     except Exception as e:
         logger.exception("Unexpected pipeline error")
