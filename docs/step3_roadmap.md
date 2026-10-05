@@ -136,7 +136,7 @@ These would expand the project without materially improving it as evidence of pr
 
 * Voice agents, AI scribe, ambient documentation
 * HL7 v2 parsing, a general EHR router, scheduling, billing, payments
-* Additional agents (e.g. the empty `reasoning_agent.py`) without a workflow need
+* Additional agents (e.g. a reasoning agent; its empty placeholder was removed in #26) without a workflow need
 * Multi-service cloud infrastructure (Lambda/RDS/S3/IAM Terraform) beyond the single deployed demo
 * Vector database migration (FAISS/Chroma) without a measured retrieval problem
 * Mobile apps

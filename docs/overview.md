@@ -57,7 +57,7 @@ Full evidence: [`project_status.md`](project_status.md).
 
 | Path | Contents | State |
 | --- | --- | --- |
-| `agents/` | Intake, structuring, retrieval, output agents; pipeline orchestrator | Implemented (`reasoning_agent.py` empty) |
+| `agents/` | Intake, structuring, retrieval, output agents; pipeline orchestrator | Implemented |
 | `api/` | FastAPI app, routers, middleware | `ingest` + audit middleware implemented; auth, rate limit and other routers empty |
 | `llm/` | Prompts, JSON schemas, safety guard | Implemented |
 | `rag/` | Embeddings, vector store, retriever, document loader | Implemented with mock embeddings |
@@ -66,7 +66,6 @@ Full evidence: [`project_status.md`](project_status.md).
 | `evaluation/` | Benchmark runner, metrics, test cases | Implemented (mock mode) |
 | `tests/` | Unit and contract tests | 39 passing at last audit |
 | `app/` | Frontend | Empty placeholders — Phase 3 |
-| `interoperability/`, `infra/aws/`, `compliance/` | Early scaffold | Empty placeholders — see roadmap |
 | `docs/` | Product, architecture, API, evaluation, roadmap, journals | — |
 
 ---

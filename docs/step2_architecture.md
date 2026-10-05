@@ -41,8 +41,8 @@ The platform is a **backend-centric AI system** with a thin demo UI and modular 
 * **Persistence Layer (`db/`)**
   PostgreSQL ORM models and transaction-safe storage with idempotency support.
 
-* **Interoperability Layer (`interoperability/`)**
-  FHIR / HL7 abstractions designed for future EHR integration.
+* **Interoperability Layer (not implemented)**
+  Planned FHIR / HL7 integration. The empty `interoperability/` scaffold was removed in #26; FHIR export is an optional enhancement and HL7 / EHR routing is out of scope ([`step3_roadmap.md`](step3_roadmap.md) §7–§8).
 
 * **Observability (`observability/`)**
   Structured tracing hooks, audit logging placeholders, and metrics interfaces.
@@ -149,7 +149,6 @@ Pipeline execution is configurable via runtime flags.
 
 * `structuring.txt`
 * `report.txt`
-* Reserved `reasoning.txt`
 
 Prompts are designed to:
 
