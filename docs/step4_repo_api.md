@@ -8,10 +8,10 @@ This document reflects the **current repository structure and API behavior after
 >
 > * `/api/ingest` returns the raw pipeline trace (keys `run_id`, `success`, `intake`, `structured`, `rag`, `report`, `safety`, `errors`, `telemetry`, `metrics`), not the `IngestResponse` shape in §4.2. App version is `0.1.0`.
 > * There is no `SafetyViolation` → 422 mapping; a blocked output surfaces as a 500.
-> * Without an OpenAI API key the endpoint returns 500 (see [`project_status.md`](project_status.md)).
+> * ~~Without an OpenAI API key the endpoint returns 500.~~ Resolved in PR #21: the default `LLM_MODE=mock` needs no key, and real mode is opt-in (#22).
 > * Staff endpoints use bearer-token authentication with clinic-scoped roles ([`auth.md`](auth.md), #28); `/api/ingest` stays unauthenticated. There is no rate limiting (the empty `rate_limit.py` placeholder was removed in #26); Redis is started but unused; there is no Terraform (empty `infra/` placeholders removed in #26).
 >
-> Response contract, error mapping and the no-key path are proposed Phase 3 work; authentication is Phase 4; rate limiting is optional; Terraform beyond a single demo deployment is out of scope ([`step3_roadmap.md`](step3_roadmap.md)).
+> The no-key path was fixed in Phase 3 and authentication delivered in Phase 4 (#28). The staff endpoints (`GET /api/staff/me`, `GET`/`PUT`/`DELETE /api/clinics/{clinic_id}/members[/{user_id}]`) are documented in [`auth.md`](auth.md), not in this document. Rate limiting is optional; Terraform beyond a single demo deployment is out of scope ([`step3_roadmap.md`](step3_roadmap.md)).
 
 It serves as a technical reference for:
 
@@ -308,4 +308,4 @@ The API contract reflects retrieval and safety traces and is ready for Phase 3 e
 ---
 
 **Document Status:** Updated after Phase 2 completion
-Future revisions will incorporate Phase 3 evaluation endpoints and Phase 4 interoperability expansion.
+Later API additions are documented separately: staff authentication and clinic membership endpoints in [`auth.md`](auth.md) (Phase 4). Planned work is listed in [`step3_roadmap.md`](step3_roadmap.md).

@@ -8,12 +8,13 @@ It serves as the authoritative architectural reference for implementation and po
 
 > **Accuracy note (2026-10-02 audit).** This document describes the Phase 2 design intent. Known differences from the code at `e12c923`:
 >
-> * `OutputAgent` always calls the OpenAI API; only `StructuringAgent` has a deterministic mock mode. The default API path fails without an API key.
+> * ~~`OutputAgent` always calls the OpenAI API; the default API path fails without an API key.~~ Resolved: both agents have a deterministic mock mode (PR #21), and the real provider is opt-in via `LLM_MODE=real` (#22).
 > * The API's pipeline (`api/deps.py`) is built without a `RetrievalAgent`, so RAG is not active through the API.
 > * Mock embeddings are hash-derived and carry no semantic meaning.
-> * The "Interoperability Layer" and cloud infrastructure files are empty placeholders.
+> * The empty "Interoperability Layer" and cloud infrastructure placeholders were removed in #26.
+> * Phase 4 added data model v2 (clinics, users, memberships, review-status fields; [`data_model.md`](data_model.md)) and staff authentication / clinic isolation ([`auth.md`](auth.md)), which are not described in the body of this document.
 >
-> The first two are proposed Phase 3 work. Retrieval quality is an optional enhancement; FHIR/HL7 interoperability and multi-service cloud infrastructure are optional or out of scope. Current status: [`project_status.md`](project_status.md). Roadmap: [`step3_roadmap.md`](step3_roadmap.md).
+> Retrieval quality is an optional enhancement. FHIR R4 export is #42 (Phase 7); HL7 interoperability and multi-service cloud infrastructure are out of scope. Current status: [`project_status.md`](project_status.md). Roadmap: [`step3_roadmap.md`](step3_roadmap.md).
 
 ---
 
@@ -235,7 +236,7 @@ Ordered SQL files applied by `db/migrate.py` (recorded in `schema_migrations`; r
 
 Encryption at rest is assumed via infrastructure-level database encryption (e.g., managed PostgreSQL with disk encryption enabled).
 
-Application-level field encryption is deferred to Phase 4 hardening.
+Application-level field encryption is an optional enhancement (roadmap §7); it is not scheduled.
 
 ---
 
@@ -272,7 +273,9 @@ Planned Phase 3:
 
 ---
 
-# 9. Interoperability Layer (Phase 4 Target)
+# 9. Interoperability Layer (Original Target — Not Implemented)
+
+> FHIR R4 export of reviewed intakes is planned as #42 (Phase 7). The HL7 parser and EHR router are out of scope (roadmap §8). The list below is the original Phase 2 design intent.
 
 * FHIR client abstraction
 * HL7 parser
