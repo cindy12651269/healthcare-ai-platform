@@ -2,7 +2,7 @@
 
 AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient input is validated, structured against a schema, summarised without diagnosis, checked by deterministic safety rules, and (planned) routed to clinic staff for human review.
 
-**Status:** in development — Phases 1–2 complete, Phase 3 in progress. Synthetic data only; no medical advice; no HIPAA compliance claim.
+**Status:** in development — Phases 1–4 complete, Phase 5 (clinical review & escalation workflow) next. Synthetic data only; no medical advice; no HIPAA compliance claim.
 
 * What works today, with evidence: [`docs/project_status.md`](docs/project_status.md)
 * Product and architecture overview: [`docs/overview.md`](docs/overview.md)
@@ -34,7 +34,7 @@ CI sets `LLM_MODE=mock` and needs no secrets: no OpenAI or other provider creden
 
 The Next.js intake UI (`app/`) submits to the FastAPI `POST /api/ingest` endpoint. Pipeline settings (RAG, persistence, LLM mode) are backend configuration and are not exposed in the browser.
 
-The default `LLM_MODE=mock` runs the deterministic pipeline and needs no OpenAI API key. `LLM_MODE=real` calls OpenAI with `OPENAI_API_KEY` (real-provider hardening is tracked separately). The key is only read by the backend; the browser only receives `NEXT_PUBLIC_API_BASE_URL`.
+The default `LLM_MODE=mock` runs the deterministic pipeline and needs no OpenAI API key. `LLM_MODE=real` calls OpenAI with `OPENAI_API_KEY` (see LLM mode below). The key is only read by the backend; the browser only receives `NEXT_PUBLIC_API_BASE_URL`.
 
 ### With Docker Compose
 
@@ -75,4 +75,6 @@ Benchmark: `python evaluation/benchmark.py --mode mock` (deterministic) or `pyth
 
 Frontend checks: `cd app && npm run lint && npm run typecheck && npm test && npm run build`.
 
-A full README (setup, demo walkthrough, architecture diagram) is part of Phase 4.
+Staff authentication, roles and clinic isolation: [`docs/auth.md`](docs/auth.md). Data model and migrations: [`docs/data_model.md`](docs/data_model.md).
+
+A full README (setup, demo walkthrough, architecture diagram) is part of portfolio handover (#36, Phase 6).

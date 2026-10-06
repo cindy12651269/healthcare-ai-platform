@@ -194,13 +194,14 @@ The benchmark harness is designed to run safely in CI:
 
 This ensures consistent CI evaluation results.
 
+GitHub Actions (`.github/workflows/ci.yml`, #25) runs `--mode mock --rag off` and `--rag on` on every pull request and push to `main`. `--mode real --limit N` (#22) is opt-in, needs `OPENAI_API_KEY`, and is never run in CI.
+
 ---
 
 # Future Extensions
 
 Future improvements may include:
 
-* Live model benchmarking
 * RAG quality metrics
 * hallucination detection
 * retrieval precision metrics

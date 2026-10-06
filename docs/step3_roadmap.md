@@ -1,6 +1,7 @@
 # Step 3 — Development Roadmap
 
-**Last revised:** 2026-10-02 (roadmap realignment after the Phase 2 / Issue 15 checkpoint)
+**Last revised:** 2026-10-06 (Phase 4 closure: phase overview synchronized with the GitHub Projects for Phases 4–7)
+**Previous revision:** 2026-10-02 (roadmap realignment after the Phase 2 / Issue 15 checkpoint)
 
 GitHub Issues and Projects are the source of truth for implementation progress. This document explains **what the remaining work is and why it exists**. It does not duplicate issue checklists.
 
@@ -37,13 +38,16 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | --- | --- | --- |
 | 1 | Core Foundation (System Spine) | **COMPLETE** — Issues #1–#6 |
 | 2 | RAG + Safety + Persistence | **COMPLETE** — Issues #7–#11 |
-| 3 | Working Demo Baseline (evaluation, observability, runnable path, CI, LLM provider, UI) | **CURRENT** — #12–#15 closed; #16, #17 open; further work proposed below |
-| 4 | Clinic Workflow, Access Control & Delivery | **PLANNED** — proposed; no GitHub Project or issues yet |
+| 3 | UI + Evaluation + Observability | **COMPLETE** — Issues #12–#17 |
+| 4 | Foundation & Provider Integration | **COMPLETE** — Issues #22, #25–#28 |
+| 5 | Clinical Review & Escalation Workflow | **NEXT** — Issues #29–#33 |
+| 6 | Security, Deployment & Handover | **PLANNED** — Issues #34–#36 |
+| 7 | Demo Experience, AI Evidence & FHIR Interoperability | **PLANNED** — Issues #40–#43 |
 | — | Optional enhancements | Not required for portfolio completion |
 
-Phase 3 is tracked in the GitHub Project **"Phase 3 — UI + Evaluation + Observability"**; "Working Demo Baseline" describes its proposed remaining focus, not a renamed project. Until the issue/project reconciliation is done, GitHub Issues remain authoritative wherever this document and an issue differ.
+Each phase is tracked as a GitHub Project of the same name, and GitHub Issues remain authoritative wherever this document and an issue differ. The work items in §5–§6 were written on 2026-10-02, before the issues existed; they are now delivered by Phases 3–6 as mapped below.
 
-The original Phase 4 ("Interoperability + Portfolio Hardening": FHIR mock, consent flow, diagrams, demo video) has been replaced. Documentation and demo work are retained in the new Phase 4; FHIR moves to optional enhancements.
+The original Phase 4 ("Interoperability + Portfolio Hardening": FHIR mock, consent flow, diagrams, demo video) has been replaced. Documentation and demo work are in Phases 6–7; FHIR R4 export is #42 (Phase 7).
 
 ---
 
@@ -61,7 +65,9 @@ Known limitations carried forward (see `project_status.md`): mock embeddings car
 
 ---
 
-## 5. Phase 3 — Working Demo Baseline (CURRENT)
+## 5. Phase 3 — Working Demo Baseline (COMPLETE)
+
+> **Outcome (2026-10-06).** Phase 3 closed with #12–#17 (record: [`project_journal/phase3_UI_Evaluation_Observability.md`](project_journal/phase3_UI_Evaluation_Observability.md)). The deterministic end-to-end path landed in #20 / PR #21, during Phase 3. CI (#25), repository hygiene (#26) and the real LLM provider (#22) landed in Phase 4 (record: [`project_journal/phase4_Foundation_&_Provider_Integration.md`](project_journal/phase4_Foundation_&_Provider_Integration.md)). The text below is the 2026-10-02 plan, kept for context.
 
 **Goal:** a reviewer can clone the repository, run one command, submit an intake through a browser, and get a safe result — with CI proving it on every change.
 
@@ -92,24 +98,26 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 
 ---
 
-## 6. Phase 4 — Clinic Workflow, Access Control & Delivery (PLANNED)
+## 6. Clinic Workflow, Access Control & Delivery (Phases 4–6)
+
+> **Status (2026-10-06).** This section was written as a single "Phase 4". It is now delivered across three phases. Data model v2 (#27) and authentication, RBAC and clinic isolation (#28) are **complete** in Phase 4. The clinic workflow items are Phase 5 (#29–#33), and security notes, deployment and handover are Phase 6 (#34–#36). The issue for each row is shown in brackets.
 
 **Goal:** turn the demo into a believable small product: identified users, clinic-scoped data, a human review step, one external integration, a deployed environment, and handover-quality documentation.
 
 | Work item | Why it exists |
 | --- | --- |
-| Data model v2 with migrations | Clinics, users/roles and intake review status are prerequisites for access control and escalation. Introduces a migration tool in place of a single raw SQL file. |
-| Authentication, RBAC and clinic isolation | Healthcare clients expect role and tenant boundaries. Enforced server-side and tested, including cross-clinic denial. |
-| Records and review-queue API | There is currently no way to read stored data back. Staff need list/get/transition endpoints; every staff action is audited with actor identity. |
-| Escalation rules | Emergency signals, blocked outputs and low-confidence structuring move an intake to `needs_review` with a recorded reason. This is the human-in-the-loop boundary for patient-facing AI. |
-| Safety and escalation evaluation set | A small labelled set (diagnosis-seeking, prescription requests, emergency language, PHI) that measures guard and escalation behaviour, so safety claims are backed by numbers. |
-| Staff review UI | Makes the human review step visible in the demo. |
-| Escalation notification webhook | One concrete outbound integration: HMAC-signed payload, retries, idempotency key, delivery log. No PHI in the payload beyond an intake reference. |
-| Security and data-handling notes | Replaces empty compliance stubs with one accurate document: data flow, what is masked or stored, threat model summary, and what would be required for HIPAA compliance. No compliance claim is made. Includes a test that audit logs contain no raw intake text. |
-| Deployment | One hosted demo environment with synthetic data only, migrations on deploy, health checks and environment-managed secrets. |
-| Portfolio handover | README, architecture diagram, decision records, demo walkthrough, scope and personal-contribution statement; Phase 3 and Phase 4 journals. |
+| Data model v2 with migrations [#27, Phase 4 — complete] | Clinics, users/roles and intake review status are prerequisites for access control and escalation. Introduces a migration tool in place of a single raw SQL file. |
+| Authentication, RBAC and clinic isolation [#28, Phase 4 — complete] | Healthcare clients expect role and tenant boundaries. Enforced server-side and tested, including cross-clinic denial. |
+| Records and review-queue API [#30, Phase 5] | There is currently no way to read stored data back. Staff need list/get/transition endpoints; every staff action is audited with actor identity. |
+| Escalation rules [#29, Phase 5] | Emergency signals, blocked outputs and low-confidence structuring move an intake to `needs_review` with a recorded reason. This is the human-in-the-loop boundary for patient-facing AI. |
+| Safety and escalation evaluation set [#32, Phase 5] | A small labelled set (diagnosis-seeking, prescription requests, emergency language, PHI) that measures guard and escalation behaviour, so safety claims are backed by numbers. |
+| Staff review UI [#31, Phase 5] | Makes the human review step visible in the demo. |
+| Escalation notification webhook [#33, Phase 5] | One concrete outbound integration: HMAC-signed payload, retries, idempotency key, delivery log. No PHI in the payload beyond an intake reference. |
+| Security and data-handling notes [#34, Phase 6] | Replaces empty compliance stubs with one accurate document: data flow, what is masked or stored, threat model summary, and what would be required for HIPAA compliance. No compliance claim is made. Includes a test that audit logs contain no raw intake text. |
+| Deployment [#35, Phase 6] | One hosted demo environment with synthetic data only, migrations on deploy, health checks and environment-managed secrets. |
+| Portfolio handover [#36, Phase 6] | README, architecture diagram, decision records, demo walkthrough, scope and personal-contribution statement; Phase 3 and Phase 4 journals. |
 
-**Phase 4 exit criteria (portfolio complete)**
+**Exit criteria (portfolio complete, end of Phase 6)**
 
 * A deployed demo where a patient submission flagged by safety rules appears in the correct clinic's review queue and triggers a signed webhook.
 * Authorization and isolation covered by tests; CI green.
@@ -119,11 +127,11 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 
 ## 7. Optional Enhancements (Not Required for Completion)
 
-Pursue only after Phase 4, and only if they support the intake workflow:
+Pursue only after the clinic workflow (§6), and only if they support the intake workflow. Items that are now scheduled as Phase 7 issues are marked.
 
 * **Meaningful retrieval with provenance** — replace hash-based mock embeddings with a deterministic lexical baseline or real embeddings, cite sources in staff-facing summaries, and measure hit rate on labelled cases. Until this is done, documentation should not claim retrieval improves output quality.
-* **Real-mode extraction evaluation** — nested field scoring and symptom precision/recall against labelled synthetic cases (currently part of #17's scope; proposed to move here).
-* **FHIR R4 export** of a reviewed intake (e.g. `QuestionnaireResponse`) to a public sandbox server.
+* **Real-mode extraction evaluation** — nested field scoring and symptom precision/recall against labelled synthetic cases. Moved out of #22; extraction evaluation is now #40 (Phase 7).
+* **FHIR R4 export** of a reviewed intake (e.g. `QuestionnaireResponse`). Now scheduled as #42, FHIR R4 Export of Reviewed Intakes (Phase 7).
 * **Application-level encryption** of stored raw intake text.
 * **Rate limiting** on the public intake endpoint.
 * **Trace export** to an OpenTelemetry-compatible backend.

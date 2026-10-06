@@ -17,29 +17,26 @@ All data is synthetic. This project does not provide medical diagnosis or treatm
 
 Full evidence: [`project_status.md`](project_status.md).
 
+Phases 1–4 are complete; Phase 5 is next.
+
 **Implemented and tested**
 
-* FastAPI service with `POST /api/ingest`
+* FastAPI service with `POST /api/ingest`, working end to end without an LLM key (deterministic mock mode by default)
+* Next.js patient intake UI with a developer trace panel
 * Intake validation, PHI keyword detection and consent gate
-* Schema-validated structuring (deterministic mock mode)
+* Schema-validated structuring and reports; opt-in real OpenAI provider (`LLM_MODE=real`) with strict JSON-schema output and no fallback to mock
 * Deterministic safety guard: diagnosis/prescription blocking, PHI masking, emergency guidance
-* PostgreSQL `HealthRecord` model with idempotency
-* Retrieval agent and vector store abstraction (mock embeddings)
+* PostgreSQL persistence with ordered SQL migrations: clinics, users, clinic memberships (`clinic_staff` / `clinic_admin`), and clinic-owned intake records with review-status fields ([`data_model.md`](data_model.md))
+* Staff bearer-token authentication, server-side role checks and clinic isolation, plus minimal clinic-admin membership management ([`auth.md`](auth.md))
+* Retrieval agent and vector store abstraction (mock embeddings; not wired into the API)
 * Deterministic benchmark harness, per-run audit events, stage-level latency metrics
+* GitHub Actions CI: backend and PostgreSQL integration tests, mock benchmark (RAG off/on), frontend lint/typecheck/tests/build
 
-**Remaining in Phase 3 (not started)**
+**Planned**
 
-* Making the default API path run end-to-end without an LLM key
-* CI pipeline
-* Real LLM provider behind a configuration flag (open Issue #17)
-* Patient intake UI (open Issue #16)
-
-**Planned (Phase 4)**
-
-* Authentication, roles and clinic-level data isolation
-* Human review queue and escalation rules
-* Signed escalation webhook to an external system
-* Deployed demo environment and handover documentation
+* Phase 5: escalation rules, records and review-queue API, staff review UI, safety/escalation evaluation set, signed escalation webhook
+* Phase 6: security and data-handling notes, deployed demo environment, handover documentation
+* Phase 7: deterministic extraction baseline, intake evidence timeline, FHIR R4 export of reviewed intakes, guided demo
 
 ---
 
@@ -63,9 +60,9 @@ Full evidence: [`project_status.md`](project_status.md).
 | `rag/` | Embeddings, vector store, retriever, document loader | Implemented with mock embeddings |
 | `db/` | ORM models (clinics, users, memberships, health records), session, ordered SQL migrations | Implemented ([`data_model.md`](data_model.md)) |
 | `observability/` | Audit logger, tracing context, metrics | Implemented (local) |
-| `evaluation/` | Benchmark runner, metrics, test cases | Implemented (mock mode) |
-| `tests/` | Unit and contract tests | 39 passing at last audit |
-| `app/` | Frontend | Empty placeholders — Phase 3 |
+| `evaluation/` | Benchmark runner, metrics, test cases | Implemented (mock mode in CI; real mode opt-in) |
+| `tests/` | Unit, contract, auth/RBAC and PostgreSQL integration tests | Run in CI on every PR and push to `main` |
+| `app/` | Next.js patient intake UI | Implemented; staff UI is Phase 5 (#31) |
 | `docs/` | Product, architecture, API, evaluation, roadmap, journals | — |
 
 ---
@@ -80,6 +77,7 @@ Full evidence: [`project_status.md`](project_status.md).
 | [`step4_repo_api.md`](step4_repo_api.md) | Repository and API reference as of Phase 2 |
 | [`step5_demo_eval.md`](step5_demo_eval.md) | Phase 1–2 behaviour walkthrough |
 | [`evaluation_design.md`](evaluation_design.md), [`evaluation_benchmark.md`](evaluation_benchmark.md) | Evaluation harness design and usage |
+| [`data_model.md`](data_model.md), [`auth.md`](auth.md) | Data model v2 and migrations; staff authentication, roles and clinic isolation |
 | [`project_status.md`](project_status.md) | Evidence-based capability audit |
 | [`project_journal/`](project_journal/) | Historical records of completed phases |
 
