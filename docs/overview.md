@@ -61,7 +61,7 @@ Full evidence: [`project_status.md`](project_status.md).
 | `api/` | FastAPI app, routers, middleware | `ingest` + audit middleware implemented; auth, rate limit and other routers empty |
 | `llm/` | Prompts, JSON schemas, safety guard | Implemented |
 | `rag/` | Embeddings, vector store, retriever, document loader | Implemented with mock embeddings |
-| `db/` | ORM model, session, SQL migration | Implemented |
+| `db/` | ORM models (clinics, users, memberships, health records), session, ordered SQL migrations | Implemented ([`data_model.md`](data_model.md)) |
 | `observability/` | Audit logger, tracing context, metrics | Implemented (local) |
 | `evaluation/` | Benchmark runner, metrics, test cases | Implemented (mock mode) |
 | `tests/` | Unit and contract tests | 39 passing at last audit |

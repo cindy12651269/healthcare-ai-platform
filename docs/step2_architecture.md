@@ -220,9 +220,16 @@ Retrieval failures are non-fatal (best-effort grounding policy).
 * Unique `input_hash` for idempotency
 * Transaction boundary via `save_record()` helper
 
+* Clinic ownership (`clinic_id`), `review_status` and `escalation_reason` (data model v2, #27)
+
+Data model v2 also adds `clinics`, `users` and `clinic_memberships` (roles `clinic_staff`, `clinic_admin`). See [`data_model.md`](data_model.md).
+
 ## 6.2 Migration
 
+Ordered SQL files applied by `db/migrate.py` (recorded in `schema_migrations`; run on every Compose start):
+
 * `001_init_health_records.sql`
+* `002_clinics_users_review_status.sql`
 
 ## 6.3 Encryption Model
 

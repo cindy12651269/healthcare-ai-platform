@@ -7,7 +7,7 @@ from agents.output_agent import OutputAgent
 from agents.pipeline import HealthcarePipeline
 from agents.structuring_agent import StructuringAgent
 from api.config import get_settings
-from db.models import Base, HealthRecord
+from db.models import DEFAULT_CLINIC_ID, Base, HealthRecord
 
 # Test DB Setup (In-Memory SQLite)
 
@@ -186,6 +186,9 @@ def test_successful_run_persists_current_report_contract(sqlite_sessions, pipeli
         assert saved.intake_json["input_id"] == trace["intake"]["input_id"]
         assert saved.report_text.startswith("overview: Pre-visit intake received.")
         assert len(saved.input_hash) == 64
+        assert saved.clinic_id == DEFAULT_CLINIC_ID
+        assert saved.review_status == "submitted"
+        assert saved.escalation_reason is None
 
 
 def test_identical_input_is_reported_as_duplicate(sqlite_sessions, pipeline):

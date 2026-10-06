@@ -7,8 +7,11 @@ from sqlalchemy import (
     String,
     Text,
     DateTime,
+    ForeignKey,
     Index,
     UniqueConstraint,
+    CheckConstraint,
+    PrimaryKeyConstraint,
     func,
 )
 from sqlalchemy import JSON
@@ -24,6 +27,56 @@ REPORT_SECTION_KEYS = (
     "risk_summary",
     "recommendations",
 )
+
+# Data model v2 (db/migrations/002_clinics_users_review_status.sql)
+# Clinic that /api/ingest assigns intakes to; seeded by migration 002.
+DEFAULT_CLINIC_ID = "default"
+
+ROLES = ("clinic_staff", "clinic_admin")
+
+# submitted: stored, not flagged; needs_review / reviewed / escalated: staff review workflow
+REVIEW_STATUSES = ("submitted", "needs_review", "reviewed", "escalated")
+DEFAULT_REVIEW_STATUS = "submitted"
+
+
+def _in_check(column: str, values) -> str:
+    return f"{column} IN ({', '.join(repr(v) for v in values)})"
+
+
+class Clinic(Base):
+    __tablename__ = "clinics"
+
+    id = Column(String, primary_key=True, default=lambda: uuid4().hex)
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True, default=lambda: uuid4().hex)
+    email = Column(String, nullable=False)
+    display_name = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    __table_args__ = (UniqueConstraint("email", name="uq_users_email"),)
+
+
+class ClinicMembership(Base):
+    """A user's role within one clinic."""
+
+    __tablename__ = "clinic_memberships"
+
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    clinic_id = Column(String, ForeignKey("clinics.id", ondelete="CASCADE"), nullable=False)
+    role = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    __table_args__ = (
+        PrimaryKeyConstraint("user_id", "clinic_id"),
+        CheckConstraint(_in_check("role", ROLES), name="ck_clinic_memberships_role"),
+        Index("ix_clinic_memberships_clinic_id", "clinic_id"),
+    )
 
 
 class HealthRecord(Base):
@@ -63,6 +116,16 @@ class HealthRecord(Base):
     # Idempotency 
     input_hash = Column(String, nullable=True)
 
+    # Clinic ownership & review workflow (v2)
+    clinic_id = Column(String, ForeignKey("clinics.id"), nullable=False)
+    review_status = Column(
+        String,
+        nullable=False,
+        default=DEFAULT_REVIEW_STATUS,
+        server_default=DEFAULT_REVIEW_STATUS,
+    )
+    escalation_reason = Column(Text, nullable=True)
+
     # Timestamps 
     created_at = Column(
         DateTime(timezone=True),
@@ -80,6 +143,11 @@ class HealthRecord(Base):
     __table_args__ = (
         Index("ix_health_records_trace_id", "trace_id"),
         UniqueConstraint("input_hash", name="uq_health_records_input_hash"),
+        CheckConstraint(
+            _in_check("review_status", REVIEW_STATUSES),
+            name="ck_health_records_review_status",
+        ),
+        Index("ix_health_records_clinic_review_status", "clinic_id", "review_status"),
     )
 
     def __repr__(self) -> str:
@@ -102,6 +170,7 @@ class HealthRecord(Base):
         report_json: dict,
         safety_audit: dict,
         input_hash: Optional[str] = None,
+        clinic_id: str = DEFAULT_CLINIC_ID,
     ) -> "HealthRecord":
    
         # Deterministic extraction of human-readable report text
@@ -126,4 +195,6 @@ class HealthRecord(Base):
             report_text=report_text,
             safety_audit_json=safety_audit,
             input_hash=input_hash,
+            clinic_id=clinic_id,
+            review_status=DEFAULT_REVIEW_STATUS,
         )
