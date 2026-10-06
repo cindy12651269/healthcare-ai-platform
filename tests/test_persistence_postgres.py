@@ -273,3 +273,82 @@ def test_v2_roles_and_escalation_are_stored(engine):
 
     assert roles == {"u1": "clinic_staff", "u2": "clinic_admin"}
     assert tuple(record) == ("escalated", "emergency language")
+
+
+# Staff auth, RBAC and clinic isolation (Issue #28) against the migrated PostgreSQL schema
+
+@pytest.fixture
+def staff_client(engine, monkeypatch):
+    from api.auth import issue_token
+    from db.session import get_db
+
+    suffix = uuid4().hex[:8]
+    ids = {k: f"{k}-{suffix}" for k in ("clinic_a", "clinic_b", "admin_a", "staff_a", "admin_b", "new_user")}
+    with engine.begin() as conn:
+        conn.execute(text("INSERT INTO clinics (id, name) VALUES (:a, 'A'), (:b, 'B')"),
+                     {"a": ids["clinic_a"], "b": ids["clinic_b"]})
+        for user in ("admin_a", "staff_a", "admin_b", "new_user"):
+            conn.execute(text("INSERT INTO users (id, email) VALUES (:id, :email)"),
+                         {"id": ids[user], "email": f"{ids[user]}@example.test"})
+        conn.execute(
+            text("INSERT INTO clinic_memberships (user_id, clinic_id, role) VALUES "
+                 "(:admin_a, :clinic_a, 'clinic_admin'), (:staff_a, :clinic_a, 'clinic_staff'), "
+                 "(:admin_b, :clinic_b, 'clinic_admin')"),
+            ids,
+        )
+
+    Session = sessionmaker(bind=engine, future=True)
+
+    def _get_db():
+        db = Session()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    monkeypatch.setattr(get_settings(), "auth_token_secret", "pg-test-secret-" + "z" * 40)
+    monkeypatch.setattr("api.middleware.audit.log_run", lambda event: None)
+    app.dependency_overrides[get_db] = _get_db
+    headers = {u: {"Authorization": f"Bearer {issue_token(ids[u], 3600)}"} for u in ("admin_a", "staff_a", "admin_b")}
+    yield TestClient(app), ids, headers
+    app.dependency_overrides.pop(get_db, None)
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM users WHERE id LIKE :s"), {"s": f"%-{suffix}"})
+        conn.execute(text("DELETE FROM clinics WHERE id LIKE :s"), {"s": f"%-{suffix}"})
+
+
+def test_staff_auth_rbac_and_isolation_on_postgres(engine, staff_client):
+    client, ids, headers = staff_client
+    a, b, new_user = ids["clinic_a"], ids["clinic_b"], ids["new_user"]
+
+    def role_of(user_id, clinic_id):
+        with engine.connect() as conn:
+            return conn.execute(
+                text("SELECT role FROM clinic_memberships WHERE user_id = :u AND clinic_id = :c"),
+                {"u": user_id, "c": clinic_id},
+            ).scalar_one_or_none()
+
+    assert client.get(f"/api/clinics/{a}/members").status_code == 401
+    assert client.get(f"/api/clinics/{a}/members", headers=headers["staff_a"]).status_code == 200
+    assert client.get(f"/api/clinics/{b}/members", headers=headers["staff_a"]).status_code == 403
+    assert client.get(f"/api/clinics/{b}/members", headers=headers["admin_a"]).status_code == 403
+
+    # Staff cannot manage; admin manages only their own clinic
+    assert client.put(f"/api/clinics/{a}/members/{new_user}", json={"role": "clinic_staff"},
+                      headers=headers["staff_a"]).status_code == 403
+    assert client.put(f"/api/clinics/{b}/members/{new_user}", json={"role": "clinic_staff"},
+                      headers=headers["admin_a"]).status_code == 403
+    assert client.delete(f"/api/clinics/{b}/members/{ids['admin_b']}", headers=headers["admin_a"]).status_code == 403
+    assert role_of(new_user, a) is None and role_of(new_user, b) is None
+    assert role_of(ids["admin_b"], b) == "clinic_admin"
+
+    assert client.put(f"/api/clinics/{a}/members/{new_user}", json={"role": "clinic_staff"},
+                      headers=headers["admin_a"]).status_code == 200
+    assert role_of(new_user, a) == "clinic_staff"
+    assert client.delete(f"/api/clinics/{a}/members/{ids['staff_a']}", headers=headers["admin_a"]).status_code == 204
+    assert role_of(ids["staff_a"], a) is None
+    assert client.get(f"/api/clinics/{a}/members", headers=headers["staff_a"]).status_code == 403

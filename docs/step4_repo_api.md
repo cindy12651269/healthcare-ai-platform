@@ -9,7 +9,7 @@ This document reflects the **current repository structure and API behavior after
 > * `/api/ingest` returns the raw pipeline trace (keys `run_id`, `success`, `intake`, `structured`, `rag`, `report`, `safety`, `errors`, `telemetry`, `metrics`), not the `IngestResponse` shape in §4.2. App version is `0.1.0`.
 > * There is no `SafetyViolation` → 422 mapping; a blocked output surfaces as a 500.
 > * Without an OpenAI API key the endpoint returns 500 (see [`project_status.md`](project_status.md)).
-> * There is no authentication or rate limiting (the empty `auth.py` / `rate_limit.py` placeholders were removed in #26); Redis is started but unused; there is no Terraform (empty `infra/` placeholders removed in #26).
+> * Staff endpoints use bearer-token authentication with clinic-scoped roles ([`auth.md`](auth.md), #28); `/api/ingest` stays unauthenticated. There is no rate limiting (the empty `rate_limit.py` placeholder was removed in #26); Redis is started but unused; there is no Terraform (empty `infra/` placeholders removed in #26).
 >
 > Response contract, error mapping and the no-key path are proposed Phase 3 work; authentication is Phase 4; rate limiting is optional; Terraform beyond a single demo deployment is out of scope ([`step3_roadmap.md`](step3_roadmap.md)).
 
