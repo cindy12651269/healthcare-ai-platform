@@ -141,7 +141,7 @@ Make the repository contain only real code and documentation, and make normal te
 
 **Validation**
 
-* `pytest` and `python -m evaluation.benchmark --mode mock` leave `git status --short` empty. This was checked in a fresh worktree of the PR head and again after the merge.
+* `pytest` and `python -m evaluation.benchmark --mode mock` leave `git status --short` empty. This was checked on the PR branch and in a fresh worktree of the PR head; the Phase 4 closure validation confirms it on the final `main`.
 * CI on the PR and on `main`: 94 passed; 3 PostgreSQL integration tests ran.
 
 **Design Notes**
