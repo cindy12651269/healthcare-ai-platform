@@ -16,7 +16,7 @@ from agents.output_agent import OutputAgent
 from agents.retrieval_agent import RetrievalAgent, RetrievalResult
 from llm.safety_guard import GuardResult
 from api.config import get_settings
-from db.models import HealthRecord
+from db.models import DEFAULT_CLINIC_ID, HealthRecord
 from db.session import SessionLocal
 from sqlalchemy.exc import IntegrityError
 
@@ -84,6 +84,8 @@ class HealthcarePipeline:
                 report_json=trace["report"],
                 safety_audit=trace["safety"],
                 input_hash=input_hash,
+                # Unauthenticated intake goes to the single seeded clinic (Issue #27 decision)
+                clinic_id=DEFAULT_CLINIC_ID,
             )
 
             session.add(record)

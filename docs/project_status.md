@@ -39,12 +39,12 @@ A file existing in the repository is not evidence of implementation. Several dir
 | --- | --- | --- |
 | Coherent end-to-end healthcare workflow | **PARTIAL** | Intake → structuring → report → safety pipeline exists (`agents/pipeline.py`). No defined end user beyond "submitter", no review step, no UI, and the default API path does not complete without an OpenAI key. |
 | FastAPI backend | **PARTIAL** | `/health`, `/`, `POST /api/ingest`. No read endpoints for stored records. Empty `api/routers/analyze.py` / `report.py` placeholders removed in #26; read endpoints are #30. Response model `IngestResponse` is declared but not applied. |
-| PostgreSQL persistence | **PARTIAL** | `HealthRecord` ORM, idempotency via `input_hash`, raw SQL migration; model tested on SQLite. Pipeline persistence is best-effort and swallows errors; `HealthRecord.from_pipeline_trace` expects `report.clinical_structuring.clinical_summary`, which the real `OutputAgent` report schema does not produce. No migration tool. |
+| PostgreSQL persistence | **PARTIAL** | `HealthRecord` ORM, idempotency via `input_hash`, clinic ownership and review status (data model v2, #27, [`data_model.md`](data_model.md)); ordered SQL migrations (`db/migrate.py`) tested on PostgreSQL in CI, including a v1 → v2 upgrade; models tested on SQLite. Pipeline persistence is best-effort and swallows errors; `HealthRecord.from_pipeline_trace` expects `report.clinical_structuring.clinical_summary`, which the real `OutputAgent` report schema does not produce. |
 | Redis / background work | **NOT NEEDED** (currently) | Redis runs in `docker-compose.yml` but no code uses it. |
 | External / third-party integration | **PARTIAL** | OpenAI client call in `OutputAgent` (no timeout/retry/fallback). No other integrations. |
 | Authentication | **ABSENT** | Not implemented (#28); the empty `api/middleware/auth.py` placeholder was removed in #26. |
-| Authorization / RBAC | **ABSENT** | No roles or permission checks. |
-| Tenant / organization isolation | **ABSENT** | No organization concept in the data model. |
+| Authorization / RBAC | **ABSENT** | Roles (`clinic_staff`, `clinic_admin`) exist in the data model (#27) but nothing checks them (#28). |
+| Tenant / organization isolation | **ABSENT** | Clinics and clinic-owned records exist in the data model (#27); all ingested intakes go to one seeded clinic and nothing enforces isolation (#28). |
 | PHI / privacy handling | **PARTIAL** | Keyword PHI heuristic + consent gate at intake (`agents/intake_agent.py`); regex PHI masking of report output (`llm/safety_guard.py`). Raw intake text is persisted unmasked. Heuristics are explicitly not a validated de-identification method. |
 | Encryption / data protection | **ABSENT** | Encryption at rest is assumed at infrastructure level only; nothing is deployed. No field-level encryption. |
 | Audit logging | **PARTIAL** | Per-run and per-request JSONL events (`observability/audit_logger.py`, `api/middleware/audit.py`). No actor identity, no user-action audit, status bug noted in §2. |
