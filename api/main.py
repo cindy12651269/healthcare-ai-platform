@@ -5,7 +5,7 @@ from api.config import get_settings
 from llm.provider import check_llm_config
 
 # Routers
-from api.routers import ingest
+from api.routers import clinics, ingest
 
 # Middleware
 from api.middleware.audit import AuditMiddleware
@@ -45,6 +45,11 @@ app.include_router(
     ingest.router,
     prefix="/api",
     tags=["Ingest"],
+)
+app.include_router(
+    clinics.router,
+    prefix="/api",
+    tags=["Staff"],
 )
 
 # Lifecycle Events

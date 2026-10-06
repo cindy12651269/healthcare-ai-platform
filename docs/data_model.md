@@ -12,7 +12,7 @@ This issue adds the tables and columns only. Authentication, role enforcement, c
 | Table | Columns | Constraints |
 | --- | --- | --- |
 | `clinics` | `id`, `name`, `created_at` | PK `id`. Migration 002 seeds `('default', 'Default Clinic')`. |
-| `users` | `id`, `email`, `display_name`, `created_at` | PK `id`; `email` unique. No credentials yet (#28). |
+| `users` | `id`, `email`, `display_name`, `created_at` | PK `id`; `email` unique. No stored credentials; staff authenticate with signed tokens ([`auth.md`](auth.md)). |
 | `clinic_memberships` | `user_id`, `clinic_id`, `role`, `created_at` | PK (`user_id`, `clinic_id`); FKs to `users` / `clinics` (cascade on delete); `role` ∈ `clinic_staff`, `clinic_admin`. A user can belong to several clinics with one role each. |
 | `health_records` (v1 + new columns) | `clinic_id`, `review_status`, `escalation_reason` | `clinic_id` NOT NULL, FK to `clinics`, no default; `review_status` NOT NULL, default `submitted`, ∈ `submitted`, `needs_review`, `reviewed`, `escalated`; `escalation_reason` nullable text. Index (`clinic_id`, `review_status`) for the review queue. |
 

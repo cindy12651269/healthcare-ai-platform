@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     enable_safety_guard: bool = True
     enable_persistence: bool = True
 
+    # Staff authentication (api/auth.py): HMAC key for bearer tokens, server-side only.
+    # Unset → staff endpoints return 503; /api/ingest is unaffected.
+    auth_token_secret: str | None = None
+    auth_token_ttl_hours: float = Field(default=8.0, gt=0)
+
     # CORS: comma-separated browser origins allowed to call the API (local Next.js UI by default)
     cors_allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 

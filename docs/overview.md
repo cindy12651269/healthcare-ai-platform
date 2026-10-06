@@ -58,7 +58,7 @@ Full evidence: [`project_status.md`](project_status.md).
 | Path | Contents | State |
 | --- | --- | --- |
 | `agents/` | Intake, structuring, retrieval, output agents; pipeline orchestrator | Implemented |
-| `api/` | FastAPI app, routers, middleware | `ingest` + audit middleware implemented; auth, rate limit and other routers empty |
+| `api/` | FastAPI app, routers, middleware | `ingest`, staff auth / clinic membership endpoints ([`auth.md`](auth.md)) and audit middleware implemented; no rate limiting |
 | `llm/` | Prompts, JSON schemas, safety guard | Implemented |
 | `rag/` | Embeddings, vector store, retriever, document loader | Implemented with mock embeddings |
 | `db/` | ORM models (clinics, users, memberships, health records), session, ordered SQL migrations | Implemented ([`data_model.md`](data_model.md)) |
