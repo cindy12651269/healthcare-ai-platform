@@ -120,6 +120,17 @@ def test_invalid_authentication_is_401(client, sessions, monkeypatch):
         assert response.status_code == 401, header
 
 
+def test_non_ascii_signature_is_401_not_500(sessions):
+    version, body, _ = issue_token("staff-a", 3600).split(".")
+    client = TestClient(app, raise_server_exceptions=False)
+    # Raw latin-1 header bytes: the server sees a signature of non-ASCII characters
+    header = f"Bearer {version}.{body}.\u00e9\u00e9".encode("latin-1")
+    response = client.get("/api/staff/me", headers=[(b"authorization", header)])
+    assert response.status_code == 401
+    with pytest.raises(InvalidToken):
+        verify_token(f"{version}.{body}.\u00e9\u00e9")
+
+
 def test_staff_endpoints_unavailable_without_secret(client, monkeypatch):
     token = issue_token("staff-a", 3600)
     monkeypatch.setattr(get_settings(), "auth_token_secret", None)

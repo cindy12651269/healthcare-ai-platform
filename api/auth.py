@@ -75,7 +75,9 @@ def verify_token(token: str, *, now: Optional[float] = None) -> str:
         raise InvalidToken("malformed token") from None
     if version != TOKEN_VERSION:
         raise InvalidToken("unsupported token version")
-    if not hmac.compare_digest(signature, _sign(f"{version}.{body}", _secret())):
+    # Compare bytes: compare_digest raises TypeError on non-ASCII str input
+    expected = _sign(f"{version}.{body}", _secret())
+    if not hmac.compare_digest(signature.encode(), expected.encode()):
         raise InvalidToken("bad signature")
     try:
         payload = json.loads(_unb64(body))
