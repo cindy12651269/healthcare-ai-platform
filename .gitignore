@@ -29,10 +29,9 @@ build/
 # Secrets 
 .env
 .env.*
+
+# Runtime audit log (observability/audit_logger.py; AUDIT_LOG_PATH)
 audit.jsonl
 
-# Real-provider benchmark output (opt-in, non-deterministic; not committed)
-evaluation/results/benchmark_results_real.json
-
-# CI benchmark outputs (.github/workflows/ci.yml)
-evaluation/results/ci_benchmark_*.json
+# Generated benchmark output (mock, real and CI runs); regenerate with `python -m evaluation.benchmark`
+evaluation/results/

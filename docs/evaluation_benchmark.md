@@ -88,6 +88,8 @@ Results will be written to:
 evaluation/results/
 ```
 
+This directory is generated output and is gitignored; results are not committed.
+
 ---
 
 # Deterministic Guarantees

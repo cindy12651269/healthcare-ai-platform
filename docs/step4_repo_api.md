@@ -9,7 +9,7 @@ This document reflects the **current repository structure and API behavior after
 > * `/api/ingest` returns the raw pipeline trace (keys `run_id`, `success`, `intake`, `structured`, `rag`, `report`, `safety`, `errors`, `telemetry`, `metrics`), not the `IngestResponse` shape in §4.2. App version is `0.1.0`.
 > * There is no `SafetyViolation` → 422 mapping; a blocked output surfaces as a 500.
 > * Without an OpenAI API key the endpoint returns 500 (see [`project_status.md`](project_status.md)).
-> * `api/middleware/auth.py` and `rate_limit.py` are empty; Redis is started but unused; Terraform files in `infra/` are empty.
+> * There is no authentication or rate limiting (the empty `auth.py` / `rate_limit.py` placeholders were removed in #26); Redis is started but unused; there is no Terraform (empty `infra/` placeholders removed in #26).
 >
 > Response contract, error mapping and the no-key path are proposed Phase 3 work; authentication is Phase 4; rate limiting is optional; Terraform beyond a single demo deployment is out of scope ([`step3_roadmap.md`](step3_roadmap.md)).
 
@@ -33,9 +33,7 @@ healthcare-ai-platform/
 ├── llm/                   # Prompts, schemas, safety guard
 ├── rag/                   # Deterministic RAG + vector store abstraction
 ├── db/                    # ORM models, migrations, session management
-├── interoperability/      # FHIR, HL7, consent, EHR routing (Phase 4)
 ├── observability/         # Audit, tracing, metrics hooks (Phase 3+)
-├── infra/                 # Docker, AWS/IaC examples
 ├── docs/                  # Architecture, roadmap, API, journals
 ├── tests/                 # Unit & integration tests
 ├── Makefile               # Developer automation
@@ -288,7 +286,6 @@ Ports:
 
 Repository is structured for future production use:
 
-* Terraform examples in `infra/`
 * Pluggable LLM provider interface
 * Deterministic CI-safe mode
 * Modular agents
