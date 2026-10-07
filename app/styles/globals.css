@@ -118,3 +118,10 @@ button.secondary { background: transparent; color: var(--text); border: 1px soli
 code { font-size: 0.85em; }
 
 .site-footer { padding: 24px 16px 40px; font-size: 0.8rem; color: var(--muted); }
+
+/* Staff review page (Issue #31) */
+.staff-input { font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; }
+input.staff-input { width: 100%; }
+.queue { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px; }
+.queue th, .queue td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.queue tr[aria-selected="true"] { background: var(--code-bg); }
