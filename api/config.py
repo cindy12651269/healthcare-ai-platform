@@ -36,6 +36,14 @@ class Settings(BaseSettings):
     auth_token_secret: str | None = None
     auth_token_ttl_hours: float = Field(default=8.0, gt=0)
 
+    # Escalation webhook (api/webhook.py, Issue #33): server-side only, never NEXT_PUBLIC_.
+    # Disabled unless both are set (secret ≥ 32 characters); /api/ingest is unaffected either way.
+    webhook_url: str | None = None
+    webhook_secret: str | None = None
+    webhook_timeout_seconds: float = Field(default=3.0, gt=0, le=10)
+    webhook_max_attempts: int = Field(default=3, ge=1, le=5)
+    webhook_retry_backoff_seconds: float = Field(default=0.5, ge=0, le=5)
+
     # CORS: comma-separated browser origins allowed to call the API (local Next.js UI by default)
     cors_allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 

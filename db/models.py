@@ -12,6 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
     CheckConstraint,
     PrimaryKeyConstraint,
+    Integer,
     func,
 )
 from sqlalchemy import JSON
@@ -201,3 +202,36 @@ class HealthRecord(Base):
             review_status=review_status,
             escalation_reason=escalation_reason,
         )
+
+
+# Escalation webhook delivery log (Issue #33, db/migrations/003_webhook_deliveries.sql).
+# One row per logical notification (unique idempotency_key). Stores outcome metadata only:
+# never the payload's source data, the signing secret, the signature or response bodies.
+WEBHOOK_DELIVERY_STATUSES = ("pending", "delivered", "failed")
+
+
+class WebhookDelivery(Base):
+    __tablename__ = "webhook_deliveries"
+
+    id = Column(String, primary_key=True, default=lambda: uuid4().hex)
+    idempotency_key = Column(String, nullable=False)
+    intake_id = Column(String, ForeignKey("health_records.id", ondelete="CASCADE"), nullable=False)
+    event_type = Column(String, nullable=False)
+    # scheme://host[:port] only; the path/query may carry receiver tokens
+    target = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="pending")
+    attempts = Column(Integer, nullable=False, default=0)
+    last_http_status = Column(Integer, nullable=True)
+    # Failure class (timeout, connection_error, http_5xx, ...), never a response body
+    last_error = Column(String, nullable=True)
+    # [{"attempt": n, "outcome": "...", "http_status": int|None, "at": iso8601}]
+    attempt_log = Column(JSON, nullable=False, default=list)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    delivered_at = Column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("idempotency_key", name="uq_webhook_deliveries_idempotency_key"),
+        Index("ix_webhook_deliveries_intake_id", "intake_id"),
+        CheckConstraint(_in_check("status", WEBHOOK_DELIVERY_STATUSES), name="ck_webhook_deliveries_status"),
+    )
