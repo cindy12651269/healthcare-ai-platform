@@ -22,6 +22,7 @@ from agents.escalation import (
 from agents.retrieval_agent import RetrievalAgent, RetrievalResult
 from llm.safety_guard import GuardResult
 from api.config import get_settings
+from api.webhook import notify_escalation
 from db.models import DEFAULT_CLINIC_ID, DEFAULT_REVIEW_STATUS, HealthRecord
 from db.session import SessionLocal
 from sqlalchemy.exc import IntegrityError
@@ -300,6 +301,15 @@ class HealthcarePipeline:
                 logger.exception("Persistence hook failed")
                 trace["persistence"] = {"status": "failed", "record_id": None}
             ctx.persistence_ms = (time.perf_counter() - t) * 1000
+
+            # Escalation webhook (Issue #33): only for a newly persisted record; the notifier re-reads the
+            # stored review_status. Best-effort and kept out of the trace, so the patient response never
+            # carries webhook details and a delivery problem cannot fail the request.
+            if trace["persistence"].get("status") == "saved":
+                try:
+                    notify_escalation(trace["persistence"]["record_id"], session_factory=SessionLocal)
+                except Exception:
+                    logger.exception("Escalation webhook hook failed")
 
             # Total 
             latency_ms = int((time.perf_counter() - start_time) * 1000)
