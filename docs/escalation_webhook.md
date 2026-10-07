@@ -70,7 +70,7 @@ Receiver verification:
 - **Not retried:** other 3xx and 4xx responses, which are recorded as `failed`. Redirects are not followed.
 - **Stopping:** retries stop at the first 2xx.
 
-Delivery is **at least once per attempt sequence, not exactly once over the network**. A receiver may see the same key twice, for example if its 2xx response is lost, and must deduplicate on the key.
+This is **one logical notification with bounded delivery attempts, not a delivery guarantee**. The receiver may get it once, more than once, or not at all. It can arrive more than once if a request succeeds but the response is lost, so the receiver must deduplicate on `Idempotency-Key`. It may not arrive if every attempt fails or the process stops mid-delivery. The resulting local state is recorded in `webhook_deliveries`.
 
 ## Delivery log (`webhook_deliveries`)
 
@@ -85,7 +85,7 @@ There is one row per logical notification:
 | `status` | `pending`, `delivered` or `failed`. |
 | `attempts` | Number of attempts made. |
 | `last_http_status` | Status code of the last response, if any. |
-| `last_error` | A failure class: `timeout`, `connection_error`, `http_5xx`, `http_4xx`, `http_408` or `http_429`. |
+| `last_error` | A failure class: `timeout`, `connection_error`, `http_3xx` (redirect, not followed), `http_4xx`, `http_408`, `http_429` or `http_5xx`. |
 | `attempt_log` | One entry per attempt: `{attempt, outcome, http_status, at}`. |
 | `created_at`, `updated_at`, `delivered_at` | Timestamps. |
 
@@ -108,7 +108,7 @@ To try it by hand, run any local receiver, set `WEBHOOK_URL=http://127.0.0.1:<po
 
 ## Limitations
 
-- **Synchronous delivery:** it happens inside the ingest request, after persistence. The time is bounded: at the defaults the worst case is 3 attempts × 3 s plus 1.5 s of backoff, about 10.5 s added to an escalated intake's response. That time is only ever latency, never an error.
+- **Synchronous delivery:** it happens inside the ingest request, after persistence. With the default retry and backoff settings and a responsive network, a failed delivery can add about 10.5 s to an escalated intake's response (3 attempts × 3 s, plus 1.5 s of backoff). The HTTP timeout applies per socket operation, not as a strict total deadline, and DNS resolution may fall outside it. The added time is only ever latency, never an error.
 - **No re-drive:** there is no queue or worker (Redis, Celery and similar are out of scope). A `failed` notification, or one left `pending` because the process stopped mid-delivery, is not retried later. It is visible in `webhook_deliveries` for manual follow-up.
 - **One receiver:** there is a single target and no per-clinic routing.
 - **No replay window:** the signature carries no timestamp, so receivers should deduplicate on `Idempotency-Key`.
