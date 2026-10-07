@@ -1,8 +1,8 @@
 # Healthcare AI Platform
 
-AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient input is validated, structured against a schema, summarised without diagnosis, checked by deterministic safety rules, and (planned) routed to clinic staff for human review.
+AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient input is validated, structured against a schema, summarised without diagnosis, checked by deterministic safety rules, and, when flagged, routed to clinic staff for human review.
 
-**Status:** in development — Phases 1–4 complete, Phase 5 (clinical review & escalation workflow) next. Synthetic data only; no medical advice; no HIPAA compliance claim.
+**Status:** in development — Phases 1–5 complete (including the clinical review & escalation workflow); Phase 6 (security, deployment & handover) next, not started. Synthetic data only; no medical advice; no HIPAA compliance claim.
 
 * What works today, with evidence: [`docs/project_status.md`](docs/project_status.md)
 * Product and architecture overview: [`docs/overview.md`](docs/overview.md)
@@ -25,14 +25,14 @@ pytest
 GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request to `main` and every push to `main`:
 
 - **Backend:** Python 3.11, `pytest` (full suite) against a `postgres:15` service container with `TEST_DATABASE_URL` set, so the PostgreSQL integration tests execute; the job fails if they are skipped.
-- **Benchmark:** `python -m evaluation.benchmark --mode mock` with `--rag off` and `--rag on` (deterministic).
+- **Benchmark:** `python -m evaluation.benchmark --mode mock` with `--rag off` and `--rag on`, plus the labelled safety & escalation suite (`--suite safety`). All are deterministic.
 - **Frontend (`app/`):** `npm ci`, then `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` (Node 22).
 
 CI sets `LLM_MODE=mock` and needs no secrets: no OpenAI or other provider credentials are used, and no real LLM call is made. Real-provider runs (`--mode real`) are intentionally excluded from default CI.
 
 ## Running the patient intake demo UI
 
-The Next.js intake UI (`app/`) submits to the FastAPI `POST /api/ingest` endpoint. Pipeline settings (RAG, persistence, LLM mode) are backend configuration and are not exposed in the browser.
+The Next.js intake UI (`app/`) submits to the FastAPI `POST /api/ingest` endpoint. Clinic staff review flagged intakes at `/staff` with an operator-issued token ([`docs/staff_review_ui.md`](docs/staff_review_ui.md)). Pipeline settings (RAG, persistence, LLM mode) are backend configuration and are not exposed in the browser.
 
 The default `LLM_MODE=mock` runs the deterministic pipeline and needs no OpenAI API key. `LLM_MODE=real` calls OpenAI with `OPENAI_API_KEY` (see LLM mode below). The key is only read by the backend; the browser only receives `NEXT_PUBLIC_API_BASE_URL`.
 

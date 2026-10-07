@@ -231,6 +231,7 @@ Ordered SQL files applied by `db/migrate.py` (recorded in `schema_migrations`; r
 
 * `001_init_health_records.sql`
 * `002_clinics_users_review_status.sql`
+* `003_webhook_deliveries.sql` (escalation webhook delivery log, #33)
 
 ## 6.3 Encryption Model
 

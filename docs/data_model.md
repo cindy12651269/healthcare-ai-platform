@@ -3,7 +3,7 @@
 Schema: `db/migrations/001_init_health_records.sql` + `002_clinics_users_review_status.sql`.
 ORM: `db/models.py`.
 
-This issue adds the tables and columns only. Authentication, role enforcement, clinic isolation (#28), escalation rules (#29) and review-queue endpoints (#30) are not implemented.
+Issue #27 added the tables and columns only. Later issues built on them: authentication, role enforcement and clinic isolation (#28, [`auth.md`](auth.md)); escalation rules (#29, below); review-queue endpoints (#30, [`review_queue_api.md`](review_queue_api.md)); the webhook delivery log, migration `003_webhook_deliveries.sql` (#33, [`escalation_webhook.md`](escalation_webhook.md)).
 
 ---
 
@@ -20,7 +20,7 @@ This issue adds the tables and columns only. Authentication, role enforcement, c
 
 * `submitted` — stored and not flagged. This is the initial status of every intake and of upgraded v1 records.
 * `needs_review` — flagged for staff review, with `escalation_reason` set (set by the escalation rules, #29).
-* `reviewed` / `escalated` — staff outcomes (transitions belong to #30).
+* `reviewed` / `escalated` — staff outcomes, set only by the `needs_review → reviewed | escalated` transition (#30).
 
 `submitted` is added alongside the three required statuses so that an intake that has not been flagged is distinguishable from one waiting in the review queue.
 

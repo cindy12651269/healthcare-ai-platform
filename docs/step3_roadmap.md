@@ -40,8 +40,8 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | 2 | RAG + Safety + Persistence | **COMPLETE** — Issues #7–#11 |
 | 3 | UI + Evaluation + Observability | **COMPLETE** — Issues #12–#17 |
 | 4 | Foundation & Provider Integration | **COMPLETE** — Issues #22, #25–#28 |
-| 5 | Clinical Review & Escalation Workflow | **NEXT** — Issues #29–#33 |
-| 6 | Security, Deployment & Handover | **PLANNED** — Issues #34–#36 |
+| 5 | Clinical Review & Escalation Workflow | **COMPLETE** — Issues #29–#33 |
+| 6 | Security, Deployment & Handover | **NEXT** — Issues #34–#36 |
 | 7 | Demo Experience, AI Evidence & FHIR Interoperability | **PLANNED** — Issues #40–#43 |
 | — | Optional enhancements | Not required for portfolio completion |
 
@@ -100,7 +100,7 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 
 ## 6. Clinic Workflow, Access Control & Delivery (Phases 4–6)
 
-> **Status (2026-10-06).** This section was written as a single "Phase 4". It is now delivered across three phases. Data model v2 (#27) and authentication, RBAC and clinic isolation (#28) are **complete** in Phase 4. The clinic workflow items are Phase 5 (#29–#33), and security notes, deployment and handover are Phase 6 (#34–#36). The issue for each row is shown in brackets.
+> **Status (2026-10-07).** This section was written as a single "Phase 4". It is now delivered across three phases. Data model v2 (#27) and authentication, RBAC and clinic isolation (#28) are **complete** in Phase 4. The clinic workflow items (#29–#33) are **complete** in Phase 5 (2026-10-07, [journal](project_journal/phase5_Clinical_Review_&_Escalation_Workflow.md)). Security notes, deployment and handover are Phase 6 (#34–#36), not started. The issue for each row is shown in brackets.
 
 **Goal:** turn the demo into a believable small product: identified users, clinic-scoped data, a human review step, one external integration, a deployed environment, and handover-quality documentation.
 
@@ -108,11 +108,11 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 | --- | --- |
 | Data model v2 with migrations [#27, Phase 4 — complete] | Clinics, users/roles and intake review status are prerequisites for access control and escalation. Introduces a migration tool in place of a single raw SQL file. |
 | Authentication, RBAC and clinic isolation [#28, Phase 4 — complete] | Healthcare clients expect role and tenant boundaries. Enforced server-side and tested, including cross-clinic denial. |
-| Records and review-queue API [#30, Phase 5] | There is currently no way to read stored data back. Staff need list/get/transition endpoints; every staff action is audited with actor identity. |
-| Escalation rules [#29, Phase 5] | Emergency signals, blocked outputs and low-confidence structuring move an intake to `needs_review` with a recorded reason. This is the human-in-the-loop boundary for patient-facing AI. |
-| Safety and escalation evaluation set [#32, Phase 5] | A small labelled set (diagnosis-seeking, prescription requests, emergency language, PHI) that measures guard and escalation behaviour, so safety claims are backed by numbers. |
-| Staff review UI [#31, Phase 5] | Makes the human review step visible in the demo. |
-| Escalation notification webhook [#33, Phase 5] | One concrete outbound integration: HMAC-signed payload, retries, idempotency key, delivery log. No PHI in the payload beyond an intake reference. |
+| Records and review-queue API [#30, Phase 5 — complete] | There is currently no way to read stored data back. Staff need list/get/transition endpoints; every staff action is audited with actor identity. |
+| Escalation rules [#29, Phase 5 — complete] | Emergency signals, blocked outputs and low-confidence structuring move an intake to `needs_review` with a recorded reason. This is the human-in-the-loop boundary for patient-facing AI. |
+| Safety and escalation evaluation set [#32, Phase 5 — complete] | A small labelled set (diagnosis-seeking, prescription requests, emergency language, PHI) that measures guard and escalation behaviour, so safety claims are backed by numbers. |
+| Staff review UI [#31, Phase 5 — complete] | Makes the human review step visible in the demo. |
+| Escalation notification webhook [#33, Phase 5 — complete] | One concrete outbound integration: HMAC-signed payload, retries, idempotency key, delivery log. No PHI in the payload beyond an intake reference. |
 | Security and data-handling notes [#34, Phase 6] | Replaces empty compliance stubs with one accurate document: data flow, what is masked or stored, threat model summary, and what would be required for HIPAA compliance. No compliance claim is made. Includes a test that audit logs contain no raw intake text. |
 | Deployment [#35, Phase 6] | One hosted demo environment with synthetic data only, migrations on deploy, health checks and environment-managed secrets. |
 | Portfolio handover [#36, Phase 6] | README, architecture diagram, decision records, demo walkthrough, scope and personal-contribution statement; Phase 3 and Phase 4 journals. |

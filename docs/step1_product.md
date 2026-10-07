@@ -28,8 +28,8 @@ Transform unstructured healthcare inputs into:
 2. The system validates the input, detects likely PHI, and structures it against a JSON schema.
 3. A non-diagnostic summary is generated for clinic staff; safety rules block diagnosis or prescription language and mask PHI.
 4. If emergency language is detected, the patient is shown urgent-care guidance.
-5. Emergency signals, blocked outputs and low-confidence results are routed to a review queue for that clinic's staff *(Phase 4)*.
-6. Staff review and resolve flagged intakes; escalations notify an external clinic system *(Phase 4)*.
+5. Emergency signals, blocked outputs and low-confidence results are routed to a review queue for that clinic's staff *(implemented in Phase 5: #29, #30)*.
+6. Staff review and resolve flagged intakes; escalations notify an external clinic system *(implemented in Phase 5: #31, #33)*.
 
 **Users:** patient (submitter), clinic staff (reviewer), clinic admin (access management, Phase 4).
 
@@ -43,7 +43,7 @@ Transform unstructured healthcare inputs into:
 
 * Structured health JSON
 * Safety-bounded summary report
-* Review status and escalation reason *(Phase 4)*
+* Review status and escalation reason *(columns added in Phase 4, #27; set by escalation rules in Phase 5, #29)*
 
 ---
 
