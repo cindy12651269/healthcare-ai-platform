@@ -308,4 +308,4 @@ The API contract reflects retrieval and safety traces and is ready for Phase 3 e
 ---
 
 **Document Status:** Updated after Phase 2 completion
-Later API additions are documented separately: staff authentication and clinic membership endpoints in [`auth.md`](auth.md) (Phase 4). Planned work is listed in [`step3_roadmap.md`](step3_roadmap.md).
+Later API additions are documented separately: staff authentication and clinic membership endpoints in [`auth.md`](auth.md) (Phase 4); records and review-queue endpoints in [`review_queue_api.md`](review_queue_api.md) (#30). Planned work is listed in [`step3_roadmap.md`](step3_roadmap.md).

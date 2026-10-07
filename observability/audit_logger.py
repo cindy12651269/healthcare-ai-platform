@@ -17,6 +17,10 @@ class AuditEvent:
     safety_violation_count: int
     retrieval_hit_count: int
     error: Optional[str] = None
+    # Staff actions (Issue #30): who did what to which intake; never intake text
+    actor_id: Optional[str] = None
+    action: Optional[str] = None
+    resource_id: Optional[str] = None
 
 # Helpers
 # Return current UTC time in ISO format
@@ -32,6 +36,9 @@ def build_event(
     retrieval_hit_count: int,
     flags: Optional[Dict[str, Any]] = None,
     error: Optional[str] = None,
+    actor_id: Optional[str] = None,
+    action: Optional[str] = None,
+    resource_id: Optional[str] = None,
 ) -> AuditEvent:
     
     return AuditEvent(
@@ -43,6 +50,9 @@ def build_event(
         retrieval_hit_count=retrieval_hit_count,
         flags=flags or {},
         error=error,
+        actor_id=actor_id,
+        action=action,
+        resource_id=resource_id,
     )
 
 
