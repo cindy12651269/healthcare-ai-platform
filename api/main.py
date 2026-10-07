@@ -5,7 +5,7 @@ from api.config import get_settings
 from llm.provider import check_llm_config
 
 # Routers
-from api.routers import clinics, ingest
+from api.routers import clinics, ingest, records
 
 # Middleware
 from api.middleware.audit import AuditMiddleware
@@ -48,6 +48,11 @@ app.include_router(
 )
 app.include_router(
     clinics.router,
+    prefix="/api",
+    tags=["Staff"],
+)
+app.include_router(
+    records.router,
     prefix="/api",
     tags=["Staff"],
 )

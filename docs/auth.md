@@ -50,7 +50,7 @@ Reusable dependencies: `get_current_principal` (401 handling, loads memberships)
 
 Minimal admin capability: a clinic admin grants, changes or removes memberships of existing users in their own clinic. Users are created by the operator CLI. An admin cannot change or remove their own membership (409), so a clinic cannot lose its admin by accident. Unknown user → 404; invalid role → 422.
 
-Intake records are not exposed by any staff endpoint yet; the records and review-queue API (#30) must use the same `require_clinic_role` dependency.
+The records and review-queue API (#30) uses the same `require_clinic_role` dependency; see [`review_queue_api.md`](review_queue_api.md).
 
 ---
 
