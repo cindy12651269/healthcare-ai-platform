@@ -46,3 +46,29 @@ def test_simple_request_disallowed_origin():
 def test_cors_origins_parsed_from_setting():
     settings = Settings(cors_allowed_origins=" http://a.test , http://b.test,, ")
     assert settings.cors_origins == ["http://a.test", "http://b.test"]
+
+
+# Staff Review UI (#31): the browser may send the staff bearer token cross-origin, still without cookies
+def test_preflight_allows_authorization_header_for_staff_api():
+    response = client.options(
+        "/api/clinics/default/intakes",
+        headers={
+            "Origin": ALLOWED,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "Authorization",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == ALLOWED
+    assert "authorization" in response.headers["access-control-allow-headers"].lower()
+    assert "access-control-allow-credentials" not in response.headers
+
+    denied = client.options(
+        "/api/clinics/default/intakes",
+        headers={
+            "Origin": DISALLOWED,
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "Authorization",
+        },
+    )
+    assert denied.status_code == 400

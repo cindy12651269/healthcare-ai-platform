@@ -31,13 +31,14 @@ app = FastAPI(
 # Enable Audit Middleware (request-level observability)
 app.add_middleware(AuditMiddleware)
 
-# CORS for the browser UI: explicit origin allowlist, no credentials, only the methods/headers the UI uses
+# CORS for the browser UI: explicit origin allowlist, no credentials (cookies), only the methods/headers the UI uses.
+# Authorization carries the staff bearer token for the Staff Review UI (#31); the backend still authorizes every call.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Router Registration

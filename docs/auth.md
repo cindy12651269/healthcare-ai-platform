@@ -31,7 +31,7 @@ python -m api.auth issue-token --user-id <id>                                   
 | `AUTH_TOKEN_SECRET` | unset | HMAC key, ≥ 32 characters, e.g. `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Never commit it or put it in a `NEXT_PUBLIC_` variable. |
 | `AUTH_TOKEN_TTL_HOURS` | `8` | Default lifetime of tokens issued by the CLI. |
 
-The browser UI does not receive or store tokens in this issue. CORS is unchanged (no `Authorization` header allowed cross-origin); the Staff Review UI (#31) decides how staff sign in from the browser.
+The patient UI never receives tokens. The Staff Review UI (#31) takes an operator-issued token pasted by the staff member and keeps it in memory only; CORS allows the `Authorization` header from the configured origins, still without credentials ([`staff_review_ui.md`](staff_review_ui.md)).
 
 ---
 
