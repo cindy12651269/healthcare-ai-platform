@@ -11,6 +11,14 @@ class ReportSchemaValidationError(ValueError):
     pass
 
 
+# Safety guard hard-blocked the report (diagnosis / prescription). Subclasses ValueError for existing callers.
+# Carries the blocking GuardResult so the pipeline can escalate (Issue #29) without the blocked text.
+class SafetyBlockedError(ValueError):
+    def __init__(self, message: str, guard: GuardResult):
+        super().__init__(message)
+        self.guard = guard
+
+
 # Report fields that carry human-readable content and therefore go through the safety guard
 GUARDED_FIELDS = ("report_sections", "input_context")
 
@@ -184,8 +192,9 @@ class OutputAgent:
 
                 if not result.allowed:
                     diagnostic_blocked = True
-                    raise ValueError(
-                        "[OutputAgent][SafetyGuard] Output blocked due to unsafe medical content"
+                    raise SafetyBlockedError(
+                        "[OutputAgent][SafetyGuard] Output blocked due to unsafe medical content",
+                        result,
                     )
 
                 return result.masked_text

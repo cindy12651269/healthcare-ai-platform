@@ -171,6 +171,8 @@ class HealthRecord(Base):
         safety_audit: dict,
         input_hash: Optional[str] = None,
         clinic_id: str = DEFAULT_CLINIC_ID,
+        review_status: str = DEFAULT_REVIEW_STATUS,
+        escalation_reason: Optional[str] = None,
     ) -> "HealthRecord":
    
         # Deterministic extraction of human-readable report text
@@ -196,5 +198,6 @@ class HealthRecord(Base):
             safety_audit_json=safety_audit,
             input_hash=input_hash,
             clinic_id=clinic_id,
-            review_status=DEFAULT_REVIEW_STATUS,
+            review_status=review_status,
+            escalation_reason=escalation_reason,
         )

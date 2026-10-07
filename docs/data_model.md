@@ -24,6 +24,19 @@ This issue adds the tables and columns only. Authentication, role enforcement, c
 
 `submitted` is added alongside the three required statuses so that an intake that has not been flagged is distinguishable from one waiting in the review queue.
 
+### Escalation rules (#29)
+
+`agents/escalation.py` evaluates every successful `/api/ingest` run. A non-triggering intake is stored as `submitted` with a NULL `escalation_reason`. Any trigger stores it as `needs_review` with `escalation_reason` set to the comma-separated reason codes, in this order:
+
+| Reason code | Trigger |
+| --- | --- |
+| `emergency_signal` | The safety guard's existing emergency detection matches the intake text or the generated report. The patient-facing emergency guidance is unchanged. |
+| `blocked_diagnosis` | The safety guard blocked the generated report for diagnostic certainty. |
+| `blocked_prescription` | The safety guard blocked the generated report for prescription or dosing content. |
+| `low_confidence` | `clinical_structuring.confidence_level` is below `LOW_CONFIDENCE_THRESHOLD = 0.5` (strict; 0.5 itself does not escalate). |
+
+A blocked report is not returned to the patient and does not produce a 500. The response carries a fixed acknowledgement report (`report_metadata.model_version = "safety_acknowledgement"`, plus the unchanged emergency guidance when an emergency signal is present), and `safety` keeps only the guard's actions and reason types. The decision is in the trace (`escalation`: `required`, `review_status`, `reasons`, `confidence_level`, `low_confidence_threshold`) and in the pipeline audit event flags (`escalation_required`, `escalation_reasons`). Neither contains intake text.
+
 ---
 
 ## `/api/ingest` clinic assignment

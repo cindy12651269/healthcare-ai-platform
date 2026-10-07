@@ -7,7 +7,7 @@ This document reflects the **current repository structure and API behavior after
 > **Accuracy note (2026-10-02 audit).** Known differences from the code at `e12c923`:
 >
 > * `/api/ingest` returns the raw pipeline trace (keys `run_id`, `success`, `intake`, `structured`, `rag`, `report`, `safety`, `errors`, `telemetry`, `metrics`), not the `IngestResponse` shape in §4.2. App version is `0.1.0`.
-> * There is no `SafetyViolation` → 422 mapping; a blocked output surfaces as a 500.
+> * ~~There is no `SafetyViolation` → 422 mapping; a blocked output surfaces as a 500.~~ Resolved in #29: a blocked output returns 200 with a safe acknowledgement report (the blocked content is not returned) and the intake is recorded as `needs_review` ([`data_model.md`](data_model.md#escalation-rules-29)). The trace also carries an `escalation` key.
 > * ~~Without an OpenAI API key the endpoint returns 500.~~ Resolved in PR #21: the default `LLM_MODE=mock` needs no key, and real mode is opt-in (#22).
 > * Staff endpoints use bearer-token authentication with clinic-scoped roles ([`auth.md`](auth.md), #28); `/api/ingest` stays unauthenticated. There is no rate limiting (the empty `rate_limit.py` placeholder was removed in #26); Redis is started but unused; there is no Terraform (empty `infra/` placeholders removed in #26).
 >

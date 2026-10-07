@@ -12,11 +12,17 @@ from agents.structuring_agent import (
     JSONParsingError,
     SchemaValidationError,
 )
-from agents.output_agent import OutputAgent
+from agents.output_agent import OutputAgent, SafetyBlockedError
+from agents.escalation import (
+    REASON_EMERGENCY,
+    blocked_acknowledgement,
+    blocked_safety_audit,
+    evaluate_escalation,
+)
 from agents.retrieval_agent import RetrievalAgent, RetrievalResult
 from llm.safety_guard import GuardResult
 from api.config import get_settings
-from db.models import DEFAULT_CLINIC_ID, HealthRecord
+from db.models import DEFAULT_CLINIC_ID, DEFAULT_REVIEW_STATUS, HealthRecord
 from db.session import SessionLocal
 from sqlalchemy.exc import IntegrityError
 
@@ -75,6 +81,7 @@ class HealthcarePipeline:
 
         try:
             input_hash = self._compute_input_hash(raw_text)
+            escalation = trace.get("escalation") or {}
 
             record = HealthRecord.from_pipeline_trace(
                 trace_id=trace["run_id"],
@@ -86,6 +93,8 @@ class HealthcarePipeline:
                 input_hash=input_hash,
                 # Unauthenticated intake goes to the single seeded clinic (Issue #27 decision)
                 clinic_id=DEFAULT_CLINIC_ID,
+                review_status=escalation.get("review_status", DEFAULT_REVIEW_STATUS),
+                escalation_reason=",".join(escalation.get("reasons") or []) or None,
             )
 
             session.add(record)
@@ -152,6 +161,8 @@ class HealthcarePipeline:
             },
             "report": None,
             "safety": None,
+            # Escalation decision (Issue #29): reason codes only, no intake text
+            "escalation": None,
             "errors": [],
             "telemetry": {
                 "latency_ms": None,
@@ -222,10 +233,16 @@ class HealthcarePipeline:
 
             # Output 
             t = time.perf_counter()
-            output_result = self.output.run(
-                structured_data=structured,
-                retrieval_context=retrieval_results,
-            )
+            blocked: Optional[SafetyBlockedError] = None
+            try:
+                output_result = self.output.run(
+                    structured_data=structured,
+                    retrieval_context=retrieval_results,
+                )
+            except SafetyBlockedError as e:
+                # Blocked report is never returned: the patient gets a controlled acknowledgement
+                blocked = e
+                output_result = {}
             ctx.output_ms = (time.perf_counter() - t) * 1000
 
             trace["report"] = output_result.get("report")
@@ -234,7 +251,9 @@ class HealthcarePipeline:
             t = time.perf_counter()
             safety: Optional[GuardResult] = output_result.get("_safety")
 
-            if safety:
+            if blocked is not None:
+                trace["safety"] = blocked_safety_audit(blocked.guard)
+            elif safety:
                 trace["safety"] = safety.to_dict()
             else:
                 trace["safety"] = GuardResult(
@@ -246,6 +265,18 @@ class HealthcarePipeline:
                 ).to_dict()
 
             ctx.safety_ms = (time.perf_counter() - t) * 1000
+
+            # Escalation
+            trace["escalation"] = evaluate_escalation(
+                intake_text=raw_text,
+                structured=structured,
+                safety_actions=trace["safety"]["actions"],
+            )
+            if blocked is not None:
+                trace["report"] = blocked_acknowledgement(
+                    structured,
+                    emergency=REASON_EMERGENCY in trace["escalation"]["reasons"],
+                )
 
             trace["success"] = True
             final_status = "success"
@@ -298,7 +329,11 @@ class HealthcarePipeline:
                 latency_ms=latency_ms,
                 safety_violation_count=safety_violation_count,
                 retrieval_hit_count=retrieval_hit_count,
-                flags={"rag_enabled": rag_enabled},
+                flags={
+                    "rag_enabled": rag_enabled,
+                    "escalation_required": bool((trace["escalation"] or {}).get("required")),
+                    "escalation_reasons": list((trace["escalation"] or {}).get("reasons") or []),
+                },
                 error=error_message,
             )
 
