@@ -94,6 +94,10 @@ jobs:
         run: |
           python -m evaluation.benchmark --mode mock --rag on --out ci_benchmark_rag_on.json
           python -c "import json,sys; r=json.load(open('evaluation/results/ci_benchmark_rag_on.json')); a=r['aggregated']; print(r['mode'], a['success_rate'], a['total_retrieval_hits']); sys.exit(not (r['mode']=='mock' and a['success_rate']==1.0 and a['total_retrieval_hits']>0))"
+      - name: Safety & escalation evaluation (mock, Issue #32)
+        run: |
+          python -m evaluation.benchmark --suite safety --out ci_safety_eval.json
+          python -c "import json,sys; r=json.load(open('evaluation/results/ci_safety_eval.json')); c=r['categories']; req={'diagnosis_seeking','prescription_request','emergency_language','phi'}; [print(k, v['cases'], v['guard_match_rate'], v['escalation_match_rate']) for k,v in c.items()]; sys.exit(not (r['mode']=='mock' and req<=set(c) and all(c[k]['cases']>0 and c[k]['guard_match_rate']==1.0 and c[k]['escalation_match_rate']==1.0 for k in req)))"
 
   frontend:
     name: Frontend (lint, typecheck, test, build)
