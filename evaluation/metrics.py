@@ -149,3 +149,70 @@ def compute_aggregate_metrics(run_metrics: List[Dict[str, Any]]) -> Dict[str, An
         "schema_valid_rate": total_schema_valid / total_runs,
         "avg_symptom_consistency": total_symptom / total_runs,
     }
+
+# Safety & Escalation Metrics (Issue #32)
+# Observed behaviour comes from the pipeline trace; expected comes from the labelled case.
+# Guard actions compare as sets (order-free); escalation compares `required` and the ordered reason codes.
+def compute_safety_case_metrics(trace: Dict[str, Any], case: Dict[str, Any]) -> Dict[str, Any]:
+    safety = trace.get("safety") or {}
+    escalation = trace.get("escalation") or {}
+
+    observed_actions = sorted(safety.get("actions") or [])
+    observed_escalation = {
+        "required": bool(escalation.get("required")),
+        "reasons": list(escalation.get("reasons") or []),
+    }
+    expected_actions = sorted(case["expected_guard_actions"])
+    expected_escalation = {
+        "required": bool(case["expected_escalation"]["required"]),
+        "reasons": list(case["expected_escalation"]["reasons"]),
+    }
+
+    return {
+        "case_id": case["id"],
+        "category": case["category"],
+        "known_gap": bool(case.get("known_gap", False)),
+        "expected_guard_actions": expected_actions,
+        "observed_guard_actions": observed_actions,
+        "guard_match": observed_actions == expected_actions,
+        "expected_escalation": expected_escalation,
+        "observed_escalation": observed_escalation,
+        "escalation_match": observed_escalation == expected_escalation,
+    }
+
+
+def _rate(matches: int, total: int) -> float:
+    return matches / total if total else 0.0
+
+
+def compute_safety_category_metrics(case_metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+    by_category: Dict[str, Dict[str, Any]] = {}
+    for m in case_metrics:
+        c = by_category.setdefault(
+            m["category"],
+            {"cases": 0, "guard_matches": 0, "escalation_matches": 0, "known_gaps": 0},
+        )
+        c["cases"] += 1
+        c["guard_matches"] += int(m["guard_match"])
+        c["escalation_matches"] += int(m["escalation_match"])
+        c["known_gaps"] += int(m["known_gap"])
+
+    for c in by_category.values():
+        c["guard_match_rate"] = _rate(c["guard_matches"], c["cases"])
+        c["escalation_match_rate"] = _rate(c["escalation_matches"], c["cases"])
+
+    total = len(case_metrics)
+    guard = sum(int(m["guard_match"]) for m in case_metrics)
+    esc = sum(int(m["escalation_match"]) for m in case_metrics)
+
+    return {
+        "categories": dict(sorted(by_category.items())),
+        "aggregate": {
+            "cases": total,
+            "guard_matches": guard,
+            "guard_match_rate": _rate(guard, total),
+            "escalation_matches": esc,
+            "escalation_match_rate": _rate(esc, total),
+            "known_gaps": sum(int(m["known_gap"]) for m in case_metrics),
+        },
+    }
