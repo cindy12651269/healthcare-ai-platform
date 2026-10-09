@@ -12,7 +12,7 @@ services:
     # A failure stops the start, so the health check never passes on an unmigrated database.
     dockerCommand: sh scripts/start_api.sh
     healthCheckPath: /health
-    autoDeploy: false
+    autoDeployTrigger: "off"
     envVars:
       - key: APP_ENV
         value: demo
@@ -41,7 +41,7 @@ services:
     dockerfilePath: ./app/Dockerfile
     dockerContext: ./app
     healthCheckPath: /
-    autoDeploy: false
+    autoDeployTrigger: "off"
     envVars:
       - key: PORT
         value: "3000"

@@ -4,6 +4,7 @@
 # This proves deployment readiness only; it is not a verification of the hosted environment.
 import json
 import re
+import subprocess
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -46,15 +47,46 @@ def _service(blueprint, name):
 def test_api_service_migrates_seeds_and_health_checks(blueprint):
     api, _ = _service(blueprint, "healthcare-ai-api")
     assert api["dockerCommand"] == "sh scripts/start_api.sh"
-    lines = [l.strip() for l in (ROOT / "scripts" / "start_api.sh").read_text().splitlines()]
-    steps = [l for l in lines if l and not l.startswith("#")]
-
     assert api["runtime"] == "docker" and api["dockerfilePath"] == "./Dockerfile"
     assert api["healthCheckPath"] == "/health"
-    # Order matters, and set -e makes a failed migration or seed stop the start
-    assert steps[0] == "set -e"
-    assert steps[1:3] == ["python -m db.migrate", "python -m db.seed_demo"]
-    assert steps[3].startswith("exec uvicorn api.main:app --host 0.0.0.0") and "--reload" not in steps[3]
+
+
+def _fake_bin(tmp_path, fail_on=None):
+    # Stand-ins for python/uvicorn that record their arguments and the DATABASE_URL they see
+    log = tmp_path / "calls.log"
+    for name in ("python", "uvicorn"):
+        tool = tmp_path / name
+        fail = f'[ "$*" = "{fail_on}" ] && exit 1\n' if fail_on else ""
+        tool.write_text(f'#!/bin/sh\n{fail}echo "{name} $* | $DATABASE_URL" >> "{log}"\n')
+        tool.chmod(0o755)
+    return log
+
+
+@pytest.mark.parametrize("url", [
+    "postgresql://u:p@db-host:5432/healthcare_ai",  # Render connectionString
+    "postgres://u:p@db-host:5432/healthcare_ai",
+    "postgresql+psycopg2://u:p@db-host:5432/healthcare_ai",
+])
+def test_start_script_runs_migrate_seed_server_with_psycopg2(tmp_path, url):
+    log = _fake_bin(tmp_path)
+    env = {"PATH": f"{tmp_path}:/usr/bin:/bin", "DATABASE_URL": url, "PORT": "10000"}
+    subprocess.run(["sh", str(ROOT / "scripts" / "start_api.sh")], env=env, check=True)
+
+    expected = "postgresql+psycopg2://u:p@db-host:5432/healthcare_ai"
+    assert log.read_text().splitlines() == [
+        f"python -m db.migrate | {expected}",
+        f"python -m db.seed_demo | {expected}",
+        f"uvicorn api.main:app --host 0.0.0.0 --port 10000 | {expected}",
+    ]
+
+
+def test_start_script_stops_when_migration_fails(tmp_path):
+    log = _fake_bin(tmp_path, fail_on="-m db.migrate")
+    env = {"PATH": f"{tmp_path}:/usr/bin:/bin", "DATABASE_URL": "postgresql://u:p@h/d"}
+    result = subprocess.run(["sh", str(ROOT / "scripts" / "start_api.sh")], env=env)
+
+    assert result.returncode != 0
+    assert not log.exists()  # neither the seed nor the server ran
 
 
 def test_api_service_defaults_to_mock_and_keeps_secrets_out_of_the_file(blueprint):

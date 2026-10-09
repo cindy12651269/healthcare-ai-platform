@@ -83,7 +83,7 @@ No secret has a value in the repository. `tests/test_deploy_demo.py` fails if a 
    * `NEXT_PUBLIC_API_BASE_URL` = `https://healthcare-ai-api.onrender.com`
 
    Render URLs are normally `https://<service-name>.onrender.com`. If Render assigns a different hostname (name taken), update both values after creation and redeploy the frontend so the new API URL is rebuilt into the bundle.
-4. **Apply.** Confirm the Blueprint with the free plans. `autoDeploy` is off, so later deploys are manual (*Manual Deploy* in the dashboard).
+4. **Apply.** Confirm the Blueprint with the free plans. `autoDeployTrigger` is `off`, so later deploys are manual (*Manual Deploy* in the dashboard).
 5. **Check the API logs** for `Migrations complete` and `Demo seed complete`, and that the service shows as healthy.
 
 ## 5. Costs and limitations
@@ -112,7 +112,8 @@ curl -fsS "$API/health"          # expect {"status":"ok", ..., "llm_mode":"mock"
 # 2. Issue staff tokens locally against the hosted database.
 #    DATABASE_URL = healthcare-ai-db "External Database URL" (dashboard → database → Connect),
 #    AUTH_TOKEN_SECRET = the API service's generated value (dashboard → API → Environment).
-#    Use the postgresql+psycopg2:// prefix or plain postgresql://; both use psycopg2.
+#    Replace the postgresql:// prefix with postgresql+psycopg2:// (SQLAlchemy 2.1 maps plain
+#    postgresql:// to psycopg v3, which is not installed). scripts/start_api.sh does this on Render.
 export DATABASE_URL='<external database url>' AUTH_TOKEN_SECRET='<value>'
 export STAFF_A_TOKEN=$(python -m api.auth issue-token --user-id demo-staff-a --ttl-hours 1)
 export STAFF_B_TOKEN=$(python -m api.auth issue-token --user-id demo-admin-b --ttl-hours 1)
