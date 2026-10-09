@@ -1,7 +1,7 @@
 # Project Status — Evidence-Based Capability Audit
 
 **Audit date:** 2026-10-09 (Phase 6 closure)
-**Audited commit:** `827aaef` (main, merge of PR #57; #34–#36 delivered). §2 records the Phase 5 closure run at `eb92cac`; §2a adds the Phase 6 verification.
+**Audited commit:** `8affdfd` (main, merge of PR #58; #34–#36 closed, Phase 6 complete). §2 records the Phase 5 closure run at `eb92cac`; §2a adds the Phase 6 verification.
 **Previous audit:** 2026-10-07 at `eb92cac`
 **Source of truth for implementation progress:** GitHub Issues / Projects. This document records what the repository *actually does* at the audited commit, so that reviewers can distinguish working code from planned work.
 
@@ -43,7 +43,7 @@ A file existing in the repository is not evidence of implementation. The empty p
 
 ### 2a. Phase 6 verification (2026-10-09)
 
-* CI green on `main` at `3e984e3` (#35), `d2aae25` (#56) and `827aaef` (#57), including `tests/test_audit_no_raw_text.py` (#34) and `tests/test_deploy_demo.py` (#35).
+* CI green on `main` after every Phase 6 merge: `6202f4e` (#54), `3e984e3` (#55), `d2aae25` (#56), `827aaef` (#57), `8affdfd` (#58). At `8affdfd` (run 37922018957): backend **209 passed** with 11 PostgreSQL integration tests executed, including `tests/test_audit_no_raw_text.py` (#34) and `tests/test_deploy_demo.py` (#35); frontend 44 tests passed; benchmark and safety suite green.
 * Hosted demo ([`deployment.md`](deployment.md) §7): `/health` 200 in mock mode; migrations and synthetic seed on deploy; `scripts/hosted_check.py` 8/8 PASS (flagged intake in clinic `default`'s queue, cross-clinic 403); exactly one webhook with a valid HMAC signature; no intake text in API logs; no secrets in the browser bundle.
 
 Resolved earlier (Phase 3): `POST /api/ingest` returned HTTP 500 without an OpenAI key, and `AuditMiddleware` recorded handled HTTP errors as `success`. Both were fixed in PR #21 (Issue #20); `tests/test_ingest_e2e.py` exercises the unmocked path.
@@ -54,7 +54,7 @@ Resolved earlier (Phase 3): `POST /api/ingest` returned HTTP 500 without an Open
 
 | Capability | Status | Evidence / notes |
 | --- | --- | --- |
-| Coherent end-to-end healthcare workflow | **COMPLETE** (local demo scope) | Browser intake → `/api/ingest` → structuring → report → safety → escalation rules (#29) → clinic-owned `health_records` row, without an API key. Staff then sign in at `/staff` (#31), work the clinic's review queue and mark intakes reviewed or escalated (#30). Escalated intakes trigger a signed webhook when one is configured (#33). Tested in CI, checked in a local browser, and verified on the hosted demo (#35, [`deployment.md`](deployment.md) §7). |
+| Coherent end-to-end healthcare workflow | **COMPLETE** (demo scope) | Browser intake → `/api/ingest` → structuring → report → safety → escalation rules (#29) → clinic-owned `health_records` row, without an API key. Staff then sign in at `/staff` (#31), work the clinic's review queue and mark intakes reviewed or escalated (#30). Escalated intakes trigger a signed webhook when one is configured (#33). Tested in CI, checked in a local browser, and verified on the hosted demo (#35, [`deployment.md`](deployment.md) §7). |
 | FastAPI backend | **PARTIAL** | `/health`, `/`, `POST /api/ingest`; staff endpoints `GET /api/staff/me` and `/api/clinics/{clinic_id}/members` (#28, [`auth.md`](auth.md)); clinic-scoped intake list, detail and transition endpoints (#30, [`review_queue_api.md`](review_queue_api.md)). PARTIAL because `IngestResponse` is declared but not applied: `/api/ingest` returns the full pipeline trace, including raw intake text and guard evidence (see PHI row). |
 | PostgreSQL persistence | **PARTIAL** | `HealthRecord` ORM, idempotency via `input_hash`, clinic ownership and review status (data model v2, #27, [`data_model.md`](data_model.md)); ordered SQL migrations (`db/migrate.py`) tested on PostgreSQL in CI, including a v1 → v2 upgrade; models tested on SQLite. Persistence is best-effort: a database error does not fail the request, and the outcome (`saved` / `duplicate` / `skipped` / `disabled` / `failed`) is reported in the trace (PR #23). |
 | Redis / background work | **NOT NEEDED** (currently) | Redis runs in `docker-compose.yml` but no code uses it. |

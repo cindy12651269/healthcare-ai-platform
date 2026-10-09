@@ -15,45 +15,92 @@ Finish the portfolio on top of the Phase 5 workflow ([`step3_roadmap.md`](../ste
 * One hosted, synthetic-data demo of the complete workflow, verified end to end (#35)
 * Reviewer-ready handover documentation (#36)
 
----
-
-## 2. Completed Issues
-
-### Issue 34 — Security & Data-Handling Notes (PR #54, merge `6202f4e`)
-
-* `docs/security_data_handling.md`: data flow (browser → API → pipeline → PostgreSQL, audit logs, webhook), masked vs stored data, threat model, and what HIPAA compliance would require. States that `intake_json.raw_text` is stored unmasked; makes no compliance claim. Supersedes the `compliance/*.md` stubs removed in #26.
-* `tests/test_audit_no_raw_text.py`: the pipeline, API middleware and staff-action audit events written to the JSONL file contain no raw intake text, while the stored `intake_json` does. A mutation (raw text added to audit flags) makes the tests fail.
-* Review fix before merge: corrected two over-broad claims (real-mode schema-validation errors can quote model output in audit `error` fields; legacy HIPAA wording exists in prompt/schema files).
-
-### Issue 35 — Deployment: Hosted Demo Environment (PRs #55 `3e984e3`, #56 `d2aae25`)
-
-* `render.yaml` (Render Blueprint): API and frontend from the existing Dockerfiles, managed PostgreSQL, free plans, health checks, `LLM_MODE=mock`, generated or dashboard-entered secrets.
-* `scripts/start_api.sh`: migrate → idempotent synthetic seed (`db/seed_demo.py`) → server, stopping on failure.
-* `scripts/hosted_check.py` and `scripts/verify_webhook.py`: the hosted acceptance flow and HMAC verification; also run in-process in CI (`tests/test_deploy_demo.py`), plus a migrate-then-seed test on PostgreSQL.
-* Readiness review found that Render's `postgresql://` connection string selects psycopg v3 under SQLAlchemy 2.1, which is not installed; the start script pins `postgresql+psycopg2://`. Verified by running both images locally against PostgreSQL 15.
-* Deployment incidents (no code change): the URLs initially used had mistyped Render suffixes (`-lovn`/`-l2s3` instead of `-tovn`/`-1s23`), and an environment-only deploy did not rebuild the frontend, so the bundle kept the Blueprint's default API URL. Fixed in the Render dashboard (`NEXT_PUBLIC_API_BASE_URL` with rebuild, `CORS_ALLOWED_ORIGINS`); the procedure was corrected in PR #56.
-* Hosted verification (2026-10-09): `/health` 200 in mock mode; migrations and seed logged; `hosted_check` 8/8 PASS including cross-clinic 403; exactly one webhook delivered with a valid signature; no intake text in API logs; no secrets in the browser bundle ([`deployment.md`](../deployment.md) §7).
-
-### Issue 36 — Portfolio Handover (PR #57, merge `827aaef`)
-
-README rewrite, architecture diagram ([`diagrams/architecture.md`](../diagrams/architecture.md)), decision records ([`decisions.md`](../decisions.md)), hosted walkthrough ([`demo_walkthrough.md`](../demo_walkthrough.md)), scope and contribution statement, status/roadmap updates, resolved accuracy notes in the Step 2/4/5 documents, and this journal.
-
-* Review gate on the first head found `docs/overview.md` still describing Phase 6 as not started and two walkthrough statements that overstated the staff UI; both fixed in the same PR before merge.
-* The merge auto-closed #36 because the PR description contained a closing keyword; the issue was reopened and is closed by the Phase 6 closure PR.
+Out of scope throughout (roadmap §7–§8): application-level encryption, rate limiting, Terraform or multi-service cloud infrastructure, multiple environments, real patient data, and any HIPAA or production-readiness claim.
 
 ---
 
-## 3. Known Limitations Carried Forward
+## 2. Pull Requests
 
-* Raw intake text stored unmasked and returned by `/api/ingest` (#32 finding); application logs not covered by the audit test.
-* Rule-based safety and PHI heuristics; RAG not wired into the API; mock embeddings.
-* Free-tier hosting: cold starts, 30-day database, ephemeral audit file; single environment and receiver.
-* No login flow, MFA, token revocation or rate limiting.
+| PR | Issue | Head commits | Merge commit | Main CI run |
+| --- | --- | --- | --- | --- |
+| #54 Security & Data-Handling Notes | #34 | `8a13d58`, `2d7f556` | `6202f4e` | 37908644983 — success |
+| #55 Deployment: Hosted Demo Environment | #35 | `5f25054`, `84bb9f0` | `3e984e3` | 37912538983 — success |
+| #56 Record hosted demo deployment (docs) | #35 | `db83bf2` | `d2aae25` | 37919942991 — success |
+| #57 Portfolio Handover | #36 | `8e141b1`, `9cb8a9d` | `827aaef` | 37921483418 — success |
+| #58 Close Phase 6 portfolio handover (docs) | #36 | `33de6dc` | `8affdfd` | 37922018957 — success |
 
-## 4. Closure Validation
+All merged on 2026-10-09 with merge commits, each pinned to its reviewed head.
 
-* `main` at `827aaef` (PR #57 merge): CI green (backend tests with PostgreSQL, deterministic benchmark and safety suite, frontend lint/typecheck/tests/build).
-* Documentation on `main`: 0 broken internal Markdown links across 27 tracked Markdown files; the architecture diagram renders on GitHub (verified at `8e141b1`, file unchanged on `main`); Phase 4, 5 and 6 journals present; Phase 1–5 journals unchanged by Phase 6.
-* Hosted demo verified on 2026-10-09 ([`deployment.md`](../deployment.md) §7).
+---
 
-Phase 6 is complete; #34, #35 and #36 are closed (#36 by the Phase 6 closure PR). Phases 1–6 are complete. Phase 7 (#40–#43) is optional and not started.
+## 3. Completed Issues
+
+### Issue 34 — Security & Data-Handling Notes
+
+**Delivered**
+
+* [`security_data_handling.md`](../security_data_handling.md), the canonical document: data flow (browser → API → pipeline → PostgreSQL, audit logs, webhook), a table of what is masked and what is stored, access control, audit producers, threat model, and what HIPAA compliance would require. It states that `intake_json.raw_text` is persisted unmasked and makes no compliance claim. It supersedes the empty `compliance/*.md` stubs, which were already removed in #26 and were not recreated.
+* `tests/test_audit_no_raw_text.py`: end to end with a synthetic sentinel, using the real `log_run` and the JSONL file it writes, it checks that pipeline events (routine, escalated, rejected), API middleware events (200 and 400) and staff-action events (list, read, transition) contain no raw intake text, while the stored `intake_json` does.
+* `HealthRecord` docstring corrected ("PHI-masked" was inaccurate).
+
+**Decisions:** document the current behaviour instead of changing storage; keep audit events to ids, counts, paths and reason codes; treat application/exception logs as an explicit gap.
+
+**Validation:** 3 tests passed; adding raw text to the pipeline's audit flags made 2 of them fail (mutation check, reverted); CI green. The review gate found two over-broad claims (real-mode schema-validation errors can quote model output in audit `error` fields; legacy HIPAA wording exists in prompt and schema files), fixed in `2d7f556` before merge.
+
+### Issue 35 — Deployment: Hosted Demo Environment
+
+**Delivered (PR #55)**
+
+* `render.yaml` (Render Blueprint): API and frontend from the existing Dockerfiles, managed PostgreSQL, free plans, health checks (`/health`, `/`), `LLM_MODE=mock`, `AUTH_TOKEN_SECRET` / `WEBHOOK_SECRET` generated by Render, `WEBHOOK_URL` / `CORS_ALLOWED_ORIGINS` / `NEXT_PUBLIC_API_BASE_URL` entered in the dashboard, `autoDeployTrigger: off`.
+* `scripts/start_api.sh`: migrate → idempotent synthetic seed (`db/seed_demo.py`) → server, stopping on failure. Migrations run here because Render's pre-deploy command is only available on paid instance types.
+* `scripts/hosted_check.py` and `scripts/verify_webhook.py`: the hosted acceptance flow and HMAC verification. `tests/test_deploy_demo.py` runs the same flow in-process (SQLite, real pipeline, loopback receiver) and checks the Blueprint and start script; `tests/test_persistence_postgres.py` adds migrate-then-seed on PostgreSQL.
+* [`deployment.md`](../deployment.md): platform choice, deploy sequence, environment variables, costs and limits, verification commands.
+
+**Decisions:** Render Blueprint as the simplest host for the existing Docker stack (no Terraform, roadmap §8); Redis not deployed (unused); secrets never in the repository or a `NEXT_PUBLIC_` variable.
+
+**Readiness gate:** Render's `postgresql://` connection string selects psycopg v3 under SQLAlchemy 2.1, which is not installed, so the API crashed on start. The start script now pins `postgresql+psycopg2://` (`84bb9f0`). Verified by building both images and running the start sequence, the hosted check and webhook verification against a local PostgreSQL 15 container.
+
+**Deployment incidents (no code change):** the URLs initially used had mistyped Render suffixes (`-lovn` / `-l2s3` instead of `-tovn` / `-1s23`), and an environment-only deploy did not rebuild the frontend, so its bundle kept the Blueprint's default API URL. Fixed in the Render dashboard (`NEXT_PUBLIC_API_BASE_URL` with *Save, rebuild, and deploy*; `CORS_ALLOWED_ORIGINS`). PR #56 corrected the procedure and recorded the hosted evidence.
+
+**Hosted verification (2026-10-09)**, API https://healthcare-ai-api-tovn.onrender.com, frontend https://healthcare-ai-frontend-1s23.onrender.com:
+
+* `/health` 200 with `llm_mode: mock`; frontend `/` and `/staff` 200; CORS preflight from the frontend origin allowed.
+* API logs: `Migrations complete (3 applied)` and `Demo seed complete (7 rows created)` on the first deploy; `0 applied` / `0 rows created` on later deploys.
+* `scripts/hosted_check.py` 8/8 PASS: synthetic flagged intake (`emergency_signal`) stored as `needs_review` in clinic `default`, listed in `demo-staff-a`'s queue, 403 for `demo-admin-b`, absent from `demo-clinic-b`'s queue.
+* Exactly one webhook at the receiver; `scripts/verify_webhook.py` → `VALID signature`, a tampered signature rejected; `webhook_deliveries`: `delivered`, 1 attempt, HTTP 200.
+* Payload limited to `event`, `schema_version`, `idempotency_key`, `intake_id`, `clinic_id`; no intake text and no tracebacks in the API logs; the browser bundle contains only the API URL and no secret names.
+
+### Issue 36 — Portfolio Handover
+
+**Delivered (PR #57)**
+
+* README rewrite: implemented vs not implemented, architecture summary, local setup, hosted demo links, testing, limitations, non-production and no-HIPAA disclaimers, scope and contribution statement (from Git history).
+* [`diagrams/architecture.md`](../diagrams/architecture.md) (Mermaid, renders on GitHub), [`decisions.md`](../decisions.md) (nine decision records), [`demo_walkthrough.md`](../demo_walkthrough.md) (hosted).
+* Status and roadmap updates; the Step 2/4/5 documents marked as historical with current-state notes, including the verified `/api/ingest` contract (full pipeline trace, 13 top-level keys; RAG not active through the API).
+* This journal.
+
+**Review gate:** the first head left `docs/overview.md` describing Phase 6 as not started and two walkthrough statements that overstated the staff UI; fixed in `9cb8a9d` before merge. The merge auto-closed #36 because the PR description contained a closing keyword; the issue was reopened and closed by PR #58, which marked Phase 6 complete.
+
+---
+
+## 4. Validation Summary
+
+* Main CI green after every Phase 6 merge (table in §2). At `8affdfd`: backend 209 passed with 11 PostgreSQL integration tests executed; frontend 44 tests passed; deterministic benchmark and safety suite green.
+* Documentation: 0 broken internal Markdown links; architecture diagram renders on GitHub; Phase 4, 5 and 6 journals present; Phase 1–5 journals unchanged by Phase 6.
+* Hosted end-to-end acceptance verified on 2026-10-09 (§3, Issue 35).
+
+---
+
+## 5. Known Limitations and Deferred Work
+
+* Raw intake text is stored unmasked and returned by `/api/ingest` (the #32 finding); application/exception logs are not covered by the audit test.
+* Safety and PHI handling are rule-based heuristics measured on a small synthetic set; RAG is not active through the API and mock embeddings carry no meaning.
+* Render free tier: services sleep after ~15 minutes idle; the free database expires 30 days after creation; the container audit file is ephemeral (events remain in the platform logs); one environment and one instance; the hosted database runs Render's PostgreSQL 18 while CI and Compose use PostgreSQL 15.
+* One webhook receiver; operator-issued staff tokens; no login flow, MFA, token revocation or rate limiting.
+* Optional Phase 7 (#40–#43) is not started.
+
+---
+
+## 6. Closure
+
+Phase 6 completed on 2026-10-09: #34, #35 and #36 are closed and PRs #54–#58 are merged. Phases 1–6 are complete. Synthetic data only; no HIPAA compliance or production-readiness claim.
