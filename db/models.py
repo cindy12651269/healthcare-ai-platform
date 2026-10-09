@@ -85,7 +85,7 @@ class HealthRecord(Base):
     Audit-ready persistence model for Healthcare AI pipeline outputs.
 
     Stores:
-    - Intake (PHI-masked)
+    - Intake (HealthInput incl. raw_text, stored UNMASKED; see docs/security_data_handling.md)
     - Structured output (clinical NLP)
     - Final report (JSON + human-readable summary)
     - Safety guard audit trail

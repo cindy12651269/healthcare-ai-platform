@@ -84,7 +84,7 @@ The empty scaffold files listed at the audited commit were removed in #26; none 
 | `api/middleware/auth.py` | #28 Authentication, RBAC & Clinic Isolation |
 | `api/routers/analyze.py`, `api/routers/report.py` | #30 Records & Review-Queue API (delivered as `api/routers/records.py`) |
 | `app/components/AdminPanel.tsx` | #31 Staff Review UI (delivered as `app/components/StaffReview.tsx`) |
-| `compliance/*.md` (BAA map, data flow, HIPAA overview, RBAC, threat model) | #34 Security & Data-Handling Notes (BAA mappings and "HIPAA compliant" labels are out of scope, roadmap §8) |
+| `compliance/*.md` (BAA map, data flow, HIPAA overview, RBAC, threat model) | #34 Security & Data-Handling Notes — superseded by the single canonical [`security_data_handling.md`](security_data_handling.md); not recreated (BAA mappings and "HIPAA compliant" labels are out of scope, roadmap §8) |
 | `docs/infra/*.md`, `infra/aws/*.tf`, `infra/docker/services.yml` | #35 Deployment (multi-service Terraform is out of scope, roadmap §8) |
 | `api/middleware/rate_limit.py` | Optional enhancement, roadmap §7 (rate limiting) |
 | `interoperability/fhir_client.py`, `docs/interoperability/fhir_mapping.md` | #42 FHIR R4 Export of Reviewed Intakes (Phase 7) |
