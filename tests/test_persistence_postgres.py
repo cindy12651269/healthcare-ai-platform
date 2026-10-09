@@ -357,3 +357,32 @@ def test_staff_auth_rbac_and_isolation_on_postgres(engine, staff_client):
     assert client.delete(f"/api/clinics/{a}/members/{ids['staff_a']}", headers=headers["admin_a"]).status_code == 204
     assert role_of(ids["staff_a"], a) is None
     assert client.get(f"/api/clinics/{a}/members", headers=headers["staff_a"]).status_code == 403
+
+
+# Hosted demo deploy sequence (Issue #35, render.yaml): migrate, then seed, both repeatable on every start
+def test_demo_seed_after_migrations_is_idempotent_on_postgres(engine):
+    from sqlalchemy.orm import Session
+
+    from db.seed_demo import seed_demo
+
+    with _isolated_schema(engine) as scoped:
+        run_migrations(scoped)
+        with Session(scoped) as s:
+            created = seed_demo(s)
+            s.commit()
+        run_migrations(scoped)
+        with Session(scoped) as s:
+            assert seed_demo(s) == []
+            s.commit()
+
+        with scoped.connect() as conn:
+            clinics = set(conn.execute(text("SELECT id FROM clinics")).scalars())
+            memberships = set(conn.execute(text("SELECT user_id, clinic_id, role FROM clinic_memberships")).all())
+
+    assert "clinic default" not in created
+    assert clinics == {"default", "demo-clinic-b"}
+    assert memberships == {
+        ("demo-staff-a", "default", "clinic_staff"),
+        ("demo-admin-a", "default", "clinic_admin"),
+        ("demo-admin-b", "demo-clinic-b", "clinic_admin"),
+    }
