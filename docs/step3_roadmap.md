@@ -41,6 +41,7 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | 3 | UI + Evaluation + Observability | **COMPLETE** — Issues #12–#17 |
 | 4 | Foundation & Provider Integration | **COMPLETE** — Issues #22, #25–#28 |
 | 5 | Clinical Review & Escalation Workflow | **COMPLETE** — Issues #29–#33 |
+| 6 | Security, Deployment & Handover | **IN REVIEW** — #34, #35 complete; #36 handover PR open |
 | 6 | Security, Deployment & Handover | **NEXT** — Issues #34–#36 |
 | 7 | Demo Experience, AI Evidence & FHIR Interoperability | **PLANNED** — Issues #40–#43 |
 | — | Optional enhancements | Not required for portfolio completion |
@@ -100,7 +101,7 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 
 ## 6. Clinic Workflow, Access Control & Delivery (Phases 4–6)
 
-> **Status (2026-10-07).** This section was written as a single "Phase 4". It is now delivered across three phases. Data model v2 (#27) and authentication, RBAC and clinic isolation (#28) are **complete** in Phase 4. The clinic workflow items (#29–#33) are **complete** in Phase 5 (2026-10-07, [journal](project_journal/phase5_Clinical_Review_&_Escalation_Workflow.md)). Security notes, deployment and handover are Phase 6 (#34–#36), not started. The issue for each row is shown in brackets.
+> **Status (2026-10-07).** This section was written as a single "Phase 4". It is now delivered across three phases. Data model v2 (#27) and authentication, RBAC and clinic isolation (#28) are **complete** in Phase 4. The clinic workflow items (#29–#33) are **complete** in Phase 5 (2026-10-07, [journal](project_journal/phase5_Clinical_Review_&_Escalation_Workflow.md)). In Phase 6, security notes (#34) and the hosted demo deployment (#35, [`deployment.md`](deployment.md)) are **complete** (2026-10-09); portfolio handover (#36) is in review. The issue for each row is shown in brackets.
 
 **Goal:** turn the demo into a believable small product: identified users, clinic-scoped data, a human review step, one external integration, a deployed environment, and handover-quality documentation.
 
@@ -113,9 +114,9 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 | Safety and escalation evaluation set [#32, Phase 5 — complete] | A small labelled set (diagnosis-seeking, prescription requests, emergency language, PHI) that measures guard and escalation behaviour, so safety claims are backed by numbers. |
 | Staff review UI [#31, Phase 5 — complete] | Makes the human review step visible in the demo. |
 | Escalation notification webhook [#33, Phase 5 — complete] | One concrete outbound integration: HMAC-signed payload, retries, idempotency key, delivery log. No PHI in the payload beyond an intake reference. |
-| Security and data-handling notes [#34, Phase 6] | Replaces empty compliance stubs with one accurate document: data flow, what is masked or stored, threat model summary, and what would be required for HIPAA compliance. No compliance claim is made. Includes a test that audit logs contain no raw intake text. |
-| Deployment [#35, Phase 6] | One hosted demo environment with synthetic data only, migrations on deploy, health checks and environment-managed secrets. |
-| Portfolio handover [#36, Phase 6] | README, architecture diagram, decision records, demo walkthrough, scope and personal-contribution statement; Phase 3 and Phase 4 journals. |
+| Security and data-handling notes [#34, Phase 6 — complete] | Replaces empty compliance stubs with one accurate document: data flow, what is masked or stored, threat model summary, and what would be required for HIPAA compliance. No compliance claim is made. Includes a test that audit logs contain no raw intake text. |
+| Deployment [#35, Phase 6 — complete] | One hosted demo environment with synthetic data only, migrations on deploy, health checks and environment-managed secrets. |
+| Portfolio handover [#36, Phase 6 — in review] | README, architecture diagram, decision records, demo walkthrough, scope and personal-contribution statement; Phase 3 and Phase 4 journals. |
 
 **Exit criteria (portfolio complete, end of Phase 6)**
 

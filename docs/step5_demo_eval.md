@@ -9,7 +9,7 @@ This document presents formal evaluation outputs for the system after:
 
 All evaluations in this document are based on **deterministic mode** (mock LLM + mock embeddings), ensuring reproducibility and CI stability.
 
-> **Accuracy note (2026-10-02 audit).** The request/response examples below illustrate intended Phase 1–2 behaviour and were produced with mocked agents. Through the real API with default dependencies, `/api/ingest` currently requires an OpenAI API key and returns a different response shape (see [`step4_repo_api.md`](step4_repo_api.md) and [`project_status.md`](project_status.md)). Retrieval scores come from hash-based mock embeddings and do not indicate relevance.
+> **Status (2026-10-09, handover #36).** This document is the **Phase 1–2 evaluation record**, kept as history. Its request/response examples were produced with mocked agents before the current contract: `/api/ingest` now works without an API key in the default mock mode and returns the full pipeline trace (see the contract note in [`step4_repo_api.md`](step4_repo_api.md)). Retrieval scores come from hash-based mock embeddings and do not indicate relevance, and RAG is not active through the API. Current evaluation: [`evaluation_benchmark.md`](evaluation_benchmark.md) (deterministic benchmark and the labelled safety & escalation suite, run in CI). Hosted walkthrough: [`demo_walkthrough.md`](demo_walkthrough.md).
 
 ---
 

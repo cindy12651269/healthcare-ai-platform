@@ -17,7 +17,7 @@ All data is synthetic. This project does not provide medical diagnosis or treatm
 
 Full evidence: [`project_status.md`](project_status.md).
 
-Phases 1–5 are complete; Phase 6 is next and has not started.
+Phases 1–5 are complete. In Phase 6, security and data-handling notes (#34) and the hosted demo (#35) are complete; portfolio handover (#36) is in review. Synthetic data only; not production software; no HIPAA compliance claim.
 
 **Implemented and tested**
 
@@ -34,10 +34,12 @@ Phases 1–5 are complete; Phase 6 is next and has not started.
 * Retrieval agent and vector store abstraction (mock embeddings; not wired into the API)
 * Deterministic benchmark harness, per-run audit events, stage-level latency metrics
 * GitHub Actions CI: backend and PostgreSQL integration tests, mock benchmark (RAG off/on), frontend lint/typecheck/tests/build
+* Security and data-handling notes: data flow, what is masked vs stored (raw intake text is stored unmasked), threat model, HIPAA gap list without a compliance claim; a regression test that pipeline, request and staff-action audit events contain no raw intake text ([`security_data_handling.md`](security_data_handling.md))
+* One hosted demo on Render free plans (API, frontend, PostgreSQL) with migrations, synthetic demo seed and health checks on deploy; the flagged-intake → clinic queue → signed webhook flow verified on 2026-10-09 ([`deployment.md`](deployment.md), [`demo_walkthrough.md`](demo_walkthrough.md))
 
 **Planned**
 
-* Phase 6: security and data-handling notes, deployed demo environment, handover documentation
+* Phase 6: portfolio handover documentation (#36, in review)
 * Phase 7: deterministic extraction baseline, intake evidence timeline, FHIR R4 export of reviewed intakes, guided demo
 
 ---
