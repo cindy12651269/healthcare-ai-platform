@@ -17,7 +17,7 @@ All data is synthetic. This project does not provide medical diagnosis or treatm
 
 Full evidence: [`project_status.md`](project_status.md).
 
-Phases 1–5 are complete. In Phase 6, security and data-handling notes (#34) and the hosted demo (#35) are complete; portfolio handover (#36) is in review. Synthetic data only; not production software; no HIPAA compliance claim.
+Phases 1–6 are complete (Phase 6: security and data-handling notes #34, hosted demo #35, portfolio handover #36; closed 2026-10-09). Phase 7 (#40–#43) is optional and not started. Synthetic data only; not production software; no HIPAA compliance claim.
 
 **Implemented and tested**
 
@@ -39,7 +39,6 @@ Phases 1–5 are complete. In Phase 6, security and data-handling notes (#34) an
 
 **Planned**
 
-* Phase 6: portfolio handover documentation (#36, in review)
 * Phase 7: deterministic extraction baseline, intake evidence timeline, FHIR R4 export of reviewed intakes, guided demo
 
 ---
