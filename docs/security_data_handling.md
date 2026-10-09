@@ -71,7 +71,7 @@ Masking is applied to **generated report text**, not to stored input. The intake
 
 `tests/test_audit_no_raw_text.py` runs each producer end to end (real pipeline in mock mode, real FastAPI app, real `log_run` writing the JSONL file) with a synthetic sentinel token in the intake text, including an escalated intake and a rejected (no-consent) intake, and asserts the token appears in no audit line while it **is** present in the stored `intake_json`. It runs in the existing `Backend tests` CI job.
 
-Limits of that guarantee: the `error` fields carry exception messages. Current intake, structuring and HTTP errors do not echo input, but a future exception that interpolates input (or a real-provider error message) could. The audit file is append-only by convention only: no integrity protection, rotation or retention policy.
+Limits of that guarantee: the `error` fields carry exception messages. Intake validation and HTTP-status errors use fixed messages. In real mode, structuring and report schema-validation errors include the jsonschema message, which can quote an offending field value from model output (possibly derived from the intake); provider error messages and any future exception that interpolates input could do the same. The regression test exercises mock mode only. The audit file is append-only by convention only: no integrity protection, rotation or retention policy.
 
 ## 5. Threat model summary
 
@@ -102,4 +102,4 @@ This list is indicative, not legal advice, and is not a gap assessment. Work tha
 * **De-identification:** if de-identified data is claimed, a validated method (Safe Harbor or Expert Determination) instead of the current regex/keyword heuristics.
 * **Independent assessment** before any compliance statement is made.
 
-None of the above is implemented beyond what §§3–4 describe, and no "HIPAA compliant" label is used anywhere in this project.
+None of the above is implemented beyond what §§3–4 describe, and no HIPAA compliance claim is made in the README or documentation. Legacy descriptive wording in LLM prompt and schema files (e.g. "HIPAA-safe, PHI-free" in `llm/schemas/report_output.json`, "Maintain HIPAA compliance" in `llm/prompts/report.txt`) is an instruction or aspiration, not a verified property, and is not changed here because those files affect model behaviour.
