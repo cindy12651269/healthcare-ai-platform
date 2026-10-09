@@ -42,7 +42,6 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | 4 | Foundation & Provider Integration | **COMPLETE** — Issues #22, #25–#28 |
 | 5 | Clinical Review & Escalation Workflow | **COMPLETE** — Issues #29–#33 |
 | 6 | Security, Deployment & Handover | **COMPLETE** — Issues #34–#36 |
-| 6 | Security, Deployment & Handover | **NEXT** — Issues #34–#36 |
 | 7 | Demo Experience, AI Evidence & FHIR Interoperability | **PLANNED** — Issues #40–#43 |
 | — | Optional enhancements | Not required for portfolio completion |
 
@@ -116,7 +115,7 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 | Escalation notification webhook [#33, Phase 5 — complete] | One concrete outbound integration: HMAC-signed payload, retries, idempotency key, delivery log. No PHI in the payload beyond an intake reference. |
 | Security and data-handling notes [#34, Phase 6 — complete] | Replaces empty compliance stubs with one accurate document: data flow, what is masked or stored, threat model summary, and what would be required for HIPAA compliance. No compliance claim is made. Includes a test that audit logs contain no raw intake text. |
 | Deployment [#35, Phase 6 — complete] | One hosted demo environment with synthetic data only, migrations on deploy, health checks and environment-managed secrets. |
-| Portfolio handover [#36, Phase 6 — complete] | README, architecture diagram, decision records, demo walkthrough, scope and personal-contribution statement; Phase 3 and Phase 4 journals. |
+| Portfolio handover [#36, Phase 6 — complete] | README, architecture diagram, decision records, demo walkthrough, scope and personal-contribution statement; Phase 6 journal (Phase 4 and 5 journals were written when those phases closed). |
 
 **Exit criteria (portfolio complete, end of Phase 6)**
 

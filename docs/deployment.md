@@ -103,6 +103,7 @@ All three resources are on Render's **free** plans in `render.yaml` (no payment 
 * A free PostgreSQL database expires after a fixed period (30 days at the time of writing) unless upgraded; data is lost. Only one free database per workspace.
 * The container filesystem is ephemeral: the JSONL audit file (`audit.jsonl`) is lost on restart. Audit events are also printed to stdout and visible in Render's logs.
 * Single instance, single environment, no autoscaling, no backups on the free database.
+* Render created the database with PostgreSQL 18, while CI and Docker Compose use PostgreSQL 15. The migrations and seed ran successfully on the hosted database (§7), but the test suite runs only against 15.
 
 Upgrading to paid instance types (roughly a few US dollars per month per service and database) removes the spin-down and expiry; that is a billing decision for the account owner and is not part of this issue.
 

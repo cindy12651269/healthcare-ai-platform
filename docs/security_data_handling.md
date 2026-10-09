@@ -1,6 +1,6 @@
 # Security & Data-Handling Notes
 
-> Issue #34 (Phase 6). Describes the implementation as of the end of Phase 5 (#27–#33). This is the canonical security and data-handling document; it replaces the empty `compliance/*.md` stubs (BAA map, data flow, HIPAA overview, RBAC, threat model), which were removed in #26.
+> Issue #34 (Phase 6). Describes the implementation as of the end of Phase 5 (#27–#33), with the hosted demo deployment (#35) noted in §1. This is the canonical security and data-handling document; it replaces the empty `compliance/*.md` stubs (BAA map, data flow, HIPAA overview, RBAC, threat model), which were removed in #26.
 >
 > **No compliance claim.** This system is not HIPAA compliant, has not been assessed against HIPAA or any other framework, and must not process real patient data. It runs on synthetic data only (roadmap §8).
 
@@ -30,7 +30,8 @@ PostgreSQL  health_records  (clinic_id = "default", review_status)
           every successful call ──► staff audit event (actor_id, action, resource_id)
 ```
 
-* Transport: the demo runs over plain HTTP locally. TLS termination is a deployment concern (#35) and is not provided by the application.
+* Transport: the application itself serves plain HTTP. Locally the demo runs over HTTP; the hosted demo (#35, [`deployment.md`](deployment.md)) is served over HTTPS terminated by the hosting platform (Render). The application does not configure TLS.
+* Hosted demo (#35): secrets are generated or entered in the platform, never in the repository or a `NEXT_PUBLIC_` variable; the container audit file is ephemeral, and audit events remain in the platform's logs. The database is managed by the platform on its free plan; this project has not assessed the platform's at-rest encryption or backups.
 * CORS: explicit origin allowlist (`CORS_ALLOWED_ORIGINS`), no credentials, `GET`/`POST` only.
 * LLM provider: in the default mock mode no data leaves the process. In real mode (`LLM_MODE=real`) the intake text is sent to the configured OpenAI API for structuring and report generation.
 
