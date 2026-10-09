@@ -1,7 +1,7 @@
 # Project Status — Evidence-Based Capability Audit
 
-**Audit date:** 2026-10-09 (Phase 6 handover, #36)
-**Audited commit:** `d2aae25` (main, merge of PR #56; #34 and #35 closed). §2 records the Phase 5 closure run at `eb92cac`; §2a adds the Phase 6 verification.
+**Audit date:** 2026-10-09 (Phase 6 closure)
+**Audited commit:** `827aaef` (main, merge of PR #57; #34–#36 delivered). §2 records the Phase 5 closure run at `eb92cac`; §2a adds the Phase 6 verification.
 **Previous audit:** 2026-10-07 at `eb92cac`
 **Source of truth for implementation progress:** GitHub Issues / Projects. This document records what the repository *actually does* at the audited commit, so that reviewers can distinguish working code from planned work.
 
@@ -43,7 +43,7 @@ A file existing in the repository is not evidence of implementation. The empty p
 
 ### 2a. Phase 6 verification (2026-10-09)
 
-* CI green on `main` at `3e984e3` (#35) and `d2aae25` (#56), including `tests/test_audit_no_raw_text.py` (#34) and `tests/test_deploy_demo.py` (#35).
+* CI green on `main` at `3e984e3` (#35), `d2aae25` (#56) and `827aaef` (#57), including `tests/test_audit_no_raw_text.py` (#34) and `tests/test_deploy_demo.py` (#35).
 * Hosted demo ([`deployment.md`](deployment.md) §7): `/health` 200 in mock mode; migrations and synthetic seed on deploy; `scripts/hosted_check.py` 8/8 PASS (flagged intake in clinic `default`'s queue, cross-clinic 403); exactly one webhook with a valid HMAC signature; no intake text in API logs; no secrets in the browser bundle.
 
 Resolved earlier (Phase 3): `POST /api/ingest` returned HTTP 500 without an OpenAI key, and `AuditMiddleware` recorded handled HTTP errors as `success`. Both were fixed in PR #21 (Issue #20); `tests/test_ingest_e2e.py` exercises the unmocked path.
@@ -74,7 +74,7 @@ Resolved earlier (Phase 3): `POST /api/ingest` returned HTTP 500 without an Open
 | Deployment / CI/CD | **COMPLETE** (single demo environment) | GitHub Actions CI on every PR and push to `main` (#25). Dockerfiles and Docker Compose for local use, with automatic migrations. One hosted demo on Render free plans from `render.yaml`, with migrations, synthetic demo seed and health checks on deploy; hosted acceptance flow verified 2026-10-09 ([`deployment.md`](deployment.md), #35). Free-tier limits: services sleep when idle; the free database expires after 30 days. |
 | Frontend / UI | **COMPLETE** (demo scope) | Next.js patient intake UI with a developer trace panel (#16) and a staff review workspace at `/staff` (#31, [`staff_review_ui.md`](staff_review_ui.md)). Both are linted, type-checked, tested and built in CI. The staff flow was checked manually in a browser; there is no automated browser E2E test. |
 | Reliability / error handling | **PARTIAL** | Typed intake, structuring and report errors mapped to 400/422; provider failures to 502 and configuration errors to 503, with LLM timeouts and bounded retries (#22). A blocked safety output returns 200 with a safe acknowledgement (#29). Retrieval failure is non-fatal, persistence outcomes are reported, and webhook failures never fail the request (#33). Webhook delivery is synchronous, with no total deadline and no resend. |
-| Documentation / handover | **PARTIAL** | Architecture, API, data-model, auth, review-queue, staff-UI, evaluation, webhook, security and deployment docs; Phase 1–6 journals. Handover documentation (#36, in review): README, [`diagrams/architecture.md`](diagrams/architecture.md), [`decisions.md`](decisions.md), [`demo_walkthrough.md`](demo_walkthrough.md), Phase 6 journal; the Step 2/4/5 documents are marked as historical with current-state notes. PARTIAL until the #36 PR is merged. |
+| Documentation / handover | **COMPLETE** (portfolio scope) | Architecture, API, data-model, auth, review-queue, staff-UI, evaluation, webhook, security and deployment docs; Phase 1–6 journals. Handover (#36, PR #57): README, [`diagrams/architecture.md`](diagrams/architecture.md), [`decisions.md`](decisions.md), [`demo_walkthrough.md`](demo_walkthrough.md); the Step 2/4/5 documents are marked as historical with current-state notes. |
 | FHIR / interoperability | **PLANNED** | Not implemented. FHIR R4 export of reviewed intakes is #42 (Phase 7). HL7 v2 and a general EHR router are out of scope (roadmap §8). |
 | Explainability / evidence provenance | **PARTIAL** | Run trace exposes intake, structured output, retrieval chunks and safety reasons. Report output does not cite retrieval sources. |
 
@@ -108,7 +108,7 @@ The runtime audit log (`audit.jsonl`) and generated benchmark results (`evaluati
 | Phase 3 — UI + Evaluation + Observability | #12–#17 | Closed | [`phase3_UI_Evaluation_Observability.md`](project_journal/phase3_UI_Evaluation_Observability.md) |
 | Phase 4 — Foundation & Provider Integration | #22, #25–#28 | Closed | [`phase4_Foundation_&_Provider_Integration.md`](project_journal/phase4_Foundation_&_Provider_Integration.md) |
 | Phase 5 — Clinical Review & Escalation Workflow | #29–#33 | Closed | [`phase5_Clinical_Review_&_Escalation_Workflow.md`](project_journal/phase5_Clinical_Review_&_Escalation_Workflow.md) |
-| Phase 6 — Security, Deployment & Handover | #34–#36 | #34, #35 closed; #36 in review | [`phase6_Security_Deployment_&_Handover.md`](project_journal/phase6_Security_Deployment_&_Handover.md) |
+| Phase 6 — Security, Deployment & Handover | #34–#36 | Closed | [`phase6_Security_Deployment_&_Handover.md`](project_journal/phase6_Security_Deployment_&_Handover.md) |
 | Phase 7 — Demo Experience, AI Evidence & FHIR Interoperability | #40–#43 | Open | See roadmap |
 
 The journals are historical records written at the time each phase closed. Where this audit qualifies a journal statement (for example, mock-mode retrieval "improving grounding"), the qualification is recorded here rather than by editing the journal.

@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 6 (2026-10-09)
 Scope: Issues #34, #35, #36
-Status: #34 and #35 closed; #36 (handover) in review — this journal is part of its PR and Phase 6 closes only after that PR is merged and validated.
+Status: Completed (2026-10-09)
 
 ---
 
@@ -34,9 +34,12 @@ Finish the portfolio on top of the Phase 5 workflow ([`step3_roadmap.md`](../ste
 * Deployment incidents (no code change): the URLs initially used had mistyped Render suffixes (`-lovn`/`-l2s3` instead of `-tovn`/`-1s23`), and an environment-only deploy did not rebuild the frontend, so the bundle kept the Blueprint's default API URL. Fixed in the Render dashboard (`NEXT_PUBLIC_API_BASE_URL` with rebuild, `CORS_ALLOWED_ORIGINS`); the procedure was corrected in PR #56.
 * Hosted verification (2026-10-09): `/health` 200 in mock mode; migrations and seed logged; `hosted_check` 8/8 PASS including cross-clinic 403; exactly one webhook delivered with a valid signature; no intake text in API logs; no secrets in the browser bundle ([`deployment.md`](../deployment.md) §7).
 
-### Issue 36 — Portfolio Handover (in review)
+### Issue 36 — Portfolio Handover (PR #57, merge `827aaef`)
 
 README rewrite, architecture diagram ([`diagrams/architecture.md`](../diagrams/architecture.md)), decision records ([`decisions.md`](../decisions.md)), hosted walkthrough ([`demo_walkthrough.md`](../demo_walkthrough.md)), scope and contribution statement, status/roadmap updates, resolved accuracy notes in the Step 2/4/5 documents, and this journal.
+
+* Review gate on the first head found `docs/overview.md` still describing Phase 6 as not started and two walkthrough statements that overstated the staff UI; both fixed in the same PR before merge.
+* The merge auto-closed #36 because the PR description contained a closing keyword; the issue was reopened and is closed by the Phase 6 closure PR.
 
 ---
 
@@ -47,6 +50,10 @@ README rewrite, architecture diagram ([`diagrams/architecture.md`](../diagrams/a
 * Free-tier hosting: cold starts, 30-day database, ephemeral audit file; single environment and receiver.
 * No login flow, MFA, token revocation or rate limiting.
 
-## 4. Closure Status
+## 4. Closure Validation
 
-Phase 6 closes when the #36 PR is reviewed and merged with green CI. Phase 7 (#40–#43) remains optional.
+* `main` at `827aaef` (PR #57 merge): CI green (backend tests with PostgreSQL, deterministic benchmark and safety suite, frontend lint/typecheck/tests/build).
+* Documentation on `main`: 0 broken internal Markdown links across 27 tracked Markdown files; the architecture diagram renders on GitHub (verified at `8e141b1`, file unchanged on `main`); Phase 4, 5 and 6 journals present; Phase 1–5 journals unchanged by Phase 6.
+* Hosted demo verified on 2026-10-09 ([`deployment.md`](../deployment.md) §7).
+
+Phase 6 is complete; #34, #35 and #36 are closed (#36 by the Phase 6 closure PR). Phases 1–6 are complete. Phase 7 (#40–#43) is optional and not started.

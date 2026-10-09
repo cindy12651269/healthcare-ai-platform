@@ -4,7 +4,7 @@ AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient
 
 > **Portfolio demo, not a medical device and not production software.** Synthetic data only. It gives no medical advice, makes **no HIPAA compliance claim**, and must not process real patient data ([`docs/security_data_handling.md`](docs/security_data_handling.md)).
 
-**Status:** Phases 1–5 complete; Phase 6 (security notes #34, hosted deployment #35) complete, portfolio handover (#36) in review. Evidence per capability: [`docs/project_status.md`](docs/project_status.md).
+**Status:** Phases 1–6 complete (Phase 6: security notes #34, hosted deployment #35, portfolio handover #36; closed 2026-10-09). Phase 7 (#40–#43) is optional and not started. Evidence per capability: [`docs/project_status.md`](docs/project_status.md).
 
 ## Hosted demo
 
