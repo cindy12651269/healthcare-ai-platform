@@ -1,80 +1,103 @@
 # Healthcare AI Platform
 
-AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient input is validated, structured against a schema, summarised without diagnosis, checked by deterministic safety rules, and, when flagged, routed to clinic staff for human review.
+AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient input is validated, structured against a schema, summarised without diagnosis, checked by deterministic safety rules, and, when flagged, routed to the right clinic's staff for human review, with a signed notification to an external system.
 
-**Status:** in development — Phases 1–5 complete (including the clinical review & escalation workflow); Phase 6 (security, deployment & handover) next, not started. Synthetic data only; no medical advice; no HIPAA compliance claim.
+> **Portfolio demo, not a medical device and not production software.** Synthetic data only. It gives no medical advice, makes **no HIPAA compliance claim**, and must not process real patient data ([`docs/security_data_handling.md`](docs/security_data_handling.md)).
 
-* What works today, with evidence: [`docs/project_status.md`](docs/project_status.md)
-* Product and architecture overview: [`docs/overview.md`](docs/overview.md)
-* Roadmap and remaining scope: [`docs/step3_roadmap.md`](docs/step3_roadmap.md)
-* Completed phase records: [`docs/project_journal/`](docs/project_journal/)
+**Status:** Phases 1–5 complete; Phase 6 (security notes #34, hosted deployment #35) complete, portfolio handover (#36) in review. Evidence per capability: [`docs/project_status.md`](docs/project_status.md).
 
-Work is tracked in GitHub Issues and Projects and delivered as Issue → branch → tests → PR → review → merge → journal.
+## Hosted demo
 
-## Running tests
+| | URL |
+| --- | --- |
+| Patient intake UI | https://healthcare-ai-frontend-1s23.onrender.com |
+| Staff review UI | https://healthcare-ai-frontend-1s23.onrender.com/staff (needs an operator-issued token) |
+| API health | https://healthcare-ai-api-tovn.onrender.com/health |
 
-```bash
-pip install -r requirements-dev.txt   # runtime (requirements.txt) + pytest/httpx; Python 3.11
-pytest
+Render free plans: services sleep after ~15 minutes idle (first request can take about a minute) and the free database expires 30 days after creation. Step-by-step walkthrough: [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md). Deployment procedure and verification evidence: [`docs/deployment.md`](docs/deployment.md).
+
+## What is implemented
+
+| Area | Implemented | Not implemented |
+| --- | --- | --- |
+| Intake pipeline | Validation and consent gate, schema-validated structuring, non-diagnostic report, deterministic safety guard (diagnosis/prescription blocking, report PHI masking, emergency guidance) | Validated de-identification |
+| LLM | `LLM_MODE=mock` (default, deterministic, no key); `LLM_MODE=real` (OpenAI, opt-in, no fallback to mock) | Real mode is never run in CI |
+| Retrieval (RAG) | Retrieval agent and in-memory vector store, exercised by tests and the benchmark (`--rag on`) | **Not wired into the API**; embeddings are hash-based mocks with no semantic meaning |
+| Human review | Escalation rules → `needs_review` with reason codes; clinic-scoped review-queue API; staff UI at `/staff` | Per-clinic intake routing (all public intakes go to clinic `default`) |
+| Access control | HMAC bearer tokens from an operator CLI; `clinic_staff` / `clinic_admin` roles re-checked per request; cross-clinic denial tested | Login/SSO, MFA, token revocation list |
+| Integration | HMAC-SHA256-signed escalation webhook with idempotency key, bounded retries and a delivery log | Delivery guarantee, per-clinic receivers |
+| Data | PostgreSQL with ordered SQL migrations; audit events without intake text (tested) | Encryption of stored intake text (stored unmasked) |
+| Delivery | CI (backend + PostgreSQL, benchmark, frontend); one hosted demo on Render | Multiple environments, autoscaling, rate limiting |
+
+Known exposure: `/api/ingest` returns the full pipeline trace, including the raw intake text, to the submitting browser (documented #32 finding).
+
+## Architecture
+
+```
+Browser (Next.js) ──POST /api/ingest──► FastAPI ──► pipeline: intake → structuring → report + safety guard → escalation
+      │                                                                                   │
+      └── /staff ── bearer token ──► review-queue API ◄── PostgreSQL (health_records) ◄──┘──► signed webhook
 ```
 
-`tests/test_persistence_postgres.py` runs only when `TEST_DATABASE_URL` points at a PostgreSQL database (for example the Compose `db` service: `postgresql+psycopg2://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5432/<POSTGRES_DB>`); otherwise it is skipped.
+Full diagram: [`docs/diagrams/architecture.md`](docs/diagrams/architecture.md). Design decisions: [`docs/decisions.md`](docs/decisions.md). API: [`docs/step4_repo_api.md`](docs/step4_repo_api.md), [`docs/review_queue_api.md`](docs/review_queue_api.md), [`docs/auth.md`](docs/auth.md). Data model: [`docs/data_model.md`](docs/data_model.md). Webhook: [`docs/escalation_webhook.md`](docs/escalation_webhook.md).
 
-## Continuous integration
-
-GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request to `main` and every push to `main`:
-
-- **Backend:** Python 3.11, `pytest` (full suite) against a `postgres:15` service container with `TEST_DATABASE_URL` set, so the PostgreSQL integration tests execute; the job fails if they are skipped.
-- **Benchmark:** `python -m evaluation.benchmark --mode mock` with `--rag off` and `--rag on`, plus the labelled safety & escalation suite (`--suite safety`). All are deterministic.
-- **Frontend (`app/`):** `npm ci`, then `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` (Node 22).
-
-CI sets `LLM_MODE=mock` and needs no secrets: no OpenAI or other provider credentials are used, and no real LLM call is made. Real-provider runs (`--mode real`) are intentionally excluded from default CI.
-
-## Running the patient intake demo UI
-
-The Next.js intake UI (`app/`) submits to the FastAPI `POST /api/ingest` endpoint. Clinic staff review flagged intakes at `/staff` with an operator-issued token ([`docs/staff_review_ui.md`](docs/staff_review_ui.md)). Pipeline settings (RAG, persistence, LLM mode) are backend configuration and are not exposed in the browser.
-
-The default `LLM_MODE=mock` runs the deterministic pipeline and needs no OpenAI API key. `LLM_MODE=real` calls OpenAI with `OPENAI_API_KEY` (see LLM mode below). The key is only read by the backend; the browser only receives `NEXT_PUBLIC_API_BASE_URL`.
+## Running locally
 
 ### With Docker Compose
 
 ```bash
 cp .env.example .env
-docker compose up --build    # api :8000, frontend http://localhost:3000, db (PostgreSQL 15), redis
+docker compose up --build    # api :8000, frontend http://localhost:3000, db (PostgreSQL 15), redis (unused)
 ```
 
-On start, the `api` container waits for `db` to be healthy, applies pending SQL migrations from `db/migrations/` (`python -m db.migrate`, recorded in `schema_migrations`; works on a new or an existing volume), then starts uvicorn. Inside Compose the API connects to Postgres through the `db` service (`DATABASE_URL` is set in `docker-compose.yml` from the `POSTGRES_*` values).
+The `api` container waits for `db`, applies pending migrations (`python -m db.migrate`), then starts uvicorn. Each successful `/api/ingest` run is stored in `health_records`; the response's `persistence` field reports `saved`, `duplicate` (identical text is stored once), `skipped`, `disabled` or `failed`. Persistence is best-effort and never fails the request.
 
-Each successful `/api/ingest` run is stored as one row in `health_records`, and the response's `persistence` field reports the outcome (`saved`, `duplicate`, `skipped`, `disabled`, `failed`). Persistence is best-effort: a database error does not fail the request, but it is logged and reported as `failed`. Rows are unique per input text (`input_hash`), so submitting identical text again returns `duplicate` and is not stored twice.
+Staff access needs `AUTH_TOKEN_SECRET` (≥ 32 characters) in `.env`, a user and a token:
+
+```bash
+python -m api.auth create-user --email admin@clinic.test --clinic default --role clinic_admin
+python -m api.auth issue-token --user-id <printed id>
+```
+
+The hosted demo seeds synthetic users instead (`python -m db.seed_demo`, [`docs/deployment.md`](docs/deployment.md) §2).
 
 ### Without Docker
 
 ```bash
-# 1. Backend (port 8000). Allowed browser origins: CORS_ALLOWED_ORIGINS (default http://localhost:3000,http://127.0.0.1:3000)
-uvicorn api.main:app --port 8000
-
-# 2. Frontend (port 3000). NEXT_PUBLIC_API_BASE_URL defaults to http://localhost:8000
-cd app
-npm install
-npm run dev        # open http://localhost:3000
+uvicorn api.main:app --port 8000          # CORS_ALLOWED_ORIGINS defaults to http://localhost:3000
+cd app && npm install && npm run dev      # http://localhost:3000; NEXT_PUBLIC_API_BASE_URL defaults to http://localhost:8000
 ```
 
-For persistence in this mode, start Postgres with `docker compose up -d db`, then run `python -m db.migrate` before uvicorn; `.env.example`'s `DATABASE_URL` targets the published `localhost:5432` port.
+For persistence, start Postgres with `docker compose up -d db` and run `python -m db.migrate` first.
 
-### LLM mode (mock / real)
+### LLM mode
 
-`LLM_MODE` in `.env` selects the execution mode for `StructuringAgent` and `OutputAgent` (shared provider interface in `llm/provider.py`, OpenAI wrapper in `llm/providers/openai_client.py`):
+`LLM_MODE=mock` (default) is deterministic and offline. `LLM_MODE=real` calls OpenAI with `OPENAI_API_KEY` (server-side only); the API refuses to start without a key, and provider failures return controlled errors (502/503/422) with no fallback to mock. `GET /health` reports the mode. Secrets are never placed in `NEXT_PUBLIC_` variables.
 
-- `mock` (default): deterministic, offline, no API key. Used by all tests and CI.
-- `real`: OpenAI with `OPENAI_API_KEY` (server-side only). The API refuses to start without a key; provider timeouts, failures and malformed output return a controlled error (HTTP 502). There is no fallback to mock.
-- Any other value fails at startup.
+## Testing
 
-Both modes go through the same `structured_output.json` / `report_output.json` validation. `GET /health` reports `llm_mode`, and the UI shows it read-only (`LLM Mode: Mock` / `LLM Mode: Real`).
+```bash
+pip install -r requirements-dev.txt   # Python 3.11
+pytest                                # PostgreSQL tests run when TEST_DATABASE_URL is set, otherwise skipped
+python -m evaluation.benchmark --mode mock --rag off      # also: --rag on, --suite safety
+cd app && npm run lint && npm run typecheck && npm test && npm run build
+```
 
-Benchmark: `python evaluation/benchmark.py --mode mock` (deterministic) or `python evaluation/benchmark.py --mode real --limit 1` (opt-in, needs `OPENAI_API_KEY`, never run in CI; output in `evaluation/results/benchmark_results_real.json`, not committed).
+GitHub Actions (`.github/workflows/ci.yml`) runs on every PR and push to `main` with `LLM_MODE=mock` and no secrets: backend tests against a `postgres:15` service (the job fails if the PostgreSQL tests are skipped), the deterministic benchmark and safety suite, and frontend lint/typecheck/tests/build. Mock-mode scores measure contract stability, not model quality ([`docs/evaluation_benchmark.md`](docs/evaluation_benchmark.md)).
 
-Frontend checks: `cd app && npm run lint && npm run typecheck && npm test && npm run build`.
+## Limitations
 
-Staff authentication, roles and clinic isolation: [`docs/auth.md`](docs/auth.md). Data model and migrations: [`docs/data_model.md`](docs/data_model.md).
+* Not production software and no compliance claim; synthetic data only.
+* Raw intake text is stored unmasked and returned in the `/api/ingest` response.
+* Safety and PHI handling are rule-based heuristics, measured only on a small synthetic set.
+* RAG is not active through the API, and mock embeddings carry no meaning.
+* Free-tier hosting: cold starts, a 30-day database, ephemeral audit file (events remain in platform logs).
+* No rate limiting, login flow, MFA or token revocation.
 
-A full README (setup, demo walkthrough, architecture diagram) is part of portfolio handover (#36, Phase 6).
+Full list: [`docs/project_status.md`](docs/project_status.md) and [`docs/security_data_handling.md`](docs/security_data_handling.md).
+
+## Scope and contribution
+
+Personal portfolio project. All commits in this repository are authored by Cindy Lin (first commit 2025-11-30), who defined the product scope, roadmap and phase acceptance criteria and reviewed and merged every PR. Implementation used AI coding assistance (Claude Code); 29 of the 80 commits at the start of Phase 6 handover carry a `Co-Authored-By: Claude` trailer. There is no client, employer or team behind this work, and no real users or patient data. Work was tracked as GitHub Issues and delivered as Issue → branch → tests → PR → review → merge → journal ([`docs/project_journal/`](docs/project_journal/)).
+
+Roadmap and remaining scope: [`docs/step3_roadmap.md`](docs/step3_roadmap.md).

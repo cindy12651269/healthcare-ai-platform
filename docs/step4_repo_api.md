@@ -4,14 +4,13 @@ Healthcare AI Platform — Repository Structure and API Specification
 
 This document reflects the **current repository structure and API behavior after Phase 2 (RAG, Safety, Persistence)**.
 
-> **Accuracy note (2026-10-02 audit).** Known differences from the code at `e12c923`:
+> **Current `/api/ingest` contract (verified 2026-10-09 against `api/routers/ingest.py`, `agents/pipeline.py` and `tests/test_ingest_e2e.py`).** The body below is the Phase 2 design and is kept as a historical record. In the code:
 >
-> * `/api/ingest` returns the raw pipeline trace (keys `run_id`, `success`, `intake`, `structured`, `rag`, `report`, `safety`, `errors`, `telemetry`, `metrics`), not the `IngestResponse` shape in §4.2. App version is `0.1.0`.
-> * ~~There is no `SafetyViolation` → 422 mapping; a blocked output surfaces as a 500.~~ Resolved in #29: a blocked output returns 200 with a safe acknowledgement report (the blocked content is not returned) and the intake is recorded as `needs_review` ([`data_model.md`](data_model.md#escalation-rules-29)). The trace also carries an `escalation` key.
-> * ~~Without an OpenAI API key the endpoint returns 500.~~ Resolved in PR #21: the default `LLM_MODE=mock` needs no key, and real mode is opt-in (#22).
-> * Staff endpoints use bearer-token authentication with clinic-scoped roles ([`auth.md`](auth.md), #28); `/api/ingest` stays unauthenticated. There is no rate limiting (the empty `rate_limit.py` placeholder was removed in #26); Redis is started but unused; there is no Terraform (empty `infra/` placeholders removed in #26).
->
-> The no-key path was fixed in Phase 3 and authentication delivered in Phase 4 (#28). The staff endpoints (`GET /api/staff/me`, `GET`/`PUT`/`DELETE /api/clinics/{clinic_id}/members[/{user_id}]`) are documented in [`auth.md`](auth.md), not in this document. Rate limiting is optional; Terraform beyond a single demo deployment is out of scope ([`step3_roadmap.md`](step3_roadmap.md)).
+> * `POST /api/ingest` (unauthenticated) takes `{text, consent_granted, source?, input_type?, user_id?}` and returns the **full pipeline trace**, not the `IngestResponse` shape in §4.2 (declared but not applied). Top-level keys: `run_id`, `success`, `llm_mode`, `intake`, `structured`, `rag`, `report`, `safety`, `escalation`, `errors`, `telemetry`, `persistence`, `metrics`. The trace includes the raw intake text (`intake.raw_text`) and guard evidence (documented #32 finding, [`security_data_handling.md`](security_data_handling.md)).
+> * Errors: intake validation (including the consent gate) → 400; body validation → 422; structuring and report-schema errors → 422; real-provider configuration → 503; provider failures → 502; anything else → 500 with a generic message. A safety-blocked output returns **200** with a safe acknowledgement report, and the intake is recorded as `needs_review` (#29).
+> * `rag.enabled` is `false` through the API (no `RetrievalAgent` in `api/deps.py`). `persistence.status` is `saved`, `duplicate`, `skipped`, `disabled` or `failed`.
+> * Default `LLM_MODE=mock` needs no key; real mode is opt-in (#22). App version `0.1.0`.
+> * Staff endpoints (bearer token, clinic roles) are documented in [`auth.md`](auth.md) and [`review_queue_api.md`](review_queue_api.md). There is no rate limiting; Redis is unused; there is no Terraform. Hosted deployment: [`deployment.md`](deployment.md).
 
 It serves as a technical reference for:
 

@@ -6,15 +6,12 @@ Target: Healthcare LLM + Agent Platform with Deterministic RAG, Safety Enforceme
 This document reflects the **current implemented architecture after Phase 2**.
 It serves as the authoritative architectural reference for implementation and portfolio review.
 
-> **Accuracy note (2026-10-02 audit).** This document describes the Phase 2 design intent. Known differences from the code at `e12c923`:
+> **Status (2026-10-09, handover #36).** This is the **Phase 2 design document**, kept as a historical record; the body is not updated. The implemented architecture is in [`diagrams/architecture.md`](diagrams/architecture.md) and the README. Differences between this body and the code:
 >
-> * ~~`OutputAgent` always calls the OpenAI API; the default API path fails without an API key.~~ Resolved: both agents have a deterministic mock mode (PR #21), and the real provider is opt-in via `LLM_MODE=real` (#22).
-> * The API's pipeline (`api/deps.py`) is built without a `RetrievalAgent`, so RAG is not active through the API.
-> * Mock embeddings are hash-derived and carry no semantic meaning.
-> * The empty "Interoperability Layer" and cloud infrastructure placeholders were removed in #26.
-> * Phase 4 added data model v2 (clinics, users, memberships, review-status fields; [`data_model.md`](data_model.md)) and staff authentication / clinic isolation ([`auth.md`](auth.md)), which are not described in the body of this document.
->
-> Retrieval quality is an optional enhancement. FHIR R4 export is #42 (Phase 7); HL7 interoperability and multi-service cloud infrastructure are out of scope. Current status: [`project_status.md`](project_status.md). Roadmap: [`step3_roadmap.md`](step3_roadmap.md).
+> * The API's pipeline (`api/deps.py`) is built without a `RetrievalAgent`, so RAG is not active through `/api/ingest` (`rag.enabled: false`); retrieval runs in tests and in the benchmark with `--rag on`. Mock embeddings are hash-derived and carry no semantic meaning.
+> * Both agents have a deterministic mock mode (default) and an opt-in OpenAI real mode (`LLM_MODE`, PR #21, #22).
+> * Added after Phase 2 and not described in the body: data model v2 with migrations ([`data_model.md`](data_model.md)), staff authentication and clinic isolation ([`auth.md`](auth.md)), escalation rules and the review-queue API ([`review_queue_api.md`](review_queue_api.md)), the staff UI, the signed webhook ([`escalation_webhook.md`](escalation_webhook.md)), security notes ([`security_data_handling.md`](security_data_handling.md)) and the hosted deployment ([`deployment.md`](deployment.md)).
+> * The "Interoperability Layer" and cloud infrastructure placeholders were removed in #26. FHIR R4 export is #42 (Phase 7); HL7 and multi-service cloud infrastructure are out of scope.
 
 ---
 

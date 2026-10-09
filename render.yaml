@@ -30,7 +30,7 @@ services:
       # Receiver URL for the signed escalation webhook; entered at Blueprint creation.
       - key: WEBHOOK_URL
         sync: false
-      # The frontend's public origin, e.g. https://healthcare-ai-frontend.onrender.com
+      # The frontend's public origin, copied from its service page, e.g. https://healthcare-ai-frontend-1s23.onrender.com
       - key: CORS_ALLOWED_ORIGINS
         sync: false
 
