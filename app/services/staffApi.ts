@@ -36,6 +36,58 @@ export interface IntakeDetail extends IntakeSummary {
   safety: JsonObject;
 }
 
+// Intake evidence & review timeline (#41). Every value is persisted data; null = not recorded.
+export interface RecordedMatch {
+  type: string | null;
+  detail: string | null;
+  match: string;
+  found_in_input: boolean;
+}
+
+export interface EscalationRuleEvidence {
+  reason: string;
+  rule: string;
+  evidence: JsonObject;
+}
+
+export interface Provenance {
+  execution_mode: "mock" | "real" | null;
+  model_version: string | null;
+  prompt_version: string | null;
+  pipeline_version: string | null;
+  run_id: string | null;
+}
+
+export type TimelineEventKind =
+  | "submitted"
+  | "processed"
+  | "safety_evaluated"
+  | "escalation_decision"
+  | "webhook_delivery"
+  | "staff_transition";
+
+export interface TimelineEvent {
+  kind: TimelineEventKind;
+  at: string | null;
+  at_source: string;
+  details: JsonObject;
+}
+
+export interface IntakeTimeline {
+  intake_id: string;
+  clinic_id: string;
+  review_status: ReviewStatus;
+  evidence: {
+    original_input: string | null;
+    extracted: JsonObject;
+    recorded_matches: RecordedMatch[];
+    escalation_rules: EscalationRuleEvidence[];
+    provenance: Provenance;
+  };
+  events: TimelineEvent[];
+  notes: string[];
+}
+
 export type StaffErrorKind =
   | "unauthorized" // 401: missing, invalid or expired token
   | "forbidden" // 403: not staff of this clinic
@@ -140,6 +192,15 @@ export function getIntake(token: string, clinicId: string, intakeId: string, opt
   );
 }
 
+export function getIntakeTimeline(token: string, clinicId: string, intakeId: string, options?: StaffClientOptions) {
+  return request<IntakeTimeline>(
+    token,
+    `${clinicPath(clinicId)}/${encodeURIComponent(intakeId)}/timeline`,
+    {},
+    options,
+  );
+}
+
 export function transitionIntake(
   token: string,
   clinicId: string,
@@ -160,6 +221,7 @@ export type StaffApi = {
   listIntakes: typeof listIntakes;
   getIntake: typeof getIntake;
   transitionIntake: typeof transitionIntake;
+  getIntakeTimeline: typeof getIntakeTimeline;
 };
 
-export const staffApi: StaffApi = { fetchStaffMe, listIntakes, getIntake, transitionIntake };
+export const staffApi: StaffApi = { fetchStaffMe, listIntakes, getIntake, transitionIntake, getIntakeTimeline };

@@ -20,7 +20,26 @@ Every route uses the #28 dependency `require_clinic_role("clinic_staff", "clinic
 | `GET /api/clinics/{clinic_id}/intakes/{intake_id}` | One intake for review. | Summary fields plus `clinic_id`, `structured` (structured result), `report`, `safety` (safety guard result). Unknown or other-clinic id → 404. |
 | `POST /api/clinics/{clinic_id}/intakes/{intake_id}/transition` body `{"review_status": "reviewed" \| "escalated"}` | Resolve a flagged intake. | The updated intake (same shape as GET). |
 
+| `GET /api/clinics/{clinic_id}/intakes/{intake_id}/timeline` (#41) | Read-only evidence and review timeline. | See [Intake evidence & timeline](#intake-evidence--timeline-41). Unknown or other-clinic id → 404. |
+
 The detail response does not include the stored raw intake payload (`intake_json`). Clinical content is read-only; there is no edit endpoint.
+
+## Intake evidence & timeline (#41)
+
+Same authorization as every route here: 401 without a valid token, 403 without a staff/admin membership of `{clinic_id}`, 404 for an intake of another clinic (indistinguishable from a missing id). Unlike the detail response, it returns the original intake text (`intake_json.raw_text`), because the reviewer needs it to judge the evidence; only authorized staff of the owning clinic can read it.
+
+Response:
+
+* `evidence.original_input`: stored intake text, or `null` if the record has none.
+* `evidence.extracted`: `symptoms`, `duration`, `onset`, `severity`, `red_flags`, `clinical_summary`, `confidence_level` from the stored structured output. These are **derived** fields (in mock mode, the #40 rule-based baseline), not recorded matches.
+* `evidence.recorded_matches[]`: `{type, detail, match, found_in_input}` for every safety-guard reason that recorded a `match`. The guard runs on the generated report, so a match may not occur in the input; `found_in_input` is a case-insensitive substring check against the stored input, and the UI highlights only those. Blocked reports keep reason types only (no matches), by the #29 design.
+* `evidence.escalation_rules[]`: one entry per stored `escalation_reason` code with the #29 rule text and its recorded evidence: guard action recorded + guard reasons of the matching type (emergency, blocked diagnosis/prescription), or `confidence_level` and the threshold (low confidence). The threshold is the current constant; it is not stored per record. For `emergency_signal`, the rule also checks the intake text; that check's match is not persisted, so the evidence can show no guard reason.
+* `evidence.provenance`: `execution_mode`, `model_version`, `prompt_version` (from `structured.output_metadata`), `pipeline_version`, `run_id` (`trace_id`). `execution_mode` is derived: `mock` when `model_version == "mock"`, `real` for any other recorded model, `null` when nothing was recorded.
+* `events[]`: `{kind, at, at_source, details}` sorted by `at`, ties in lifecycle order: `submitted` (`intake.timestamp`), `processed`, `safety_evaluated`, `escalation_decision` (all three at `record.created_at`, because their own times are not persisted), `webhook_delivery` (per `webhook_deliveries` row: event type, status, attempts, last HTTP status/error class, delivered time, attempt log; no target path, payload or secret) and `staff_transition` (per `review_events` row: actor id, from → to status).
+* Timestamps: every `at` (and `delivered_at`) is returned as a timezone-aware UTC ISO 8601 string (`+00:00`). Timezone-naive values are interpreted as UTC, which is how they are written (`intake.timestamp` comes from `datetime.utcnow()`; SQLite returns naive UTC). Values with another offset are converted to UTC. Events are sorted on these parsed datetimes, not on the raw strings. An unparseable timestamp is returned as `null`.
+* `notes[]`: plain statements of missing data for legacy records (status changed without a recorded transition, no input text, no model/prompt version). Missing values are `null`, never filled in.
+
+No model reasoning is stored, so none is returned. Each successful read emits an `intake.timeline.read` audit event with actor, clinic and intake id only (covered by `tests/test_audit_no_raw_text.py`).
 
 ## Allowed transitions
 

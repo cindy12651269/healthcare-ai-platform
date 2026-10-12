@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from api.auth import Principal, require_clinic_role
-from db.models import HealthRecord
+from db.models import HealthRecord, ReviewEvent
 from db.session import get_db
 from observability.audit_logger import build_event, log_run
 
@@ -163,6 +163,14 @@ def transition_intake(
     if updated != 1:
         db.rollback()
         raise HTTPException(status_code=409, detail="Intake status changed concurrently; reload and retry")
+    # Queryable history for the intake timeline (#41), committed with the status change
+    db.add(ReviewEvent(
+        intake_id=record.id,
+        clinic_id=clinic_id,
+        actor_id=principal.user_id,
+        from_status=current,
+        to_status=body.review_status,
+    ))
     db.commit()
     db.refresh(record)
 

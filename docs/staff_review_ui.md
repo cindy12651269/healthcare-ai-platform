@@ -17,7 +17,13 @@ The patient intake page (`/`) and its developer trace panel are unchanged.
 
 1. **Queue:** `GET /api/clinics/{clinic_id}/intakes?review_status=…`, filterable by Needs review (default), Reviewed, Escalated, Submitted or All. Rows show received time, status and escalation reason.
 2. **Detail:** `GET /api/clinics/{clinic_id}/intakes/{id}` shows review status, escalation reason, structured summary, report sections and safety result.
-3. **Transition:** for a `needs_review` intake, Mark reviewed / Mark escalated call `POST …/{id}/transition` with `{"review_status": …}`. Buttons are disabled while the request is in flight and hidden once the intake is no longer `needs_review`. The queue is refetched after a transition.
+3. **Evidence & timeline (#41):** the detail view loads `GET …/{id}/timeline` and shows:
+   * **Why flagged**: each triggered #29 rule with its recorded evidence, or "No escalation rule was triggered".
+   * The original input next to the extracted fields. Safety-guard matches are highlighted only where the recorded phrase occurs in the input; recorded matches that do not (they came from the generated report) are listed separately. Extracted fields are labelled "derived, not recorded matches".
+   * Processing provenance (execution mode, model, prompt and pipeline version, run id); missing values show "Not recorded".
+   * A chronological timeline: submitted, processed, safety evaluated, escalation decision, webhook delivery (status, attempts, last error class) and staff actions (actor, from → to). It reloads after a transition.
+   * Loading, error (including 403/404) and empty states. No model reasoning is shown.
+4. **Transition:** for a `needs_review` intake, Mark reviewed / Mark escalated call `POST …/{id}/transition` with `{"review_status": …}`. Buttons are disabled while the request is in flight and hidden once the intake is no longer `needs_review`. The queue is refetched after a transition.
 
 Errors: 401 returns to sign-in with an expired-session message. 403 shows "no staff access". 404 shows "not found". On 409 the intake and queue are reloaded so the server's current state wins. 422, other HTTP errors and network failures show a retryable error in place.
 

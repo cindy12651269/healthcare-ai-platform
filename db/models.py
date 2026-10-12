@@ -235,3 +235,19 @@ class WebhookDelivery(Base):
         Index("ix_webhook_deliveries_intake_id", "intake_id"),
         CheckConstraint(_in_check("status", WEBHOOK_DELIVERY_STATUSES), name="ck_webhook_deliveries_status"),
     )
+
+
+# Staff review transition history (Issue #41, db/migrations/004_review_events.sql).
+# Written in the same transaction as the status change. Ids and status values only.
+class ReviewEvent(Base):
+    __tablename__ = "review_events"
+
+    id = Column(String, primary_key=True, default=lambda: uuid4().hex)
+    intake_id = Column(String, ForeignKey("health_records.id", ondelete="CASCADE"), nullable=False)
+    clinic_id = Column(String, ForeignKey("clinics.id"), nullable=False)
+    actor_id = Column(String, nullable=False)
+    from_status = Column(String, nullable=False)
+    to_status = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    __table_args__ = (Index("ix_review_events_intake_id", "intake_id"),)
