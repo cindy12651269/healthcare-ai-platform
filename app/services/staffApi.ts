@@ -201,6 +201,16 @@ export function getIntakeTimeline(token: string, clinicId: string, intakeId: str
   );
 }
 
+// FHIR R4 Bundle export (#42): synthetic demo data; the QuestionnaireResponse holds the raw intake text
+export function exportIntakeFhir(token: string, clinicId: string, intakeId: string, options?: StaffClientOptions) {
+  return request<JsonObject>(
+    token,
+    `${clinicPath(clinicId)}/${encodeURIComponent(intakeId)}/fhir`,
+    {},
+    options,
+  );
+}
+
 export function transitionIntake(
   token: string,
   clinicId: string,
@@ -222,6 +232,7 @@ export type StaffApi = {
   getIntake: typeof getIntake;
   transitionIntake: typeof transitionIntake;
   getIntakeTimeline: typeof getIntakeTimeline;
+  exportIntakeFhir: typeof exportIntakeFhir;
 };
 
-export const staffApi: StaffApi = { fetchStaffMe, listIntakes, getIntake, transitionIntake, getIntakeTimeline };
+export const staffApi: StaffApi = { fetchStaffMe, listIntakes, getIntake, transitionIntake, getIntakeTimeline, exportIntakeFhir };

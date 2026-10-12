@@ -23,7 +23,8 @@ The patient intake page (`/`) and its developer trace panel are unchanged.
    * Processing provenance (execution mode, model, prompt and pipeline version, run id); missing values show "Not recorded".
    * A chronological timeline: submitted, processed, safety evaluated, escalation decision, webhook delivery (status, attempts, last error class) and staff actions (actor, from → to). It reloads after a transition.
    * Loading, error (including 403/404) and empty states. No model reasoning is shown.
-4. **Transition:** for a `needs_review` intake, Mark reviewed / Mark escalated call `POST …/{id}/transition` with `{"review_status": …}`. Buttons are disabled while the request is in flight and hidden once the intake is no longer `needs_review`. The queue is refetched after a transition.
+4. **FHIR R4 export (#42):** labelled "FHIR R4 — Synthetic Demo Data". "Load FHIR export" calls `GET …/{id}/fhir` on demand (each call is audited), shows the Bundle as a JSON preview and offers "Download JSON" (`intake-<id>-fhir-r4.json`). States: not loaded yet, loading, error (including 403/404) and an empty Bundle. The export is cleared after a status transition. The file contains the raw intake text ([`security_data_handling.md`](security_data_handling.md)).
+5. **Transition:** for a `needs_review` intake, Mark reviewed / Mark escalated call `POST …/{id}/transition` with `{"review_status": …}`. Buttons are disabled while the request is in flight and hidden once the intake is no longer `needs_review`. The queue is refetched after a transition.
 
 Errors: 401 returns to sign-in with an expired-session message. 403 shows "no staff access". 404 shows "not found". On 409 the intake and queue are reloaded so the server's current state wins. 422, other HTTP errors and network failures show a retryable error in place.
 

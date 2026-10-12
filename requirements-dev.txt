@@ -2,3 +2,4 @@
 pytest
 # fastapi.testclient
 httpx
+jsonschema==4.25.1  # pinned engine for the vendored FHIR R4 JSON Schema (#42)

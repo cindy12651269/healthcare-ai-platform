@@ -1,4 +1,5 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import FhirExport from "./FhirExport";
 import IntakeEvidence from "./IntakeEvidence";
 import {
   IntakeDetail,
@@ -448,6 +449,16 @@ function IntakeDetailView({
       {/* Keyed on status so a staff transition remounts it and reloads the timeline */}
       <IntakeEvidence
         key={intake.review_status}
+        api={api}
+        token={token}
+        clinicId={clinicId}
+        intakeId={intakeId}
+        onAuthError={onAuthError}
+      />
+
+      {/* Keyed on status so a stale export is cleared after a transition */}
+      <FhirExport
+        key={`fhir-${intake.review_status}`}
         api={api}
         token={token}
         clinicId={clinicId}

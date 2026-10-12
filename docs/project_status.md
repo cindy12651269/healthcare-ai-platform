@@ -92,7 +92,7 @@ The empty scaffold files listed at the audited commit were removed in #26; none 
 | `compliance/*.md` (BAA map, data flow, HIPAA overview, RBAC, threat model) | #34 Security & Data-Handling Notes — superseded by the single canonical [`security_data_handling.md`](security_data_handling.md); not recreated (BAA mappings and "HIPAA compliant" labels are out of scope, roadmap §8) |
 | `docs/infra/*.md`, `infra/aws/*.tf`, `infra/docker/services.yml` | #35 Deployment (multi-service Terraform is out of scope, roadmap §8) |
 | `api/middleware/rate_limit.py` | Optional enhancement, roadmap §7 (rate limiting) |
-| `interoperability/fhir_client.py`, `docs/interoperability/fhir_mapping.md` | #42 FHIR R4 Export of Reviewed Intakes (Phase 7) |
+| `interoperability/fhir_client.py`, `docs/interoperability/fhir_mapping.md` | #42 FHIR R4 Export of Reviewed Intakes (delivered as `interoperability/fhir_export.py` and [`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md)) |
 | `agents/reasoning_agent.py`, `llm/prompts/reasoning.txt`; `interoperability/hl7_parser.py`, `ehr_router.py`, `consent.py`; `docs/interoperability/hl7_notes.md`, `ehr_router_design.md`; `tests/test_ehr.py`, `tests/test_llm.py` | Not planned, roadmap §8 (extra agents, HL7 v2, general EHR router); the empty test files had no tests |
 
 The runtime audit log (`audit.jsonl`) and generated benchmark results (`evaluation/results/`) are no longer tracked (#26).

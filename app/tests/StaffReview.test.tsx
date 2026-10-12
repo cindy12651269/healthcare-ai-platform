@@ -98,6 +98,12 @@ function timeline(over: Partial<IntakeTimeline> = {}): IntakeTimeline {
   };
 }
 
+const FHIR_BUNDLE = {
+  resourceType: "Bundle",
+  type: "collection",
+  entry: [{ fullUrl: "urn:uuid:1", resource: { resourceType: "Task", status: "ready", intent: "order" } }],
+};
+
 const ok = <T,>(data: T): StaffResult<T> => ({ ok: true, data });
 const fail = (kind: keyof typeof STAFF_MESSAGES, status?: number): StaffResult<never> => ({
   ok: false,
@@ -119,6 +125,7 @@ function makeApi(over: Partial<Record<keyof StaffApi, unknown>> = {}) {
     getIntake: vi.fn().mockResolvedValue(ok(detail())),
     transitionIntake: vi.fn(),
     getIntakeTimeline: vi.fn().mockResolvedValue(ok(timeline())),
+    exportIntakeFhir: vi.fn().mockResolvedValue(ok(FHIR_BUNDLE)),
     ...over,
   } as unknown as StaffApi & Record<keyof StaffApi, ReturnType<typeof vi.fn>>;
 }
@@ -432,5 +439,53 @@ describe("StaffReview evidence & timeline (#41)", () => {
     expect(await screen.findByTestId("timeline-error")).toHaveTextContent(STAFF_MESSAGES.forbidden);
     expect(screen.queryByTestId("original-input")).not.toBeInTheDocument();
     expect(screen.queryByTestId("timeline")).not.toBeInTheDocument();
+  });
+});
+
+describe("StaffReview FHIR export (#42)", () => {
+  it("is labelled synthetic, loads on demand, previews and downloads the Bundle", async () => {
+    const api = makeApi();
+    const user = await signIn(api);
+    await openFirst(user);
+
+    expect(await screen.findByTestId("fhir-label")).toHaveTextContent("FHIR R4 — Synthetic Demo Data");
+    expect(screen.getByText("No export loaded yet.")).toBeInTheDocument();
+    expect(api.exportIntakeFhir).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Load FHIR export" }));
+    expect(api.exportIntakeFhir).toHaveBeenCalledWith(TOKEN, "default", "flagged-0001");
+    expect(await screen.findByTestId("fhir-preview")).toHaveTextContent('"resourceType": "Bundle"');
+
+    const createObjectURL = vi.fn(() => "blob:fhir");
+    const revokeObjectURL = vi.fn();
+    Object.assign(URL, { createObjectURL, revokeObjectURL });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    await user.click(screen.getByRole("button", { name: "Download JSON" }));
+    expect(createObjectURL).toHaveBeenCalledOnce();
+    expect(click).toHaveBeenCalledOnce();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:fhir");
+    click.mockRestore();
+  });
+
+  it("shows loading and then an error state without a preview", async () => {
+    const pending = deferred<StaffResult<Record<string, unknown>>>();
+    const api = makeApi({ exportIntakeFhir: vi.fn().mockReturnValueOnce(pending.promise) });
+    const user = await signIn(api);
+    await openFirst(user);
+
+    await user.click(await screen.findByRole("button", { name: "Load FHIR export" }));
+    expect(screen.getByText("Building FHIR export…")).toBeInTheDocument();
+    pending.resolve(fail("forbidden", 403));
+    expect(await screen.findByTestId("fhir-error")).toHaveTextContent(STAFF_MESSAGES.forbidden);
+    expect(screen.queryByTestId("fhir-preview")).not.toBeInTheDocument();
+  });
+
+  it("shows an empty state for a Bundle without entries", async () => {
+    const api = makeApi({ exportIntakeFhir: vi.fn().mockResolvedValue(ok({ resourceType: "Bundle", type: "collection" })) });
+    const user = await signIn(api);
+    await openFirst(user);
+
+    await user.click(await screen.findByRole("button", { name: "Load FHIR export" }));
+    expect(await screen.findByText("The export contains no resources.")).toBeInTheDocument();
   });
 });

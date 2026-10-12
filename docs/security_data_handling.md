@@ -28,7 +28,10 @@ PostgreSQL  health_records  (clinic_id = "default", review_status)
    │
    └─► Staff API (api/routers/records.py) ── bearer token + clinic membership ──► Staff Review UI (app/pages/staff.tsx)
           every successful call ──► staff audit event (actor_id, action, resource_id)
+          └─► FHIR R4 export (api/routers/fhir.py, #42) ──► JSON preview / file download in the staff browser
 ```
+
+* FHIR export (#42): `GET /api/clinics/{clinic_id}/intakes/{id}/fhir` returns a Bundle whose `QuestionnaireResponse` contains the **raw, unmasked intake text**. It is PHI-bearing and is protected only by the staff token and clinic membership (401/403; another clinic's intake → 404). It is never transmitted to an external system. Each export is audited with actor and ids only. A downloaded file leaves the platform's access control and audit trail: it sits unencrypted in the staff member's browser downloads, can be copied or shared, and cannot be revoked. Patient, Encounter, Condition, Observation, structured AI output and safety evidence are deliberately not exported ([`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md)).
 
 * Transport: the application itself serves plain HTTP. Locally the demo runs over HTTP; the hosted demo (#35, [`deployment.md`](deployment.md)) is served over HTTPS terminated by the hosting platform (Render). The application does not configure TLS.
 * Hosted demo (#35): secrets are generated or entered in the platform, never in the repository or a `NEXT_PUBLIC_` variable; the container audit file is ephemeral, and audit events remain in the platform's logs. The database is managed by the platform on its free plan; this project has not assessed the platform's at-rest encryption or backups.
@@ -47,6 +50,7 @@ PostgreSQL  health_records  (clinic_id = "default", review_status)
 | `/api/ingest` response (to the browser) | **Yes** | Returns the full pipeline trace, including `intake.raw_text`, `chief_complaint` and guard evidence. Known finding from #32, not fixed here. |
 | Staff detail API (`GET …/intakes/{id}`) | Indirectly | Returns `structured`, `report` and `safety` (which can hold fragments, above); does **not** return `intake_json`. |
 | Staff timeline API (`GET …/intakes/{id}/timeline`, #41) | **Yes** | Returns the original intake text and recorded guard matches (which can include PHI values) to authorized staff of the owning clinic only; 403/404 otherwise. Its audit event carries ids only. |
+| Staff FHIR export (`GET …/intakes/{id}/fhir`, #42) | **Yes** | `QuestionnaireResponse` answer holds the raw intake text; staff of the owning clinic only. Downloads are outside platform control (§1). Its audit event carries ids only. |
 | Audit events (`audit.jsonl` + stdout) | **No** | Pipeline, API middleware and staff-action events carry ids, status, latency, counts, paths and reason codes only. Verified by `tests/test_audit_no_raw_text.py` (see §4). |
 | Webhook payload | No | Allowlisted model (`EscalationPayload`, `extra="forbid"`): event, schema version, idempotency key, intake id, clinic id. |
 | `webhook_deliveries` | No | Outcome metadata only: target as `scheme://host[:port]`, attempts, HTTP status, error class. Never the secret, signature or response body. |

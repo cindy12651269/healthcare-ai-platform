@@ -131,3 +131,6 @@ input.staff-input { width: 100%; }
 mark[data-testid="recorded-match"] { background: var(--warn-bg); outline: 1px solid var(--warn-border); border-radius: 2px; }
 .timeline { padding-left: 1.2rem; font-size: 0.85rem; }
 .timeline li { margin-bottom: 8px; overflow-wrap: anywhere; }
+
+/* FHIR export preview (#42) */
+.json-preview { max-height: 320px; overflow: auto; font-size: 0.75rem; background: var(--warn-bg); padding: 8px; border-radius: 4px; }
