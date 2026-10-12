@@ -5,6 +5,7 @@ from typing import Any, Dict
 import jsonschema
 from jsonschema import ValidationError
 from llm.provider import LLMProvider, build_provider, resolve_llm_mode
+from agents.extraction_baseline import EXTRACTION_METHOD, build_summary, extract
 
 # Paths
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -70,7 +71,8 @@ class StructuringAgent:
     """
     Enterprise-grade structuring agent.
 
-    - mock (default): deterministic output, CI-safe / offline-safe
+    - mock (default): deterministic rule-based extraction baseline (Issue #40), CI-safe / offline-safe.
+      Not LLM output; see agents/extraction_baseline.py for the lexicon, confidence rule and limitations.
     - real: OpenAI through the shared provider interface (llm/provider.py)
     Both modes go through provider.generate_json and the same schema validation.
     """
@@ -130,9 +132,22 @@ class StructuringAgent:
             "safety_violation_count": 0,
         }
 
-    # Mock Implementation: Deterministic structured output.
-    # Must match StructuredHealthOutput schema for Issue 13 evaluation metrics.
+    # Mock Implementation: deterministic rule-based extraction baseline (Issue #40).
+    # Reports only fields stated in the intake; must match the StructuredHealthOutput schema.
     def _mock_structuring(self, health_input: Dict[str, Any]) -> Dict[str, Any]:
+
+        fields = extract(health_input.get("raw_text", ""))
+        clinical = {
+            "chief_complaint": health_input.get("raw_text", "")[:200],
+            "symptoms": fields["symptoms"],
+            "red_flags": fields["red_flags"],
+            "clinical_summary": build_summary(fields),
+            "confidence_level": fields["confidence_level"],
+        }
+        # Optional fields are omitted (not invented) when the intake does not state them
+        for key in ("severity", "duration", "onset"):
+            if fields[key]:
+                clinical[key] = fields[key]
 
         return {
             # Trace Layer
@@ -153,12 +168,7 @@ class StructuringAgent:
             },
 
             # Clinical Layer
-            "clinical_structuring": {
-                "chief_complaint": health_input.get("raw_text", "")[:200],
-                "symptoms": [],
-                "clinical_summary": "mock summary",
-                "confidence_level": 0.9,
-            },
+            "clinical_structuring": clinical,
 
             # Decision Layer
             "agent_decisioning": {},
@@ -170,7 +180,7 @@ class StructuringAgent:
             "output_metadata": {
                 "generated_at": "2025-01-01T00:00:00Z",
                 "model_version": "mock",
-                "prompt_version": "v1",
+                "prompt_version": EXTRACTION_METHOD,
             },
         }
 

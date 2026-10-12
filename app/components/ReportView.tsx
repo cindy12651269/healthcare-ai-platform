@@ -42,6 +42,13 @@ export default function ReportView({ data }: ReportViewProps) {
     ? (clinical!.symptoms as unknown[]).filter((s): s is string => typeof s === "string")
     : [];
 
+  const duration = asText(clinical?.duration);
+  const onset = asText(clinical?.onset);
+  const severity = asText(clinical?.severity);
+  // Mock mode (#40): a deterministic rule-based baseline produced these fields, not an LLM
+  const ruleBasedBaseline =
+    asText(asObject(asObject(data.structured)?.output_metadata)?.model_version) === "mock";
+
   const reportSections = asObject(asObject(data.report)?.report_sections);
   const sections = REPORT_SECTIONS.flatMap(([key, heading]) => {
     const body = asText(reportSections?.[key]);
@@ -80,6 +87,24 @@ export default function ReportView({ data }: ReportViewProps) {
               "No specific symptoms were extracted."
             )}
           </dd>
+          {duration && (
+            <>
+              <dt>Duration</dt>
+              <dd>{duration}</dd>
+            </>
+          )}
+          {onset && (
+            <>
+              <dt>Onset</dt>
+              <dd>{onset}</dd>
+            </>
+          )}
+          {severity && (
+            <>
+              <dt>Severity</dt>
+              <dd>{severity}</dd>
+            </>
+          )}
           {clinicalSummary && (
             <>
               <dt>Summary</dt>
@@ -87,6 +112,13 @@ export default function ReportView({ data }: ReportViewProps) {
             </>
           )}
         </dl>
+        {ruleBasedBaseline && (
+          <p className="muted" data-testid="extraction-baseline-note">
+            Extracted by a deterministic rule-based baseline, not LLM-generated output. It
+            recognises only a small fixed symptom vocabulary and simple duration, onset and
+            severity phrases, and may miss or misread anything else.
+          </p>
+        )}
       </article>
 
       <article className="card">

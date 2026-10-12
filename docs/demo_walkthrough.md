@@ -30,7 +30,7 @@ Staff tokens are issued by the operator, not by the browser ([`deployment.md`](d
 
 1. Open `/staff` and paste a `demo-staff-a` token. The token stays in browser memory only.
 2. Expected: the `default` clinic's queue lists the intake from step 1 as **Needs review** with reason `emergency_signal`.
-3. Open it: the structured output, report and safety result are shown. The staff API does not return the stored raw intake record (`intake_json`), but structured fields can still contain parts of the original text (in mock mode `chief_complaint` is its first 200 characters).
+3. Open it: the structured output, report and safety result are shown. The staff API does not return the stored raw intake record (`intake_json`), but structured fields can still contain parts of the original text (in mock mode `chief_complaint` is its first 200 characters). In mock mode the symptoms, duration, onset, severity and summary come from a deterministic rule-based extraction baseline (#40), labelled as such in the UI; they are not LLM-generated. An intake with no symptom from its lexicon gets confidence below 0.5 and is escalated with `low_confidence`.
 4. Mark it **Reviewed** (or **Escalated**). Expected: the status changes and the transition buttons are replaced by "Only intakes that need review can be marked reviewed or escalated." The API itself rejects any further transition of that intake with HTTP 409 (only `needs_review` can be resolved).
 5. With a `demo-admin-b` token, the `default` clinic's queue is not accessible (403) and `demo-clinic-b`'s queue does not contain the intake.
 

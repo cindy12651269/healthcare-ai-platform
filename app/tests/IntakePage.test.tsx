@@ -77,6 +77,35 @@ describe("IntakePage", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("labels mock extraction as a rule-based baseline and shows duration (#40)", async () => {
+    const data = pipelineResult({
+      structured: {
+        clinical_structuring: {
+          chief_complaint: VALID_TEXT,
+          symptoms: ["sore throat", "fever"],
+          duration: "two days",
+          severity: "mild",
+          clinical_summary: "Rule-based baseline (not LLM-generated). Reported symptoms: sore throat, fever.",
+          confidence_level: 1,
+        },
+        output_metadata: { generated_at: "2025-01-01T00:00:00Z", model_version: "mock", prompt_version: "v1" },
+      },
+    });
+    render(<IntakePage submit={vi.fn().mockResolvedValue({ kind: "success", status: 200, data })} />);
+    await fillAndSubmit();
+
+    await screen.findByRole("heading", { name: "Your intake has been received" });
+    expect(screen.getByText("two days")).toBeInTheDocument();
+    expect(screen.getByTestId("extraction-baseline-note")).toHaveTextContent(/rule-based baseline, not LLM-generated/);
+  });
+
+  it("does not show the baseline label for non-mock output", async () => {
+    render(<IntakePage submit={vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() })} />);
+    await fillAndSubmit();
+    await screen.findByRole("heading", { name: "Your intake has been received" });
+    expect(screen.queryByTestId("extraction-baseline-note")).not.toBeInTheDocument();
+  });
+
   it("says so honestly when the backend returns no report", async () => {
     const submit = vi
       .fn()

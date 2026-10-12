@@ -163,7 +163,7 @@ def test_emergency_intake_needs_review_and_guidance_unchanged(client, sessions, 
 
 @pytest.mark.parametrize(
     "text, reason",
-    [(DIAGNOSIS, "blocked_diagnosis"), (PRESCRIPTION, "blocked_prescription")],
+    [(DIAGNOSIS, "blocked_diagnosis,low_confidence"), (PRESCRIPTION, "blocked_prescription")],
 )
 def test_blocked_output_returns_controlled_acknowledgement(client, sessions, audit_events, text, reason):
     data = _ingest(client, text)
@@ -180,7 +180,7 @@ def test_blocked_output_returns_controlled_acknowledgement(client, sessions, aud
     # No blocked content in anything derived from the generated report
     assert data["safety"]["allowed"] is False
     assert data["safety"]["masked_text"] == ""
-    assert f"block_{reason.split('_')[1]}" in data["safety"]["actions"]
+    assert f"block_{reason.split(',')[0].split('_')[1]}" in data["safety"]["actions"]
     exposed = json.dumps([report, data["safety"], data["escalation"]])
     for fragment in BLOCKED_FRAGMENTS:
         assert fragment not in exposed
@@ -189,7 +189,7 @@ def test_blocked_output_returns_controlled_acknowledgement(client, sessions, aud
     assert record.review_status == "needs_review"
     assert record.escalation_reason == reason
     assert record.report_json == report
-    _assert_trace_and_audit_safe(data, audit_events, text, [reason])
+    _assert_trace_and_audit_safe(data, audit_events, text, reason.split(","))
 
 
 def test_blocked_output_with_emergency_keeps_guidance(sessions, audit_events, monkeypatch):

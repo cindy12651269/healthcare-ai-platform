@@ -106,7 +106,7 @@ def test_benchmark_detects_a_wrong_label():
 def test_safety_benchmark_meets_baseline():
     results = run_safety_benchmark()
     assert results["aggregated"]["cases"] == 16
-    assert results["aggregated"]["known_gaps"] == 4
+    assert results["aggregated"]["known_gaps"] == 3  # em_paraphrased_breathing closed by #40 extraction
     for name in REQUIRED_SAFETY_CATEGORIES:
         c = results["categories"][name]
         assert c["cases"] == 4

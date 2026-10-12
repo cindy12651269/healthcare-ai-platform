@@ -21,7 +21,7 @@ Render free plans: services sleep after ~15 minutes idle (first request can take
 | Area | Implemented | Not implemented |
 | --- | --- | --- |
 | Intake pipeline | Validation and consent gate, schema-validated structuring, non-diagnostic report, deterministic safety guard (diagnosis/prescription blocking, report PHI masking, emergency guidance) | Validated de-identification |
-| LLM | `LLM_MODE=mock` (default, deterministic, no key); `LLM_MODE=real` (OpenAI, opt-in, no fallback to mock) | Real mode is never run in CI |
+| LLM | `LLM_MODE=mock` (default, deterministic, no key; structuring is a **rule-based extraction baseline, not LLM output**, #40); `LLM_MODE=real` (OpenAI, opt-in, no fallback to mock) | Real mode is never run in CI |
 | Retrieval (RAG) | Retrieval agent and in-memory vector store, exercised by tests and the benchmark (`--rag on`) | **Not wired into the API**; embeddings are hash-based mocks with no semantic meaning |
 | Human review | Escalation rules → `needs_review` with reason codes; clinic-scoped review-queue API; staff UI at `/staff` | Per-clinic intake routing (all public intakes go to clinic `default`) |
 | Access control | HMAC bearer tokens from an operator CLI; `clinic_staff` / `clinic_admin` roles re-checked per request; cross-clinic denial tested | Login/SSO, MFA, token revocation list |
@@ -79,11 +79,11 @@ For persistence, start Postgres with `docker compose up -d db` and run `python -
 ```bash
 pip install -r requirements-dev.txt   # Python 3.11
 pytest                                # PostgreSQL tests run when TEST_DATABASE_URL is set, otherwise skipped
-python -m evaluation.benchmark --mode mock --rag off      # also: --rag on, --suite safety
+python -m evaluation.benchmark --mode mock --rag off      # also: --rag on, --suite safety, --suite extraction
 cd app && npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on every PR and push to `main` with `LLM_MODE=mock` and no secrets: backend tests against a `postgres:15` service (the job fails if the PostgreSQL tests are skipped), the deterministic benchmark and safety suite, and frontend lint/typecheck/tests/build. Mock-mode scores measure contract stability, not model quality ([`docs/evaluation_benchmark.md`](docs/evaluation_benchmark.md)).
+GitHub Actions (`.github/workflows/ci.yml`) runs on every PR and push to `main` with `LLM_MODE=mock` and no secrets: backend tests against a `postgres:15` service (the job fails if the PostgreSQL tests are skipped), the deterministic benchmark, extraction suite (#40) and safety suite, and frontend lint/typecheck/tests/build. Mock-mode scores measure contract stability, not model quality ([`docs/evaluation_benchmark.md`](docs/evaluation_benchmark.md)).
 
 ## Limitations
 
@@ -91,6 +91,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every PR and push to `main` 
 * Raw intake text is stored unmasked and returned in the `/api/ingest` response.
 * Safety and PHI handling are rule-based heuristics, measured only on a small synthetic set.
 * RAG is not active through the API, and mock embeddings carry no meaning.
+* Mock-mode extraction is a small keyword lexicon (#40): it misses anything outside its vocabulary, and its 1.00 symptom precision/recall is on six in-sample synthetic cases only.
 * Free-tier hosting: cold starts, a 30-day database, ephemeral audit file (events remain in platform logs).
 * No rate limiting, login flow, MFA or token revocation.
 

@@ -110,7 +110,7 @@ def _payload(call):
     "text,structuring,reasons",
     [
         (EMERGENCY, None, ["emergency_signal"]),
-        (DIAGNOSIS, None, ["blocked_diagnosis"]),
+        (DIAGNOSIS, None, ["blocked_diagnosis", "low_confidence"]),  # no lexicon symptom (#40)
         (PRESCRIPTION, None, ["blocked_prescription"]),
         (NORMAL, LowConfidenceStructuring(mode="mock"), ["low_confidence"]),
     ],
