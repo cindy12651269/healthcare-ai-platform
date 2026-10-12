@@ -1,9 +1,9 @@
 # Phase 7 — Demo Experience, AI Evidence & FHIR Interoperability
 
 Healthcare AI Platform
-Timeline: Phase 7 (2026-10-12)
+Timeline: Phase 7 (2026-10-12 – 2026-10-13)
 Scope: Issues #40, #41, #42, #43
-Status: Implemented and merged — #40–#43 closed (2026-10-12). Hosted API redeployed from `2afdb4b` and verified on 2026-10-13 (read-only staff checks; flagged scenarios not re-submitted, §4).
+Status: Completed (2026-10-13) — #40–#43 closed (2026-10-12); PRs #60–#64 merged. Hosted API redeployed from `2afdb4b` and verified on 2026-10-13 (read-only staff checks; flagged scenarios not re-submitted, §4).
 
 ---
 
@@ -28,8 +28,9 @@ Out of scope throughout: real LLM mode on the hosted demo, real patient data, co
 | #61 Intake evidence & review timeline | #41 | `63001bd`, `efd4a17` | `428fbf9` | 38235577805 — success |
 | #62 FHIR R4 export of reviewed intakes | #42 | `8c962a4`, `47d4023` | `b91d6ea` | 38237316553 — success |
 | #63 Guided demo, system card & Phase 7 close-out | #43 | `8946ec4`, `5fd759b` | `2afdb4b` | 38238842122 — success |
+| #64 Phase 7 merge state & hosted deployment (docs) | — (follow-up to #63) | `02ec30e`, `98d2a1d` | `4194d18` | 38288257899 — success |
 
-Merged with merge commits after a final review gate. Two gates were blocked and fixed on the branch before merge: #61 (naive intake timestamps displayed in the browser's local time → normalised to UTC, sorted on parsed datetimes) and #62 (Questionnaire consent wording did not match the intake form → exact wording plus a regression test).
+#60–#63 were merged with merge commits after a final review gate; #64 is documentation only (merge state and the hosted evidence in §4). Two gates were blocked and fixed on the branch before merge: #61 (naive intake timestamps displayed in the browser's local time → normalised to UTC, sorted on parsed datetimes) and #62 (Questionnaire consent wording did not match the intake form → exact wording plus a regression test).
 
 ---
 
@@ -64,6 +65,7 @@ Merged with merge commits after a final review gate. Two gates were blocked and 
 ## 4. Validation Summary
 
 * Every Phase 7 PR passed the three CI jobs (backend + PostgreSQL, deterministic benchmark incl. extraction and safety suites, frontend lint/typecheck/test/build) on its final head and on `main` after merge (runs in §2).
+* Post-merge `main` CI at `4194d18` (PR #64, run 38288257899): backend **248 passed** with 11 PostgreSQL integration tests executed; frontend 63 tests passed; deterministic benchmark green, extraction suite micro/macro P = R = 1.00 (in-sample, §3).
 * Hosted verification, 2026-10-13. Synthetic data only; staff checks were read-only and used 1-hour operator-issued tokens for the three seeded users.
   * **Deploy.** Render *Manual Deploy* of `main` at `2afdb4b` (replacing the Phase 6 build `3e984e3`; `main` CI run 38238842122 — success). Start log: `Applied migration 004_review_events.sql`, `Migrations complete (1 applied)`, `Demo seed complete (12 rows created)` (8 intakes + 4 seeded transitions), `Application startup complete`. The previous instance served `/health` until the new one was live.
   * **API.** `/health` → `environment: demo`, `llm_mode: mock`. `/openapi.json` lists `/api/system-card`, `…/timeline` and `…/fhir`. The `evaluation` block of `GET /api/system-card` is identical to `evaluation/system_card_results.json` (#32: 16 cases, guard and escalation match 1.00, 3 known gaps; #40: 6 cases, micro/macro P/R 1.00). Without a token every staff route returns 401.
@@ -78,8 +80,16 @@ Merged with merge commits after a final review gate. Two gates were blocked and 
 
 ---
 
-## 5. Carried-forward Limitations
+## 5. Known and Carried-forward Limitations
 
 * Rule-based safety, escalation and extraction: paraphrases and out-of-lexicon text are missed; evaluation sets are tiny, synthetic and partly in-sample.
 * Raw intake text is stored unmasked and returned to authorized staff (timeline, FHIR export).
 * No real-mode measurements; the hosted demo stays in mock mode.
+* Hosted demo gaps (§4): the staff browser UI and the emergency, prescription and vague presets were not exercised on the hosted demo; the last hosted signed-webhook evidence is the Phase 6 acceptance of 2026-10-09. Render free tier limits are unchanged ([`deployment.md`](../deployment.md) §5).
+* FHIR export is checked against the R4 JSON Schema plus local required-element and reference checks only, not the official HL7 validator, profiles or terminology. Exports carry raw intake text ([`security_data_handling.md`](../security_data_handling.md)).
+
+---
+
+## 6. Closure
+
+Phase 7 completed on 2026-10-13: #40–#43 are closed, PRs #60–#64 are merged and post-merge `main` CI is green (§4). Phases 1–7 are complete. Synthetic data only; mock mode only on the hosted demo; no HIPAA compliance, FHIR conformance or production-readiness claim.

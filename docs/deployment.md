@@ -155,6 +155,8 @@ Run against the URLs above from `main` at `3e984e3`, following §6:
 * Receiver: exactly one POST with `Idempotency-Key: intake.escalated:<intake id>`; `scripts/verify_webhook.py` → `VALID signature`, a tampered signature is rejected; `webhook_deliveries` row `delivered`, 1 attempt, HTTP 200.
 * Payload limited to `event`, `schema_version`, `idempotency_key`, `intake_id`, `clinic_id`. API logs contain no intake text and no tracebacks. The browser bundle contains only the API URL and no secret names.
 
+Phase 7 redeploy (2026-10-13, `main` at `2afdb4b`: migration 004, demo seed, read-only staff checks; flagged presets, staff browser UI and a new webhook delivery not exercised): [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4.
+
 ## 8. Tear-down
 
 Dashboard → each of `healthcare-ai-api`, `healthcare-ai-frontend`, `healthcare-ai-db` → *Settings* → *Delete*. Rotate nothing else: no secret outside Render was created except the receiver URL.
