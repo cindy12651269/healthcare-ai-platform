@@ -216,3 +216,41 @@ def compute_safety_category_metrics(case_metrics: List[Dict[str, Any]]) -> Dict[
             "known_gaps": sum(int(m["known_gap"]) for m in case_metrics),
         },
     }
+
+
+# Extraction Metrics (Issue #40)
+# Exact match on normalised symptom labels (lower-case, trimmed); no semantic or LLM-judge scoring.
+def _symptom_set(symptoms: Any) -> set:
+    return {str(s).strip().lower() for s in (symptoms or []) if str(s).strip()}
+
+
+def compute_symptom_metrics(predicted: Any, expected: Any) -> Dict[str, Any]:
+    pred, gold = _symptom_set(predicted), _symptom_set(expected)
+    tp = len(pred & gold)
+    return {
+        "predicted": sorted(pred),
+        "expected": sorted(gold),
+        "true_positives": tp,
+        "false_positives": len(pred - gold),
+        "false_negatives": len(gold - pred),
+        # Empty prediction / empty ground truth count as perfect (nothing wrong / nothing missed)
+        "precision": tp / len(pred) if pred else 1.0,
+        "recall": tp / len(gold) if gold else 1.0,
+    }
+
+
+def compute_aggregate_symptom_metrics(run_metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+    tp = sum(r["true_positives"] for r in run_metrics)
+    fp = sum(r["false_positives"] for r in run_metrics)
+    fn = sum(r["false_negatives"] for r in run_metrics)
+    n = len(run_metrics)
+    return {
+        "cases": n,
+        "true_positives": tp,
+        "false_positives": fp,
+        "false_negatives": fn,
+        "micro_precision": _rate(tp, tp + fp) if (tp + fp) else 0.0,
+        "micro_recall": _rate(tp, tp + fn) if (tp + fn) else 0.0,
+        "macro_precision": _rate(sum(r["precision"] for r in run_metrics), n),
+        "macro_recall": _rate(sum(r["recall"] for r in run_metrics), n),
+    }

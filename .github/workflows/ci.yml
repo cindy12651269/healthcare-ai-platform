@@ -94,6 +94,10 @@ jobs:
         run: |
           python -m evaluation.benchmark --mode mock --rag on --out ci_benchmark_rag_on.json
           python -c "import json,sys; r=json.load(open('evaluation/results/ci_benchmark_rag_on.json')); a=r['aggregated']; print(r['mode'], a['success_rate'], a['total_retrieval_hits']); sys.exit(not (r['mode']=='mock' and a['success_rate']==1.0 and a['total_retrieval_hits']>0))"
+      - name: Extraction evaluation (mock rule-based baseline, Issue #40)
+        run: |
+          python -m evaluation.benchmark --suite extraction --mode mock --out ci_extraction_eval.json
+          python -c "import json,sys; r=json.load(open('evaluation/results/ci_extraction_eval.json')); a=r['aggregated']; print(r['mode'], a['cases'], a['micro_precision'], a['micro_recall']); sys.exit(not (r['mode']=='mock' and a['cases']>0 and len(r['runs'])==a['cases']))"
       - name: Safety & escalation evaluation (mock, Issue #32)
         run: |
           python -m evaluation.benchmark --suite safety --out ci_safety_eval.json

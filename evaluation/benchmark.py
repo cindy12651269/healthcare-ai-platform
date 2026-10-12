@@ -18,6 +18,8 @@ from evaluation.metrics import (
     compute_aggregate_metrics,
     compute_safety_case_metrics,
     compute_safety_category_metrics,
+    compute_symptom_metrics,
+    compute_aggregate_symptom_metrics,
 )
 from agents.retrieval_agent import RetrievalResult, RetrievalChunk
 from observability.metrics import compute_aggregate_latency
@@ -306,6 +308,50 @@ def run_safety_benchmark(cases: List[Dict[str, Any]] | None = None, pipeline: He
     }
 
 
+# Extraction Suite (Issue #40)
+# Symptom precision/recall of the production StructuringAgent against test_cases.json ground truth.
+# mock: deterministic rule-based baseline, runs in CI. real: opt-in, needs provider config, never gates CI.
+def run_extraction_benchmark(mode: str = "mock", limit: int | None = None) -> Dict[str, Any]:
+    if mode == "real":
+        check_llm_config(get_settings().model_copy(update={"llm_mode": "real"}))
+    elif mode != "mock":
+        raise LLMConfigurationError(f"Unsupported benchmark mode {mode!r}; expected mock or real")
+
+    agent = StructuringAgent(mode=mode)
+    cases = load_cases()[:limit] if limit else load_cases()
+
+    runs: List[Dict[str, Any]] = []
+    for case in cases:
+        clinical = agent.run(case["input"]).get("clinical_structuring") or {}
+        m = compute_symptom_metrics(clinical.get("symptoms"), case.get("expected", {}).get("symptoms"))
+        runs.append({
+            "case_id": case["id"],
+            "run_id": f"{case['id']}:{mode}:extraction",
+            "confidence_level": clinical.get("confidence_level"),
+            **m,
+        })
+
+    return {
+        "mode": mode,
+        "suite": "extraction",
+        "extraction_method": "deterministic_rule_based_baseline" if mode == "mock" else "llm",
+        "runs": runs,
+        "aggregated": compute_aggregate_symptom_metrics(runs),
+    }
+
+
+def print_extraction_summary(results: Dict[str, Any]):
+
+    print("\nExtraction Summary (symptoms)")
+    print("----------------------------")
+    print(f"mode: {results['mode']} ({results['extraction_method']})")
+    for r in results["runs"]:
+        print(f"{r['case_id']:<24} P={r['precision']:.2f} R={r['recall']:.2f} pred={r['predicted']} gold={r['expected']}")
+    a = results["aggregated"]
+    print(f"micro P={a['micro_precision']:.2f} R={a['micro_recall']:.2f} | macro P={a['macro_precision']:.2f} R={a['macro_recall']:.2f}")
+    print("----------------------------\n")
+
+
 def print_safety_summary(results: Dict[str, Any]):
 
     print("\nSafety & Escalation Summary")
@@ -364,7 +410,7 @@ def main():
         description="HealthcarePipeline benchmark harness"
     )
 
-    parser.add_argument("--suite", choices=["pipeline", "safety"], default="pipeline", help="safety: labelled safety & escalation set (Issue #32, mock only)")
+    parser.add_argument("--suite", choices=["pipeline", "safety", "extraction"], default="pipeline", help="safety: labelled safety & escalation set (Issue #32, mock only); extraction: symptom precision/recall (Issue #40)")
     parser.add_argument("--mode", choices=["mock", "real"], default="mock")
     parser.add_argument("--rag", choices=["on", "off"], default="off")
     parser.add_argument("--limit", type=int, default=None, help="run only the first N cases (keeps real-mode API usage small)")
@@ -381,6 +427,15 @@ def main():
             raise SystemExit(f"Safety benchmark refused to start: {e}")
         print_safety_summary(results)
         save_results(results, args.out or "safety_results.json")
+        return
+
+    if args.suite == "extraction":
+        try:
+            results = run_extraction_benchmark(mode=args.mode, limit=args.limit)
+        except LLMConfigurationError as e:
+            raise SystemExit(f"mode: {args.mode}\nExtraction benchmark refused to start: {e}")
+        print_extraction_summary(results)
+        save_results(results, args.out or ("extraction_results.json" if args.mode == "mock" else "extraction_results_real.json"))
         return
 
     try:
