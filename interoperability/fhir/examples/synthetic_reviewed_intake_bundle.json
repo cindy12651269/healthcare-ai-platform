@@ -34,7 +34,7 @@
           },
           {
             "linkId": "consent",
-            "text": "I consent to my intake being processed and reviewed by clinic staff",
+            "text": "I consent to this information being processed to prepare a summary for my care team.",
             "answer": [
               {
                 "valueBoolean": true
@@ -63,7 +63,7 @@
           },
           {
             "linkId": "consent",
-            "text": "I consent to my intake being processed and reviewed by clinic staff",
+            "text": "I consent to this information being processed to prepare a summary for my care team.",
             "type": "boolean",
             "required": true
           }

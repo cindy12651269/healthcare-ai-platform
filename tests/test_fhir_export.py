@@ -79,6 +79,19 @@ def test_static_questionnaire_is_valid_r4():
     assert validate_resource(load_questionnaire()) == []
 
 
+# The Questionnaire must record exactly what the patient saw on the intake form (no invented wording)
+def test_questionnaire_item_texts_match_intake_form_verbatim():
+    import re
+    from pathlib import Path
+    form = Path(__file__).resolve().parent.parent / "app" / "components" / "InputForm.tsx"
+    form_text = re.sub(r"\s+", " ", form.read_text(encoding="utf-8"))
+    items = {i["linkId"]: i["text"] for i in load_questionnaire()["item"]}
+    assert items["symptoms"] == "Your symptoms"
+    assert items["consent"] == "I consent to this information being processed to prepare a summary for my care team."
+    for text in items.values():
+        assert f">{text}<" in form_text.replace("> ", ">").replace(" <", "<"), text
+
+
 # Deterministic synthetic fixture: interoperability/fhir/examples/synthetic_reviewed_intake_bundle.json
 FIXTURE = SCHEMA_ZIP.parent / "examples" / "synthetic_reviewed_intake_bundle.json"
 
@@ -131,6 +144,8 @@ def test_export_is_valid_r4_and_reflects_current_task_status(client, seeded, aud
 
     qr = types["QuestionnaireResponse"][0]
     answers = {i["linkId"]: i["answer"][0] for i in qr["resource"]["item"]}
+    consent_text = next(i["text"] for i in qr["resource"]["item"] if i["linkId"] == "consent")
+    assert consent_text == "I consent to this information being processed to prepare a summary for my care team."
     assert answers == {"symptoms": {"valueString": TEXT}, "consent": {"valueBoolean": True}}
     assert qr["resource"]["authored"] == "2026-01-01T09:00:00+00:00"
     assert qr["resource"]["questionnaire"] == types["Questionnaire"][0]["resource"]["url"]

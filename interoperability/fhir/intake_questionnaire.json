@@ -9,6 +9,6 @@
   "description": "Static definition of the platform's pre-visit intake form (app/components/InputForm.tsx): one free-text symptoms field and one consent checkbox. Synthetic demo data only.",
   "item": [
     {"linkId": "symptoms", "text": "Your symptoms", "type": "text", "required": true},
-    {"linkId": "consent", "text": "I consent to my intake being processed and reviewed by clinic staff", "type": "boolean", "required": true}
+    {"linkId": "consent", "text": "I consent to this information being processed to prepare a summary for my care team.", "type": "boolean", "required": true}
   ]
 }
