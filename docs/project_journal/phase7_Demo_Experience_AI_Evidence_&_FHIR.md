@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 7 (2026-10-12)
 Scope: Issues #40, #41, #42, #43
-Status: In progress — #40–#42 merged and closed; #43 in review (PR open). This journal is updated when #43 merges.
+Status: Implemented and merged — #40–#43 closed (2026-10-12). Hosted API redeployed from `2afdb4b` and verified on 2026-10-13 (read-only staff checks; flagged scenarios not re-submitted, §4).
 
 ---
 
@@ -27,7 +27,7 @@ Out of scope throughout: real LLM mode on the hosted demo, real patient data, co
 | #60 Deterministic extraction baseline & extraction evaluation | #40 | `cfac44b` | `ba2aa3f` | 38234168161 — success |
 | #61 Intake evidence & review timeline | #41 | `63001bd`, `efd4a17` | `428fbf9` | 38235577805 — success |
 | #62 FHIR R4 export of reviewed intakes | #42 | `8c962a4`, `47d4023` | `b91d6ea` | 38237316553 — success |
-| #63 Guided demo, system card & Phase 7 close-out | #43 | in review | not merged | — |
+| #63 Guided demo, system card & Phase 7 close-out | #43 | `8946ec4`, `5fd759b` | `2afdb4b` | 38238842122 — success |
 
 Merged with merge commits after a final review gate. Two gates were blocked and fixed on the branch before merge: #61 (naive intake timestamps displayed in the browser's local time → normalised to UTC, sorted on parsed datetimes) and #62 (Questionnaire consent wording did not match the intake form → exact wording plus a regression test).
 
@@ -53,18 +53,28 @@ Merged with merge commits after a final review gate. Two gates were blocked and 
 **Evidence:** official HL7 FHIR R4 4.0.1 JSON Schema vendored and SHA-256 pinned, plus required-primitive and reference checks; committed synthetic example must equal exporter output; isolation and ids-only audit tests.
 **Limitations:** not the full HL7 validator (no profiles/invariants/terminology); reviewer is a staff user id only; `reviewed`/`escalated` both map to `Task.status = completed` (kept in `businessStatus`); downloaded files leave platform control.
 
-### Issue 43 — Guided Demo, System Card & Phase 7 Close-out (in review)
+### Issue 43 — Guided Demo, System Card & Phase 7 Close-out
 
-**Delivered on the branch:** landing page with Patient / Staff / System card entry points and the workflow (`app/pages/index.tsx`, intake moved to `/intake`); four scenario presets that fill text only (`app/services/demo.ts`); developer trace behind a reviewer toggle; seeded synthetic intakes in two clinics covering every status, refused unless `APP_ENV=demo` (`db/seed_demo.py`); read-only `GET /api/system-card` and `/system-card` page serving the committed snapshot `evaluation/system_card_results.json`; demo staff identities (never tokens) shown only when `NEXT_PUBLIC_DEMO_MODE=true`.
+**Delivered:** landing page with Patient / Staff / System card entry points and the workflow (`app/pages/index.tsx`, intake moved to `/intake`); four scenario presets that fill text only (`app/services/demo.ts`); developer trace behind a reviewer toggle; seeded synthetic intakes in two clinics covering every status, refused unless `APP_ENV=demo` (`db/seed_demo.py`); read-only `GET /api/system-card` and `/system-card` page serving the committed snapshot `evaluation/system_card_results.json`; demo staff identities (never tokens) shown only when `NEXT_PUBLIC_DEMO_MODE=true`.
 **Evidence:** the snapshot is re-computed and compared in CI (`tests/test_system_card.py`); preset outcomes pinned through the real pipeline; seed idempotency, status coverage and clinic isolation tests; frontend tests for presets, toggle, system card and demo-flag visibility.
-**Limitations:** hosted demo not yet redeployed or re-verified for #43; tokens still require the operator (no self-service sign-in, by design); seeded transitions are synthetic demo history.
+**Limitations:** hosted verification (§4) is API-level plus public pages; the staff browser UI and the three flagged presets were not exercised on the hosted demo; tokens still require the operator (no self-service sign-in, by design); seeded transitions are synthetic demo history.
 
 ---
 
 ## 4. Validation Summary
 
 * Every Phase 7 PR passed the three CI jobs (backend + PostgreSQL, deterministic benchmark incl. extraction and safety suites, frontend lint/typecheck/test/build) on its final head and on `main` after merge (runs in §2).
-* Hosted-demo verification for Phase 7 has **not** been performed; [`demo_walkthrough.md`](../demo_walkthrough.md) marks the Phase 7 steps accordingly.
+* Hosted verification, 2026-10-13. Synthetic data only; staff checks were read-only and used 1-hour operator-issued tokens for the three seeded users.
+  * **Deploy.** Render *Manual Deploy* of `main` at `2afdb4b` (replacing the Phase 6 build `3e984e3`; `main` CI run 38238842122 — success). Start log: `Applied migration 004_review_events.sql`, `Migrations complete (1 applied)`, `Demo seed complete (12 rows created)` (8 intakes + 4 seeded transitions), `Application startup complete`. The previous instance served `/health` until the new one was live.
+  * **API.** `/health` → `environment: demo`, `llm_mode: mock`. `/openapi.json` lists `/api/system-card`, `…/timeline` and `…/fhir`. The `evaluation` block of `GET /api/system-card` is identical to `evaluation/system_card_results.json` (#32: 16 cases, guard and escalation match 1.00, 3 known gaps; #40: 6 cases, micro/macro P/R 1.00). Without a token every staff route returns 401.
+  * **Frontend.** `/`, `/intake`, `/staff` and `/system-card` return 200. The landing page lists the workflow and the three demo identities (no tokens). `/intake` shows the four preset buttons. `/system-card` renders the API's numbers above.
+  * **Intake.** The routine preset submitted to `POST /api/ingest`: `submitted`, no reasons, symptoms `sore throat`, `fever`, duration `two days`. One record stored (an identical second submission was not stored again). The emergency, prescription and vague presets were **not** submitted to the hosted demo, because a flagged intake sends a real webhook. Their outcomes (`emergency_signal`, `blocked_prescription`, `low_confidence`) are verified by CI and a local mock-mode run of the same commit only.
+  * **Queues and isolation.** `/api/staff/me` returns the expected single membership for each user. Clinic `default` (as `demo-staff-a` and `demo-admin-a`) shows `demo-intake-a1…a4` as `submitted`, `needs_review`, `reviewed`, `escalated`, plus two live intakes (the routine one above and the Phase 6 acceptance intake of 2026-10-09). `demo-clinic-b` (as `demo-admin-b`) shows `demo-intake-b1…b4` as `submitted`, `needs_review`, `escalated`, `reviewed`. Neither queue contains the other clinic's intakes. Cross-clinic list, detail, timeline, FHIR and member reads return **403** in both directions. Another clinic's intake id under one's own clinic path returns **404**. `clinic_staff` cannot change memberships (`PUT …/members/…` → 403, sent with the member's unchanged role). Tampered and malformed tokens → 401.
+  * **Timeline.** All eight seeded intakes: status and clinic match, escalation reasons match the seed, and the four seeded transitions show the right actor and `needs_review` → `reviewed`/`escalated`. The Phase 6 intake shows its persisted `webhook_delivery` (delivered, 1 attempt, HTTP 200, 2026-10-09). No new delivery was created in this session.
+  * **FHIR.** All ten intakes in both queues return `application/fhir+json` collection Bundles (6 entries; 7 with a seeded transition) that pass `interoperability.fhir_validation.validate_bundle` (R4 JSON schema per resource, required fields, internal references resolve).
+  * **Audit.** The Render logs show one `intake.fhir_export` event per export with `actor_id`, `action`, `clinic_id` and `resource_id` only, no intake text. Denied (403) requests appear only in the request log; no audit event is written for a denial.
+  * **Observed limitation.** In the seeded intakes' timelines, `submitted` is listed after processing and the seeded transition. PostgreSQL `NOW()` gives every row created in the one seed transaction the same `created_at`, which is earlier than the intake timestamps. Live intakes (one transaction each) list `submitted` first.
+  * **Not verified on the hosted demo:** the staff browser UI (token entry, queue, evidence and FHIR preview/download in the page), the three flagged presets, and a new signed webhook delivery. The 2026-10-09 Phase 6 acceptance remains the hosted webhook evidence.
 
 ---
 
