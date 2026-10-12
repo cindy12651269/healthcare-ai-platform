@@ -7,6 +7,9 @@ COPY . .
 # Public (browser-visible) API base URL is inlined at build time. Never pass secrets here.
 ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+# Guided demo (#43): "true" shows the seeded demo staff identities on the landing page. Boolean only.
+ARG NEXT_PUBLIC_DEMO_MODE=false
+ENV NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 

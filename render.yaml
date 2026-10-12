@@ -48,6 +48,9 @@ services:
       # Browser-visible, inlined at build time: the API's public URL only. Never a secret.
       - key: NEXT_PUBLIC_API_BASE_URL
         sync: false
+      # Browser-visible boolean (#43): shows the seeded demo staff identities. Never a credential.
+      - key: NEXT_PUBLIC_DEMO_MODE
+        value: "true"
 
 databases:
   - name: healthcare-ai-db

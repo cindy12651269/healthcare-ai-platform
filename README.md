@@ -4,13 +4,15 @@ AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient
 
 > **Portfolio demo, not a medical device and not production software.** Synthetic data only. It gives no medical advice, makes **no HIPAA compliance claim**, and must not process real patient data ([`docs/security_data_handling.md`](docs/security_data_handling.md)).
 
-**Status:** Phases 1–6 complete (Phase 6: security notes #34, hosted deployment #35, portfolio handover #36; closed 2026-10-09). Phase 7 (#40–#43) is optional and not started. Evidence per capability: [`docs/project_status.md`](docs/project_status.md).
+**Status:** Phases 1–6 complete (closed 2026-10-09). Phase 7 (demo experience, AI evidence & FHIR): #40 extraction baseline, #41 evidence & review timeline and #42 FHIR R4 export are merged; #43 guided demo & system card is in review. Evidence per capability: [`docs/project_status.md`](docs/project_status.md).
 
 ## Hosted demo
 
 | | URL |
 | --- | --- |
-| Patient intake UI | https://healthcare-ai-frontend-1s23.onrender.com |
+| Guided demo (landing) | https://healthcare-ai-frontend-1s23.onrender.com (after #43 is deployed; currently the intake form) |
+| Patient intake UI | https://healthcare-ai-frontend-1s23.onrender.com/intake (after #43; `/` before) |
+| System card | https://healthcare-ai-frontend-1s23.onrender.com/system-card (after #43) |
 | Staff review UI | https://healthcare-ai-frontend-1s23.onrender.com/staff (needs an operator-issued token) |
 | API health | https://healthcare-ai-api-tovn.onrender.com/health |
 
@@ -23,11 +25,11 @@ Render free plans: services sleep after ~15 minutes idle (first request can take
 | Intake pipeline | Validation and consent gate, schema-validated structuring, non-diagnostic report, deterministic safety guard (diagnosis/prescription blocking, report PHI masking, emergency guidance) | Validated de-identification |
 | LLM | `LLM_MODE=mock` (default, deterministic, no key; structuring is a **rule-based extraction baseline, not LLM output**, #40); `LLM_MODE=real` (OpenAI, opt-in, no fallback to mock) | Real mode is never run in CI |
 | Retrieval (RAG) | Retrieval agent and in-memory vector store, exercised by tests and the benchmark (`--rag on`) | **Not wired into the API**; embeddings are hash-based mocks with no semantic meaning |
-| Human review | Escalation rules → `needs_review` with reason codes; clinic-scoped review-queue API; staff UI at `/staff` | Per-clinic intake routing (all public intakes go to clinic `default`) |
+| Human review | Escalation rules → `needs_review` with reason codes; clinic-scoped review-queue API; staff UI at `/staff` with "why flagged" evidence and a review timeline (#41) | Per-clinic intake routing (all public intakes go to clinic `default`) |
 | Access control | HMAC bearer tokens from an operator CLI; `clinic_staff` / `clinic_admin` roles re-checked per request; cross-clinic denial tested | Login/SSO, MFA, token revocation list |
-| Integration | HMAC-SHA256-signed escalation webhook with idempotency key, bounded retries and a delivery log | Delivery guarantee, per-clinic receivers |
+| Integration | HMAC-SHA256-signed escalation webhook with idempotency key, bounded retries and a delivery log; export-only FHIR R4 Bundle of an intake, validated against the pinned official R4 JSON Schema (#42, [`docs/interoperability/fhir_mapping.md`](docs/interoperability/fhir_mapping.md)) | Delivery guarantee, per-clinic receivers |
 | Data | PostgreSQL with ordered SQL migrations; audit events without intake text (tested) | Encryption of stored intake text (stored unmasked) |
-| Delivery | CI (backend + PostgreSQL, benchmark, frontend); one hosted demo on Render | Multiple environments, autoscaling, rate limiting |
+| Delivery | CI (backend + PostgreSQL, benchmark, frontend); one hosted demo on Render; guided demo landing, four scenario presets, seeded two-clinic demo data and a read-only system card (#43) | Multiple environments, autoscaling, rate limiting |
 
 Known exposure: `/api/ingest` returns the full pipeline trace, including the raw intake text, to the submitting browser (documented #32 finding).
 

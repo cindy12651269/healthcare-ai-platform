@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import IntakePage from "../pages/index";
+import IntakePage from "../pages/intake";
 import { IngestOutcome, MESSAGES } from "../services/api";
 import { pipelineResult } from "./fixtures";
+import { SCENARIO_PRESETS } from "../services/demo";
 
 const VALID_TEXT = "I have had a sore throat and a mild fever for two days.";
 
@@ -128,8 +129,9 @@ describe("IntakePage", () => {
   it("renders the developer trace collapsed by default with metrics, retrieval, safety and JSON", async () => {
     const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() });
     render(<IntakePage submit={submit} />);
-    await fillAndSubmit();
+    const user = await fillAndSubmit();
 
+    await user.click(await screen.findByRole("checkbox", { name: /Reviewer \/ developer/ }));
     const summary = await screen.findByText("Developer trace");
     const details = summary.closest("details")!;
     expect(details).not.toHaveAttribute("open");
@@ -151,7 +153,8 @@ describe("IntakePage", () => {
     const data = pipelineResult({ metrics: undefined, rag: undefined, safety: undefined, report: null });
     const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data });
     render(<IntakePage submit={submit} />);
-    await fillAndSubmit();
+    const user = await fillAndSubmit();
+    await user.click(await screen.findByRole("checkbox", { name: /Reviewer \/ developer/ }));
     await screen.findByText("Developer trace");
     for (const id of ["metrics-section", "retrieval-section", "safety-section"]) {
       expect(screen.getByTestId(id)).toHaveTextContent("Not returned by the API for this run.");
@@ -178,13 +181,16 @@ describe("IntakePage", () => {
       diagnostics: { status: 500, body: "Traceback (most recent call last): secret internals" },
     });
     render(<IntakePage submit={submit} />);
-    await fillAndSubmit();
+    const user = await fillAndSubmit();
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("Something went wrong");
     expect(alert).toHaveTextContent(MESSAGES.processing);
     expect(alert).not.toHaveTextContent(/Traceback/);
     expect(screen.queryByRole("heading", { name: "Your intake has been received" })).not.toBeInTheDocument();
+    // Backend detail is hidden from the patient view until a reviewer opts in
+    expect(screen.queryByText("Developer trace")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("checkbox", { name: /Reviewer \/ developer/ }));
 
     const details = screen.getByText("Developer trace").closest("details")!;
     expect(details).not.toHaveAttribute("open");
@@ -202,4 +208,36 @@ describe("IntakePage", () => {
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /mock|real/i })).not.toBeInTheDocument();
   });
+
+  it("hides the developer trace from the patient view by default", async () => {
+    const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() });
+    render(<IntakePage submit={submit} />);
+    await fillAndSubmit();
+    await screen.findByRole("heading", { name: "Your intake has been received" });
+    expect(screen.queryByText("Developer trace")).not.toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: /Reviewer \/ developer/ })).not.toBeChecked();
+  });
+
+  it.each(SCENARIO_PRESETS.map((p) => [p.label, p] as const))(
+    "preset %s fills the form but keeps consent and the normal submission",
+    async (_label, preset) => {
+      const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() });
+      render(<IntakePage submit={submit} />);
+      const user = userEvent.setup();
+
+      await user.click(screen.getByRole("button", { name: preset.label }));
+      expect(screen.getByLabelText("Your symptoms")).toHaveValue(preset.text);
+      expect(screen.getByTestId("preset-expectation")).toHaveTextContent(preset.expect);
+      expect(screen.getByRole("checkbox", { name: /I consent/ })).not.toBeChecked();
+
+      // The preset never grants consent: an unticked form submits consent_granted=false through the
+      // normal path, where the backend rejects it (consent is enforced server-side)
+      await user.click(screen.getByRole("button", { name: "Submit intake" }));
+      expect(submit).toHaveBeenLastCalledWith({ text: preset.text, consent_granted: false });
+
+      await user.click(screen.getByRole("checkbox", { name: /I consent/ }));
+      await user.click(screen.getByRole("button", { name: "Submit intake" }));
+      expect(submit).toHaveBeenLastCalledWith({ text: preset.text, consent_granted: true });
+    },
+  );
 });

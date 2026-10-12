@@ -4,15 +4,18 @@ import {
   MAX_TEXT_LENGTH,
   validateIntake,
 } from "../services/api";
+import { ScenarioPreset } from "../services/demo";
 
 interface InputFormProps {
   onSubmit: (req: IngestRequest) => void;
   isSubmitting: boolean;
+  presets?: ScenarioPreset[]; // guided demo (#43): fill the text only
 }
 
 // Patient-facing intake form. Only patient-provided input lives here; runtime/backend settings do not.
-export default function InputForm({ onSubmit, isSubmitting }: InputFormProps) {
+export default function InputForm({ onSubmit, isSubmitting, presets = [] }: InputFormProps) {
   const [text, setText] = useState("");
+  const [activePreset, setActivePreset] = useState<ScenarioPreset | null>(null);
   const [consent, setConsent] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -35,6 +38,33 @@ export default function InputForm({ onSubmit, isSubmitting }: InputFormProps) {
         Describe your symptoms in your own words: what you are feeling, when it
         started, and anything that makes it better or worse.
       </p>
+
+      {presets.length > 0 && (
+        <div className="presets" role="group" aria-label="Synthetic demo scenarios">
+          <span className="muted">Try a synthetic scenario:</span>
+          {presets.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              disabled={isSubmitting}
+              aria-pressed={activePreset?.id === p.id}
+              onClick={() => {
+                // Fills the text only; consent and validation stay with the patient
+                setText(p.text);
+                setActivePreset(p);
+                setLocalError(null);
+              }}
+            >
+              {p.label}
+            </button>
+          ))}
+          {activePreset && (
+            <p className="muted" data-testid="preset-expectation">
+              Expected: {activePreset.expect}
+            </p>
+          )}
+        </div>
+      )}
 
       <label htmlFor="symptoms" className="field-label">
         Your symptoms

@@ -1,83 +1,27 @@
 import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
-import InputForm from "../components/InputForm";
-import ReportView from "../components/ReportView";
-import DeveloperTracePanel from "../components/DeveloperTracePanel";
-import {
-  FailureDiagnostics,
-  IngestOutcome,
-  IngestRequest,
-  LlmMode,
-  PipelineResult,
-  fetchLlmMode,
-  submitIntake,
-} from "../services/api";
+import Link from "next/link";
+import SiteNav from "../components/SiteNav";
+import { DEMO_MODE, DEMO_STAFF, SCENARIO_PRESETS } from "../services/demo";
 
-type PageState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "success"; httpStatus: number; data: PipelineResult }
-  | {
-      status: "error";
-      kind: "validation" | "failure";
-      message: string;
-      diagnostics: FailureDiagnostics;
-    };
+// Guided demo landing page (#43): entry points and the end-to-end workflow.
+const WORKFLOW: Array<[string, string]> = [
+  ["Patient intake", "A synthetic patient describes symptoms and gives consent."],
+  ["AI processing", "Mock mode: a deterministic rule-based extractor structures the intake (not an LLM)."],
+  ["Safety & escalation", "Rule-based guard blocks diagnosis/prescription content, adds emergency guidance, masks PHI; escalation rules flag intakes for review."],
+  ["Staff review", "Clinic staff see only their clinic's queue and mark flagged intakes reviewed or escalated."],
+  ["Evidence timeline", "Why it was flagged, the recorded evidence, provenance, webhook delivery and staff actions."],
+  ["FHIR export", "A validated FHIR R4 Bundle of the intake, previewed and downloaded (synthetic demo data)."],
+];
 
-function toPageState(outcome: IngestOutcome): PageState {
-  if (outcome.kind === "success") {
-    return { status: "success", httpStatus: outcome.status, data: outcome.data };
-  }
-  return {
-    status: "error",
-    kind: outcome.kind,
-    message: outcome.message,
-    diagnostics: outcome.diagnostics,
-  };
+interface LandingProps {
+  demoMode?: boolean; // injectable for tests; defaults to NEXT_PUBLIC_DEMO_MODE
 }
 
-interface IntakePageProps {
-  submit?: typeof submitIntake; // injectable for tests
-  loadLlmMode?: () => Promise<LlmMode | null>; // injectable for tests
-}
-
-export default function IntakePage({
-  submit = submitIntake,
-  loadLlmMode = fetchLlmMode,
-}: IntakePageProps) {
-  const [state, setState] = useState<PageState>({ status: "idle" });
-  const [llmMode, setLlmMode] = useState<LlmMode | null>(null);
-  const inFlight = useRef(false);
-
-  // Display-only: the mode is configured on the server (LLM_MODE) and cannot be changed here
-  useEffect(() => {
-    let active = true;
-    loadLlmMode().then((mode) => {
-      if (active) setLlmMode(mode);
-    });
-    return () => {
-      active = false;
-    };
-  }, [loadLlmMode]);
-
-  async function handleSubmit(req: IngestRequest) {
-    // Guard against double submission even if the click lands before re-render
-    if (inFlight.current) return;
-    inFlight.current = true;
-    setState({ status: "loading" });
-    try {
-      setState(toPageState(await submit(req)));
-    } finally {
-      inFlight.current = false;
-    }
-  }
-
-  const isSubmitting = state.status === "loading";
-
+export default function Landing({ demoMode = DEMO_MODE }: LandingProps) {
   return (
     <>
       <Head>
-        <title>Pre-visit Intake | Healthcare AI Platform</title>
+        <title>Guided Demo | Healthcare AI Platform</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -85,62 +29,96 @@ export default function IntakePage({
         <div className="container">
           <span className="brand">Healthcare AI Platform</span>
           <span className="badges">
-            {llmMode && (
-              <span className="badge" data-testid="llm-mode">
-                LLM Mode: {llmMode === "real" ? "Real" : "Mock"}
-              </span>
-            )}
             <span className="badge">Demo · synthetic data only</span>
           </span>
+        </div>
+        <div className="container">
+          <SiteNav current="/" />
         </div>
       </header>
 
       <main className="container">
         <section className="intro">
-          <h1>Pre-visit symptom intake</h1>
+          <h1>Pre-visit intake with human review — guided demo</h1>
           <p>
-            Share how you are feeling before your appointment. We will prepare a
-            short, safety-checked summary so your care team can get ready for
-            your visit.
+            A patient-facing intake that is structured, safety-checked and escalated to clinic staff when needed. Every
+            step runs on synthetic data in deterministic mock mode.
           </p>
-          <ol className="steps" aria-label="How it works">
-            <li>Describe your symptoms</li>
-            <li>We structure your intake</li>
-            <li>You receive a safe summary</li>
+        </section>
+
+        <section className="card" aria-labelledby="entry-heading">
+          <h2 id="entry-heading">Start here</h2>
+          <div className="entry-points">
+            <Link className="entry" href="/intake">
+              <strong>Patient</strong>
+              <span>Submit a synthetic intake, or pick one of the four scenarios.</span>
+            </Link>
+            <Link className="entry" href="/staff">
+              <strong>Staff</strong>
+              <span>Review your clinic&apos;s queue, evidence timeline and FHIR export.</span>
+            </Link>
+            <Link className="entry" href="/system-card">
+              <strong>System card</strong>
+              <span>Pipeline, safety and escalation rules, evaluation results, limitations.</span>
+            </Link>
+          </div>
+        </section>
+
+        <section className="card" aria-labelledby="workflow-heading">
+          <h2 id="workflow-heading">How it works</h2>
+          <ol className="workflow" data-testid="workflow">
+            {WORKFLOW.map(([title, body]) => (
+              <li key={title}>
+                <strong>{title}</strong> — {body}
+              </li>
+            ))}
           </ol>
         </section>
 
-        <InputForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <section className="card" aria-labelledby="scenarios-heading">
+          <h2 id="scenarios-heading">Four scenarios to try</h2>
+          <ul>
+            {SCENARIO_PRESETS.map((p) => (
+              <li key={p.id}>
+                <strong>{p.label}</strong>: {p.expect}
+              </li>
+            ))}
+          </ul>
+          <p className="muted">Then sign in as staff to see the intake in the queue, its evidence timeline and FHIR export.</p>
+        </section>
 
-        <div aria-live="polite">
-          {isSubmitting && (
-            <p className="status-loading" role="status">
-              Processing your intake…
+        {demoMode && (
+          <section className="card" aria-labelledby="demo-staff-heading" data-testid="demo-staff">
+            <h2 id="demo-staff-heading">Demo staff accounts</h2>
+            <p className="muted">
+              Synthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every
+              review status; staff see only their own clinic.
             </p>
-          )}
-
-          {state.status === "error" && (
-            <div
-              className={`alert ${state.kind === "validation" ? "alert-warn" : "alert-error"}`}
-              role="alert"
-            >
-              <strong>
-                {state.kind === "validation"
-                  ? "Please check your intake"
-                  : "Something went wrong"}
-              </strong>
-              <p>{state.message}</p>
-            </div>
-          )}
-        </div>
-
-        {state.status === "success" && <ReportView data={state.data} />}
-
-        {state.status === "success" && (
-          <DeveloperTracePanel mode="success" status={state.httpStatus} data={state.data} />
-        )}
-        {state.status === "error" && (
-          <DeveloperTracePanel mode="failure" diagnostics={state.diagnostics} />
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Clinic</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {DEMO_STAFF.map((u) => (
+                  <tr key={u.userId}>
+                    <td>
+                      <code>{u.userId}</code>
+                    </td>
+                    <td>{u.clinicId}</td>
+                    <td>{u.role}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="muted">
+              Sign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not
+              published on this page or in the site code; ask the person who shared this demo.
+            </p>
+          </section>
         )}
       </main>
 

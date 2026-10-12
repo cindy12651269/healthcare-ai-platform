@@ -40,7 +40,7 @@ exec uvicorn api.main:app --host 0.0.0.0 --port "${PORT:-8000}"
 ```
 
 1. **Migrations** (`db/migrate.py`) apply pending files from `db/migrations/`; applied files are recorded in `schema_migrations`, so this is safe on every start.
-2. **Demo seed** (`db/seed_demo.py`) inserts any missing synthetic demo rows (below) and never changes existing ones.
+2. **Demo seed** (`db/seed_demo.py`) inserts any missing synthetic demo rows (below) and never changes existing ones. It refuses to run (exit 2) unless `APP_ENV=demo`. Since #43 it also seeds eight synthetic intakes with fixed ids (`demo-intake-a1`–`a4` in `default`, `demo-intake-b1`–`b4` in `demo-clinic-b`), one per review status per clinic, processed by the mock pipeline without persistence side effects (no webhook).
 3. **Server** starts only if both steps succeed. Render's health check (`GET /health`, which also reports `llm_mode`) only passes once the server is up, so a failed migration leaves the deploy unhealthy instead of serving an unmigrated database.
 
 The migrations run in the start command rather than a pre-deploy command because Render's pre-deploy commands are not available on the free instance type.
@@ -75,10 +75,11 @@ Public intakes are always assigned to `default` (#27). `demo-clinic-b` exists to
 
 | Variable | Source | Notes |
 | --- | --- | --- |
-| `NEXT_PUBLIC_API_BASE_URL` | Entered at creation | The API's public URL. Inlined into the browser bundle at **build** time; it is the only frontend variable and is never a secret. Changing it requires a rebuild. |
+| `NEXT_PUBLIC_API_BASE_URL` | Entered at creation | The API's public URL. Inlined into the browser bundle at **build** time; it is never a secret. Changing it requires a rebuild. |
+| `NEXT_PUBLIC_DEMO_MODE` | `true` (literal, #43) | Browser-visible boolean, inlined at build time. Shows the seeded demo staff identities (user id, clinic, role) on the landing page. Never a credential; tokens are still issued by the operator. |
 | `PORT` | `3000` | Next.js standalone server port. |
 
-No secret has a value in the repository. `tests/test_deploy_demo.py` fails if a secret-like key in `render.yaml` has a literal value, if the frontend service receives anything other than `PORT` and `NEXT_PUBLIC_API_BASE_URL`, or if the UI reads any other `process.env` variable.
+No secret has a value in the repository. `tests/test_deploy_demo.py` fails if a secret-like key in `render.yaml` has a literal value, if the frontend service receives anything other than `PORT`, `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEMO_MODE`, or if the UI reads any other `process.env` variable.
 
 ## 4. Deployment steps (requires the account owner)
 

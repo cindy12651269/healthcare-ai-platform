@@ -1,7 +1,8 @@
 import Head from "next/head";
+import SiteNav from "../components/SiteNav";
 import StaffReview from "../components/StaffReview";
 
-// Staff review workspace (Issue #31). Separate from the patient intake page at "/".
+// Staff review workspace (Issue #31). Separate from the patient intake page at "/intake".
 export default function StaffPage() {
   return (
     <>
@@ -16,6 +17,9 @@ export default function StaffPage() {
           <span className="badges">
             <span className="badge">Demo · synthetic data only</span>
           </span>
+        </div>
+        <div className="container">
+          <SiteNav current="/staff" />
         </div>
       </header>
 
