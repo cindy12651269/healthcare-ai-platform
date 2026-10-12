@@ -46,6 +46,7 @@ PostgreSQL  health_records  (clinic_id = "default", review_status)
 | `health_records.input_hash` | No | SHA-256 of the raw text, used for idempotency. An unsalted hash of short text is guessable; treat it as sensitive. |
 | `/api/ingest` response (to the browser) | **Yes** | Returns the full pipeline trace, including `intake.raw_text`, `chief_complaint` and guard evidence. Known finding from #32, not fixed here. |
 | Staff detail API (`GET …/intakes/{id}`) | Indirectly | Returns `structured`, `report` and `safety` (which can hold fragments, above); does **not** return `intake_json`. |
+| Staff timeline API (`GET …/intakes/{id}/timeline`, #41) | **Yes** | Returns the original intake text and recorded guard matches (which can include PHI values) to authorized staff of the owning clinic only; 403/404 otherwise. Its audit event carries ids only. |
 | Audit events (`audit.jsonl` + stdout) | **No** | Pipeline, API middleware and staff-action events carry ids, status, latency, counts, paths and reason codes only. Verified by `tests/test_audit_no_raw_text.py` (see §4). |
 | Webhook payload | No | Allowlisted model (`EscalationPayload`, `extra="forbid"`): event, schema version, idempotency key, intake id, clinic id. |
 | `webhook_deliveries` | No | Outcome metadata only: target as `scheme://host[:port]`, attempts, HTTP status, error class. Never the secret, signature or response body. |

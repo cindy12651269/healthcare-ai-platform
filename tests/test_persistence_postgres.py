@@ -180,6 +180,7 @@ def test_fresh_database_migrates_to_v2(engine):
             "001_init_health_records.sql",
             "002_clinics_users_review_status.sql",
             "003_webhook_deliveries.sql",
+            "004_review_events.sql",
         ]
         assert run_migrations(scoped) == []
 
@@ -191,6 +192,7 @@ def test_fresh_database_migrates_to_v2(engine):
     assert {"clinic_id", "review_status", "escalation_reason"} <= tables["health_records"]
     assert {"user_id", "clinic_id", "role"} <= tables["clinic_memberships"]
     assert {"idempotency_key", "intake_id", "status", "attempts", "attempt_log"} <= tables["webhook_deliveries"]
+    assert {"intake_id", "clinic_id", "actor_id", "from_status", "to_status", "created_at"} <= tables["review_events"]
     assert clinics == ["default"]
 
 
@@ -212,7 +214,11 @@ def test_v1_database_upgrades_to_v2_without_losing_records(engine, tmp_path):
                 V1_RECORD,
             )
 
-        assert run_migrations(scoped) == ["002_clinics_users_review_status.sql", "003_webhook_deliveries.sql"]
+        assert run_migrations(scoped) == [
+            "002_clinics_users_review_status.sql",
+            "003_webhook_deliveries.sql",
+            "004_review_events.sql",
+        ]
 
         with scoped.connect() as conn:
             row = conn.execute(

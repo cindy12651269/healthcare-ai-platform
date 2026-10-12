@@ -1,4 +1,5 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import IntakeEvidence from "./IntakeEvidence";
 import {
   IntakeDetail,
   IntakeSummary,
@@ -443,6 +444,16 @@ function IntakeDetailView({
         <dt>Guard actions</dt>
         <dd>{actions.join(", ") || "None"}</dd>
       </dl>
+
+      {/* Keyed on status so a staff transition remounts it and reloads the timeline */}
+      <IntakeEvidence
+        key={intake.review_status}
+        api={api}
+        token={token}
+        clinicId={clinicId}
+        intakeId={intakeId}
+        onAuthError={onAuthError}
+      />
 
       <div aria-live="polite">
         {pending && (

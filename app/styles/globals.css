@@ -125,3 +125,9 @@ input.staff-input { width: 100%; }
 .queue { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px; }
 .queue th, .queue td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
 .queue tr[aria-selected="true"] { background: var(--code-bg); }
+
+/* Intake evidence & timeline (#41) */
+.evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+mark[data-testid="recorded-match"] { background: var(--warn-bg); outline: 1px solid var(--warn-border); border-radius: 2px; }
+.timeline { padding-left: 1.2rem; font-size: 0.85rem; }
+.timeline li { margin-bottom: 8px; overflow-wrap: anywhere; }

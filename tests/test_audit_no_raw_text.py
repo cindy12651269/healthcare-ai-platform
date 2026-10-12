@@ -143,6 +143,9 @@ def test_staff_action_audit_events_exclude_raw_text(audit_file, sessions):  # no
     assert transition.status_code == 200
     # The staff detail response does not expose intake_json either
     assert SENTINEL not in detail.text and SENTINEL not in transition.text
+    # The #41 timeline returns the original input to authorized staff, but its audit event carries ids only
+    timeline = client.get(f"{base}/sentinel-intake/timeline", headers=auth("staff-a"))
+    assert timeline.status_code == 200 and SENTINEL in timeline.text
 
     lines, events = _events(audit_file)
     _assert_no_raw_text(lines, EMERGENCY_TEXT)
@@ -152,4 +155,5 @@ def test_staff_action_audit_events_exclude_raw_text(audit_file, sessions):  # no
         ("staff-a", "intake.list", None),
         ("staff-a", "intake.read", "sentinel-intake"),
         ("admin-a", "intake.transition", "sentinel-intake"),
+        ("staff-a", "intake.timeline.read", "sentinel-intake"),
     ]

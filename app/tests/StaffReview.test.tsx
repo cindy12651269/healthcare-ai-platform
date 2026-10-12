@@ -7,6 +7,7 @@ import StaffReview from "../components/StaffReview";
 import {
   IntakeDetail,
   IntakeSummary,
+  IntakeTimeline,
   STAFF_MESSAGES,
   StaffApi,
   StaffResult,
@@ -59,6 +60,44 @@ function detail(over: Partial<IntakeDetail> = {}): IntakeDetail {
   };
 }
 
+function timeline(over: Partial<IntakeTimeline> = {}): IntakeTimeline {
+  return {
+    intake_id: "flagged-0001",
+    clinic_id: "default",
+    review_status: "needs_review",
+    evidence: {
+      original_input: "Chest pain since this morning.",
+      extracted: { symptoms: ["chest pain"], duration: null, onset: "since this morning", severity: null,
+        red_flags: ["chest pain"], confidence_level: 0.7 },
+      recorded_matches: [
+        { type: "EMERGENCY", detail: "Emergency or crisis signal detected", match: "chest pain", found_in_input: true },
+        { type: "EMERGENCY", detail: "Emergency or crisis signal detected", match: "report only", found_in_input: false },
+      ],
+      escalation_rules: [
+        { reason: "emergency_signal", rule: "Emergency or crisis language in the intake or the generated report",
+          evidence: { guard_action_recorded: true } },
+      ],
+      provenance: { execution_mode: "mock", model_version: "mock", prompt_version: "deterministic_rule_based_baseline_v1",
+        pipeline_version: "v0.1.0", run_id: "run-1" },
+    },
+    events: [
+      { kind: "submitted", at: "2026-10-01T09:59:59Z", at_source: "intake.timestamp", details: {} },
+      { kind: "processed", at: "2026-10-01T10:00:00Z", at_source: "record.created_at",
+        details: { execution_mode: "mock", model_version: "mock", run_id: "run-1" } },
+      { kind: "safety_evaluated", at: "2026-10-01T10:00:00Z", at_source: "record.created_at",
+        details: { actions: ["add_emergency_guidance"], reason_types: ["EMERGENCY"], severity: "high" } },
+      { kind: "escalation_decision", at: "2026-10-01T10:00:00Z", at_source: "record.created_at",
+        details: { required: true, reasons: ["emergency_signal"] } },
+      { kind: "webhook_delivery", at: "2026-10-01T10:00:01Z", at_source: "webhook_deliveries.created_at",
+        details: { event_type: "intake.escalated", status: "failed", attempts: 3, last_error: "timeout" } },
+      { kind: "staff_transition", at: "2026-10-01T10:05:00Z", at_source: "review_events.created_at",
+        details: { actor_id: "admin-a", from_status: "needs_review", to_status: "escalated" } },
+    ],
+    notes: [],
+    ...over,
+  };
+}
+
 const ok = <T,>(data: T): StaffResult<T> => ({ ok: true, data });
 const fail = (kind: keyof typeof STAFF_MESSAGES, status?: number): StaffResult<never> => ({
   ok: false,
@@ -79,6 +118,7 @@ function makeApi(over: Partial<Record<keyof StaffApi, unknown>> = {}) {
     listIntakes: vi.fn().mockResolvedValue(ok([summary("flagged-0001", "needs_review", "emergency_signal")])),
     getIntake: vi.fn().mockResolvedValue(ok(detail())),
     transitionIntake: vi.fn(),
+    getIntakeTimeline: vi.fn().mockResolvedValue(ok(timeline())),
     ...over,
   } as unknown as StaffApi & Record<keyof StaffApi, ReturnType<typeof vi.fn>>;
 }
@@ -317,5 +357,80 @@ describe("client bundle hygiene", () => {
     expect(code).not.toMatch(/AUTH_TOKEN_SECRET|OPENAI_API_KEY|DATABASE_URL/);
     expect(code).not.toMatch(/localStorage|sessionStorage|document\.cookie/);
     expect(new Set(code.match(/NEXT_PUBLIC_[A-Z_]+/g))).toEqual(new Set(["NEXT_PUBLIC_API_BASE_URL"]));
+  });
+});
+
+describe("StaffReview evidence & timeline (#41)", () => {
+  it("shows the triggered rule, highlights only recorded matches found in the input, and labels extracted fields", async () => {
+    const api = makeApi();
+    const user = await signIn(api);
+    await openFirst(user);
+
+    const rules = await screen.findByTestId("escalation-rules");
+    expect(rules).toHaveTextContent("Emergency or crisis language");
+    expect(rules).toHaveTextContent("emergency_signal");
+    expect(api.getIntakeTimeline).toHaveBeenCalledWith(TOKEN, "default", "flagged-0001");
+
+    const marks = within(screen.getByTestId("original-input")).getAllByTestId("recorded-match");
+    expect(marks.map((m) => m.textContent)).toEqual(["Chest pain"]);
+    expect(screen.getByText(/not the input\): report only/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Extracted fields \(derived, not recorded matches\)/ })).toBeInTheDocument();
+    expect(within(screen.getByTestId("provenance")).getByText("deterministic_rule_based_baseline_v1")).toBeInTheDocument();
+  });
+
+  it("renders the timeline in the order returned, including webhook delivery and staff actions", async () => {
+    const user = await signIn(makeApi());
+    await openFirst(user);
+
+    const items = within(await screen.findByTestId("timeline")).getAllByRole("listitem");
+    expect(items.map((li) => li.getAttribute("data-kind"))).toEqual([
+      "submitted", "processed", "safety_evaluated", "escalation_decision", "webhook_delivery", "staff_transition",
+    ]);
+    expect(items[4]).toHaveTextContent("failed after 3 attempt(s)");
+    expect(items[4]).toHaveTextContent("timeout");
+    expect(items[5]).toHaveTextContent("admin-a: needs_review → escalated");
+  });
+
+  it("shows loading, then an error state when the timeline cannot be loaded", async () => {
+    const pending = deferred<StaffResult<IntakeTimeline>>();
+    const api = makeApi({ getIntakeTimeline: vi.fn().mockReturnValueOnce(pending.promise) });
+    const user = await signIn(api);
+    await openFirst(user);
+
+    expect(await screen.findByText("Loading evidence and timeline…")).toBeInTheDocument();
+    pending.resolve(fail("not_found", 404));
+    expect(await screen.findByTestId("timeline-error")).toHaveTextContent(STAFF_MESSAGES.not_found);
+  });
+
+  it("handles missing data without inventing values", async () => {
+    const data = timeline({
+      evidence: {
+        original_input: null,
+        extracted: {},
+        recorded_matches: [],
+        escalation_rules: [],
+        provenance: { execution_mode: null, model_version: null, prompt_version: null, pipeline_version: "v0.0.1", run_id: "r" },
+      },
+      events: [],
+      notes: ["Model and prompt version were not recorded for this intake."],
+    });
+    const user = await signIn(makeApi({ getIntakeTimeline: vi.fn().mockResolvedValue(ok(data)) }));
+    await openFirst(user);
+
+    expect(await screen.findByTestId("no-escalation")).toBeInTheDocument();
+    expect(screen.getByText("Original input is not available for this intake.")).toBeInTheDocument();
+    expect(screen.getByText("No events have been recorded for this intake.")).toBeInTheDocument();
+    expect(within(screen.getByTestId("provenance")).getAllByText("Not recorded")).toHaveLength(3);
+    expect(screen.getByTestId("timeline-note")).toHaveTextContent("not recorded");
+  });
+
+  it("does not render another clinic's evidence when the server denies access", async () => {
+    const api = makeApi({ getIntakeTimeline: vi.fn().mockResolvedValue(fail("forbidden", 403)) });
+    const user = await signIn(api);
+    await openFirst(user);
+
+    expect(await screen.findByTestId("timeline-error")).toHaveTextContent(STAFF_MESSAGES.forbidden);
+    expect(screen.queryByTestId("original-input")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("timeline")).not.toBeInTheDocument();
   });
 });
