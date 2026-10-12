@@ -188,3 +188,19 @@ export async function fetchLlmMode(
     return null;
   }
 }
+
+// Read-only system card (#43): GET /api/system-card. Public, no credentials.
+export type SystemCard = Record<string, unknown>;
+
+export async function fetchSystemCard(
+  options: Pick<SubmitOptions, "baseUrl" | "fetchImpl"> = {},
+): Promise<SystemCard | null> {
+  const { baseUrl = API_BASE_URL, fetchImpl = fetch } = options;
+  try {
+    const response = await fetchImpl(`${baseUrl.replace(/\/$/, "")}/api/system-card`);
+    if (!response.ok) return null;
+    return (await response.json()) as SystemCard;
+  } catch {
+    return null;
+  }
+}

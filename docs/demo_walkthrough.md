@@ -1,6 +1,6 @@
 # Hosted Demo Walkthrough
 
-Reproducible walkthrough of the Phase 4–5 workflow on the hosted demo (#35). Synthetic data only: never enter real personal or health information. No medical advice; no HIPAA compliance claim.
+Reproducible walkthrough of the hosted demo (#35), including the Phase 7 guided demo (#43). Synthetic data only: never enter real personal or health information. No medical advice; no HIPAA compliance claim.
 
 | | URL |
 | --- | --- |
@@ -15,24 +15,37 @@ curl -s https://healthcare-ai-api-tovn.onrender.com/health
 curl -s -o /dev/null -w "%{http_code}\n" https://healthcare-ai-frontend-1s23.onrender.com/
 ```
 
-## 1. Patient intake (anyone)
+> **Phase 7 (#43) status.** Steps 0–2 below describe the guided demo added in #43. They are verified by automated tests (frontend and in-process backend) but **have not yet been re-run against the hosted demo**; the hosted services must be redeployed from `main` first (frontend rebuild with `NEXT_PUBLIC_DEMO_MODE=true`, API restart to seed the demo intakes). Record the hosted result here once performed.
 
-1. Open the frontend. The header shows `LLM Mode: Mock`.
-2. Enter a short synthetic description that mentions an emergency symptom, plus something unique (identical text is stored only once), for example: *"Synthetic test 4821: sudden chest pain and trouble breathing since this morning."*
-3. Tick consent and submit.
-4. Expected: a non-diagnostic summary report. Expand **Developer trace**: its raw JSON (the full `/api/ingest` response) shows `escalation.required: true`, `escalation.reasons: ["emergency_signal"]` and `persistence.status: "saved"` with a `record_id`.
+## 0. Guided demo landing (anyone)
 
-A routine description (e.g. a mild sore throat) shows `escalation.required: false` and is stored as `submitted`, so it does not appear in the review queue filter for `needs_review`.
+Open the frontend root (`/`). It explains the workflow (patient intake → AI processing → safety & escalation → staff review → evidence timeline → FHIR export) and links to **Patient intake** (`/intake`), **Staff review** (`/staff`) and the **System card** (`/system-card`). With `NEXT_PUBLIC_DEMO_MODE=true` it also lists the seeded demo staff identities (user id, clinic, role) — identities only, never tokens.
 
-## 2. Staff review (operator token required)
+The **System card** shows the pipeline stages, the current execution mode (`mock`), the safety and escalation rules with the 0.5 low-confidence threshold, the committed #32 and #40 evaluation results with their limitations, known limitations and a "Not a medical device" statement.
 
-Staff tokens are issued by the operator, not by the browser ([`deployment.md`](deployment.md) §6 step 2). The seeded synthetic users are `demo-staff-a` / `demo-admin-a` (clinic `default`) and `demo-admin-b` (`demo-clinic-b`).
+## 1. Patient intake: four scenarios (anyone)
 
-1. Open `/staff` and paste a `demo-staff-a` token. The token stays in browser memory only.
-2. Expected: the `default` clinic's queue lists the intake from step 1 as **Needs review** with reason `emergency_signal`.
-3. Open it: the structured output, report and safety result are shown. The staff API does not return the stored raw intake record (`intake_json`), but structured fields can still contain parts of the original text (in mock mode `chief_complaint` is its first 200 characters). In mock mode the symptoms, duration, onset, severity and summary come from a deterministic rule-based extraction baseline (#40), labelled as such in the UI; they are not LLM-generated. An intake with no symptom from its lexicon gets confidence below 0.5 and is escalated with `low_confidence`.
-4. Mark it **Reviewed** (or **Escalated**). Expected: the status changes and the transition buttons are replaced by "Only intakes that need review can be marked reviewed or escalated." The API itself rejects any further transition of that intake with HTTP 409 (only `needs_review` can be resolved).
-5. With a `demo-admin-b` token, the `default` clinic's queue is not accessible (403) and `demo-clinic-b`'s queue does not contain the intake.
+1. Open `/intake`. The header shows `LLM Mode: Mock`.
+2. Click a scenario button. It fills the text only; tick consent yourself, then submit. Identical text is stored only once, so add something unique (e.g. "Synthetic test 4821") if you want a new record each time.
+
+| Scenario | Preset text | Expected |
+| --- | --- | --- |
+| Routine symptoms | I have had a sore throat and a mild fever for two days. | Summary shown; symptoms *sore throat, fever*, duration *two days*; not flagged (`submitted`) |
+| Emergency language | I have chest pain and shortness of breath since this morning. | Emergency guidance banner; flagged `emergency_signal` |
+| Prescription request | Should I take 500 mg of amoxicillin for this cough? | Report blocked, safe acknowledgement shown; flagged `blocked_prescription` |
+| Vague / low confidence | I just don't feel right and wanted to check in. | No lexicon symptom, confidence below 0.5; flagged `low_confidence` |
+
+These outcomes are pinned by `tests/test_demo_seed_intakes.py::test_scenario_presets_produce_the_documented_outcomes`. The **developer trace** is hidden by default; tick "Reviewer / developer: show the pipeline trace" to see the raw `/api/ingest` response (`escalation`, `persistence.record_id`).
+
+## 2. Staff review, evidence, FHIR export and clinic isolation (operator token required)
+
+Staff tokens are issued by the operator, not by the browser ([`deployment.md`](deployment.md) §6 step 2); the site never publishes a token. Seeded synthetic users: `demo-staff-a` / `demo-admin-a` (clinic `default`) and `demo-admin-b` (`demo-clinic-b`). The demo seed (`APP_ENV=demo` only) adds four synthetic intakes per clinic, one in each review status (`submitted`, `needs_review`, `reviewed`, `escalated`); resolved ones carry one seeded staff transition.
+
+1. Open `/staff` and paste a `demo-staff-a` token (kept in browser memory only). The `default` queue shows the flagged scenario intakes from step 1 and the seeded `demo-intake-a2`. Filter **All** to see every status.
+2. Open a flagged intake. **Why flagged** shows the triggered rule and its recorded evidence; the original input sits next to the extracted fields (derived), with recorded safety matches highlighted where they occur in the input; provenance shows mode `mock`, model/prompt/pipeline versions and the run id. The **Timeline** lists submitted → processed → safety evaluated → escalation decision → webhook delivery → staff actions.
+3. Mark it **Reviewed** or **Escalated**: the timeline reloads with the staff action (actor, from → to).
+4. **FHIR R4 — Synthetic Demo Data**: click "Load FHIR export" for the JSON Bundle preview, then "Download JSON". The `Task` shows the current status and escalation reason; a `Provenance` names the reviewer after step 3.
+5. Clinic isolation: with a `demo-admin-b` token, the `demo-clinic-b` queue shows only `demo-intake-b1`–`b4`; the `default` clinic's queue returns 403 and none of its intakes appear.
 
 ## 3. Signed webhook (operator)
 
@@ -40,8 +53,8 @@ Each newly stored `needs_review` intake sends one HMAC-signed POST to the config
 
 ## 4. Scripted version
 
-`python -m scripts.hosted_check --api https://healthcare-ai-api-tovn.onrender.com` (with `STAFF_A_TOKEN` and `STAFF_B_TOKEN` set) runs steps 1–2 non-interactively and prints `[PASS]`/`[FAIL]` per check. Result on 2026-10-09: 8/8 PASS, exactly one webhook, `VALID signature` ([`deployment.md`](deployment.md) §7).
+`python -m scripts.hosted_check --api https://healthcare-ai-api-tovn.onrender.com` (with `STAFF_A_TOKEN` and `STAFF_B_TOKEN` set) runs the original Phase 5 acceptance flow (emergency intake → `default` queue → cross-clinic denial) non-interactively and prints `[PASS]`/`[FAIL]` per check. Result on 2026-10-09: 8/8 PASS, exactly one webhook, `VALID signature` ([`deployment.md`](deployment.md) §7).
 
 ## What this demo does not show
 
-Real LLM output (the hosted demo runs in mock mode), retrieval (not wired into the API), real patient data, or any production or compliance property. See [`project_status.md`](project_status.md).
+Real LLM output (the hosted demo runs in mock mode; extraction is a rule-based baseline), retrieval (not wired into the API), clinical validation, real patient data, or any production or compliance property. See [`project_status.md`](project_status.md).

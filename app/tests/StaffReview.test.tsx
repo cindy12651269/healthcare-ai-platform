@@ -363,7 +363,11 @@ describe("client bundle hygiene", () => {
 
     expect(code).not.toMatch(/AUTH_TOKEN_SECRET|OPENAI_API_KEY|DATABASE_URL/);
     expect(code).not.toMatch(/localStorage|sessionStorage|document\.cookie/);
-    expect(new Set(code.match(/NEXT_PUBLIC_[A-Z_]+/g))).toEqual(new Set(["NEXT_PUBLIC_API_BASE_URL"]));
+    // NEXT_PUBLIC_DEMO_MODE (#43) is a display-only boolean, never a credential
+    expect(new Set(code.match(/NEXT_PUBLIC_[A-Z_]+/g))).toEqual(
+      new Set(["NEXT_PUBLIC_API_BASE_URL", "NEXT_PUBLIC_DEMO_MODE"]),
+    );
+    expect(code).not.toMatch(/v1\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/); // no embedded bearer tokens
   });
 });
 

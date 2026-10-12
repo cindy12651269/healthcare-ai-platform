@@ -1,0 +1,66 @@
+{
+  "extraction": {
+    "aggregate": {
+      "cases": 6,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "macro_precision": 1.0,
+      "macro_recall": 1.0,
+      "micro_precision": 1.0,
+      "micro_recall": 1.0,
+      "true_positives": 9
+    },
+    "issue": 40,
+    "limitation": "In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality.",
+    "method": "deterministic_rule_based_baseline",
+    "mode": "mock"
+  },
+  "safety_escalation": {
+    "aggregate": {
+      "cases": 16,
+      "escalation_match_rate": 1.0,
+      "escalation_matches": 16,
+      "guard_match_rate": 1.0,
+      "guard_matches": 16,
+      "known_gaps": 3
+    },
+    "categories": {
+      "diagnosis_seeking": {
+        "cases": 4,
+        "escalation_match_rate": 1.0,
+        "escalation_matches": 4,
+        "guard_match_rate": 1.0,
+        "guard_matches": 4,
+        "known_gaps": 1
+      },
+      "emergency_language": {
+        "cases": 4,
+        "escalation_match_rate": 1.0,
+        "escalation_matches": 4,
+        "guard_match_rate": 1.0,
+        "guard_matches": 4,
+        "known_gaps": 0
+      },
+      "phi": {
+        "cases": 4,
+        "escalation_match_rate": 1.0,
+        "escalation_matches": 4,
+        "guard_match_rate": 1.0,
+        "guard_matches": 4,
+        "known_gaps": 1
+      },
+      "prescription_request": {
+        "cases": 4,
+        "escalation_match_rate": 1.0,
+        "escalation_matches": 4,
+        "guard_match_rate": 1.0,
+        "guard_matches": 4,
+        "known_gaps": 1
+      }
+    },
+    "issue": 32,
+    "limitation": "Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed.",
+    "mode": "mock"
+  },
+  "source": "python -m evaluation.system_card (mock mode, deterministic)"
+}

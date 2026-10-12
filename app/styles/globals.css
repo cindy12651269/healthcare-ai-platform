@@ -134,3 +134,13 @@ mark[data-testid="recorded-match"] { background: var(--warn-bg); outline: 1px so
 
 /* FHIR export preview (#42) */
 .json-preview { max-height: 320px; overflow: auto; font-size: 0.75rem; background: var(--warn-bg); padding: 8px; border-radius: 4px; }
+
+/* Guided demo (#43) */
+.site-nav { display: flex; gap: 14px; flex-wrap: wrap; padding-bottom: 10px; font-size: 0.9rem; }
+.site-nav a[aria-current="page"] { font-weight: 600; text-decoration: underline; }
+.entry-points { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.entry { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; }
+.workflow li { margin-bottom: 6px; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.presets p { flex-basis: 100%; margin: 0; }
+.reviewer-toggle { margin-top: 16px; }

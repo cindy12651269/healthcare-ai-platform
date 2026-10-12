@@ -106,12 +106,14 @@ def test_frontend_receives_no_backend_secrets(blueprint):
     frontend, env = _service(blueprint, "healthcare-ai-frontend")
 
     assert frontend["dockerContext"] == "./app" and frontend["healthCheckPath"] == "/"
-    assert set(env) == {"PORT", "NEXT_PUBLIC_API_BASE_URL"}
+    assert set(env) == {"PORT", "NEXT_PUBLIC_API_BASE_URL", "NEXT_PUBLIC_DEMO_MODE"}
     assert env["NEXT_PUBLIC_API_BASE_URL"] == {"key": "NEXT_PUBLIC_API_BASE_URL", "sync": False}
-    # The only browser-visible variable the UI reads
+    # Display-only demo flag (#43): a literal boolean, never a credential
+    assert env["NEXT_PUBLIC_DEMO_MODE"] == {"key": "NEXT_PUBLIC_DEMO_MODE", "value": "true"}
+    # The only browser-visible variables the UI reads
     sources = [p for d in ("components", "pages", "services") for p in (ROOT / "app" / d).rglob("*.ts*")]
     public = {m for p in sources for m in re.findall(r"process\.env\.(\w+)", p.read_text())}
-    assert public == {"NEXT_PUBLIC_API_BASE_URL"}
+    assert public == {"NEXT_PUBLIC_API_BASE_URL", "NEXT_PUBLIC_DEMO_MODE"}
 
 
 def test_single_free_database_and_two_services(blueprint):

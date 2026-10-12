@@ -42,7 +42,7 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | 4 | Foundation & Provider Integration | **COMPLETE** — Issues #22, #25–#28 |
 | 5 | Clinical Review & Escalation Workflow | **COMPLETE** — Issues #29–#33 |
 | 6 | Security, Deployment & Handover | **COMPLETE** — Issues #34–#36 |
-| 7 | Demo Experience, AI Evidence & FHIR Interoperability | **PLANNED** — Issues #40–#43 |
+| 7 | Demo Experience, AI Evidence & FHIR Interoperability | **IN PROGRESS** — #40, #41, #42 complete; #43 in review |
 | — | Optional enhancements | Not required for portfolio completion |
 
 Each phase is tracked as a GitHub Project of the same name, and GitHub Issues remain authoritative wherever this document and an issue differ. The work items in §5–§6 were written on 2026-10-02, before the issues existed; they are now delivered by Phases 3–6 as mapped below.
@@ -130,8 +130,8 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 Pursue only after the clinic workflow (§6), and only if they support the intake workflow. Items that are now scheduled as Phase 7 issues are marked.
 
 * **Meaningful retrieval with provenance** — replace hash-based mock embeddings with a deterministic lexical baseline or real embeddings, cite sources in staff-facing summaries, and measure hit rate on labelled cases. Until this is done, documentation should not claim retrieval improves output quality.
-* **Real-mode extraction evaluation** — nested field scoring and symptom precision/recall against labelled synthetic cases. Moved out of #22; extraction evaluation is now #40 (Phase 7).
-* **FHIR R4 export** of a reviewed intake (e.g. `QuestionnaireResponse`). Now scheduled as #42, FHIR R4 Export of Reviewed Intakes (Phase 7).
+* **Real-mode extraction evaluation** — nested field scoring and symptom precision/recall against labelled synthetic cases. Moved out of #22; the extraction evaluation harness (mock in CI, real opt-in) was delivered in #40 (Phase 7, complete); real-mode results remain unmeasured.
+* **FHIR R4 export** of a reviewed intake (e.g. `QuestionnaireResponse`). Delivered as #42, FHIR R4 Export of Reviewed Intakes (Phase 7, complete).
 * **Application-level encryption** of stored raw intake text.
 * **Rate limiting** on the public intake endpoint.
 * **Trace export** to an OpenTelemetry-compatible backend.
