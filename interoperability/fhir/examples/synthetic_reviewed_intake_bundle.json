@@ -1,0 +1,223 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "meta": {
+    "tag": [
+      {
+        "system": "urn:healthcare-ai-platform:data",
+        "code": "synthetic-demo",
+        "display": "FHIR R4 — Synthetic Demo Data"
+      }
+    ]
+  },
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:04ad5944-252b-55e0-b848-c7dd7cc486a0",
+      "resource": {
+        "resourceType": "QuestionnaireResponse",
+        "identifier": {
+          "system": "urn:healthcare-ai-platform:intake",
+          "value": "synthetic-0001"
+        },
+        "questionnaire": "urn:healthcare-ai-platform:fhir:Questionnaire:pre-visit-intake",
+        "status": "completed",
+        "authored": "2026-01-01T09:00:00+00:00",
+        "item": [
+          {
+            "linkId": "symptoms",
+            "text": "Your symptoms",
+            "answer": [
+              {
+                "valueString": "Synthetic: sore throat and mild fever for two days."
+              }
+            ]
+          },
+          {
+            "linkId": "consent",
+            "text": "I consent to my intake being processed and reviewed by clinic staff",
+            "answer": [
+              {
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:96b65847-1c8d-55c5-b3d0-79fc3d51a800",
+      "resource": {
+        "resourceType": "Questionnaire",
+        "url": "urn:healthcare-ai-platform:fhir:Questionnaire:pre-visit-intake",
+        "version": "1",
+        "name": "PreVisitIntake",
+        "title": "Pre-visit symptom intake (synthetic demo)",
+        "status": "active",
+        "description": "Static definition of the platform's pre-visit intake form (app/components/InputForm.tsx): one free-text symptoms field and one consent checkbox. Synthetic demo data only.",
+        "item": [
+          {
+            "linkId": "symptoms",
+            "text": "Your symptoms",
+            "type": "text",
+            "required": true
+          },
+          {
+            "linkId": "consent",
+            "text": "I consent to my intake being processed and reviewed by clinic staff",
+            "type": "boolean",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:775b354c-19cf-5962-b648-44cd095fcfc6",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:healthcare-ai-platform:intake-review",
+            "value": "synthetic-0001"
+          }
+        ],
+        "status": "completed",
+        "businessStatus": {
+          "coding": [
+            {
+              "system": "urn:healthcare-ai-platform:review-status",
+              "code": "reviewed"
+            }
+          ],
+          "text": "reviewed"
+        },
+        "intent": "order",
+        "description": "Staff review of a pre-visit intake",
+        "focus": {
+          "reference": "urn:uuid:04ad5944-252b-55e0-b848-c7dd7cc486a0"
+        },
+        "authoredOn": "2026-01-01T09:00:01+00:00",
+        "lastModified": "2026-01-01T09:30:00+00:00",
+        "owner": {
+          "reference": "urn:uuid:31b9ce19-e50b-53fa-9cb0-effe7f0f08f3"
+        },
+        "reasonCode": {
+          "text": "low_confidence"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:31b9ce19-e50b-53fa-9cb0-effe7f0f08f3",
+      "resource": {
+        "resourceType": "Organization",
+        "identifier": [
+          {
+            "system": "urn:healthcare-ai-platform:clinic",
+            "value": "default"
+          }
+        ],
+        "name": "Default Clinic"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:be2c02e1-0132-5715-80f2-b9fc37a876d5",
+      "resource": {
+        "resourceType": "Device",
+        "deviceName": [
+          {
+            "name": "Healthcare AI Platform intake pipeline",
+            "type": "user-friendly-name"
+          }
+        ],
+        "version": [
+          {
+            "type": {
+              "text": "model"
+            },
+            "value": "mock"
+          },
+          {
+            "type": {
+              "text": "prompt"
+            },
+            "value": "deterministic_rule_based_baseline_v1"
+          },
+          {
+            "type": {
+              "text": "pipeline"
+            },
+            "value": "v0.1.0"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b216b783-0f3c-5205-bc78-738859cc15fe",
+      "resource": {
+        "resourceType": "Provenance",
+        "target": [
+          {
+            "reference": "urn:uuid:04ad5944-252b-55e0-b848-c7dd7cc486a0"
+          },
+          {
+            "reference": "urn:uuid:775b354c-19cf-5962-b648-44cd095fcfc6"
+          }
+        ],
+        "recorded": "2026-01-01T09:00:01+00:00",
+        "activity": {
+          "text": "AI structuring, safety check and escalation decision (run run-synthetic-0001)"
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "assembler"
+                }
+              ]
+            },
+            "who": {
+              "reference": "urn:uuid:be2c02e1-0132-5715-80f2-b9fc37a876d5"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:086d5cca-fd2e-56ff-bc0f-317d103557bc",
+      "resource": {
+        "resourceType": "Provenance",
+        "target": [
+          {
+            "reference": "urn:uuid:775b354c-19cf-5962-b648-44cd095fcfc6"
+          }
+        ],
+        "recorded": "2026-01-01T09:30:00+00:00",
+        "activity": {
+          "text": "Staff review: needs_review -> reviewed"
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "verifier"
+                }
+              ]
+            },
+            "who": {
+              "identifier": {
+                "system": "urn:healthcare-ai-platform:user",
+                "value": "staff-a"
+              }
+            },
+            "onBehalfOf": {
+              "reference": "urn:uuid:31b9ce19-e50b-53fa-9cb0-effe7f0f08f3"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

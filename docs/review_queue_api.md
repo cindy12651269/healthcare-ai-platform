@@ -20,6 +20,7 @@ Every route uses the #28 dependency `require_clinic_role("clinic_staff", "clinic
 | `GET /api/clinics/{clinic_id}/intakes/{intake_id}` | One intake for review. | Summary fields plus `clinic_id`, `structured` (structured result), `report`, `safety` (safety guard result). Unknown or other-clinic id → 404. |
 | `POST /api/clinics/{clinic_id}/intakes/{intake_id}/transition` body `{"review_status": "reviewed" \| "escalated"}` | Resolve a flagged intake. | The updated intake (same shape as GET). |
 
+| `GET /api/clinics/{clinic_id}/intakes/{intake_id}/fhir` (#42) | FHIR R4 Bundle export (synthetic demo data), `application/fhir+json`. | See [`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md). Unknown or other-clinic id → 404. Audited as `intake.fhir_export`. |
 | `GET /api/clinics/{clinic_id}/intakes/{intake_id}/timeline` (#41) | Read-only evidence and review timeline. | See [Intake evidence & timeline](#intake-evidence--timeline-41). Unknown or other-clinic id → 404. |
 
 The detail response does not include the stored raw intake payload (`intake_json`). Clinical content is read-only; there is no edit endpoint.

@@ -1,0 +1,14 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "pre-visit-intake",
+  "url": "urn:healthcare-ai-platform:fhir:Questionnaire:pre-visit-intake",
+  "version": "1",
+  "name": "PreVisitIntake",
+  "title": "Pre-visit symptom intake (synthetic demo)",
+  "status": "active",
+  "description": "Static definition of the platform's pre-visit intake form (app/components/InputForm.tsx): one free-text symptoms field and one consent checkbox. Synthetic demo data only.",
+  "item": [
+    {"linkId": "symptoms", "text": "Your symptoms", "type": "text", "required": true},
+    {"linkId": "consent", "text": "I consent to my intake being processed and reviewed by clinic staff", "type": "boolean", "required": true}
+  ]
+}
