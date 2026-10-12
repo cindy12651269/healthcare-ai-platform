@@ -40,7 +40,7 @@ The platform is a **backend-centric AI system** with a thin demo UI and modular 
   PostgreSQL ORM models and transaction-safe storage with idempotency support.
 
 * **Interoperability Layer (not implemented)**
-  Planned FHIR / HL7 integration. The empty `interoperability/` scaffold was removed in #26; FHIR export is an optional enhancement and HL7 / EHR routing is out of scope ([`step3_roadmap.md`](step3_roadmap.md) §7–§8).
+  Planned FHIR / HL7 integration. The empty `interoperability/` scaffold was removed in #26; an export-only FHIR R4 Bundle was delivered in #42 (Phase 7, [`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md)) and HL7 / EHR routing is out of scope ([`step3_roadmap.md`](step3_roadmap.md) §7–§8).
 
 * **Observability (`observability/`)**
   Structured tracing hooks, audit logging placeholders, and metrics interfaces.
@@ -273,7 +273,7 @@ Planned Phase 3:
 
 # 9. Interoperability Layer (Original Target — Not Implemented)
 
-> FHIR R4 export of reviewed intakes is planned as #42 (Phase 7). The HL7 parser and EHR router are out of scope (roadmap §8). The list below is the original Phase 2 design intent.
+> An export-only FHIR R4 Bundle of an intake was delivered in #42 (Phase 7); there is no FHIR client or server. The HL7 parser and EHR router are out of scope (roadmap §8). The list below is the original Phase 2 design intent.
 
 * FHIR client abstraction
 * HL7 parser

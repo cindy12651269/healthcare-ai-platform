@@ -17,12 +17,12 @@ All data is synthetic. This project does not provide medical diagnosis or treatm
 
 Full evidence: [`project_status.md`](project_status.md).
 
-Phases 1–6 are complete (Phase 6: security and data-handling notes #34, hosted demo #35, portfolio handover #36; closed 2026-10-09). Phase 7 (#40–#43) is optional and not started. Synthetic data only; not production software; no HIPAA compliance claim.
+Phases 1–7 are complete (Phase 6: security and data-handling notes #34, hosted demo #35, portfolio handover #36; closed 2026-10-09. Phase 7: extraction baseline #40, evidence timeline #41, FHIR R4 export #42, guided demo #43; closed 2026-10-13). Synthetic data only; not production software; no HIPAA compliance claim.
 
 **Implemented and tested**
 
 * FastAPI service with `POST /api/ingest`, working end to end without an LLM key (deterministic mock mode by default)
-* Next.js patient intake UI with a developer trace panel, and a staff review workspace at `/staff` ([`staff_review_ui.md`](staff_review_ui.md))
+* Next.js guided demo landing, patient intake UI at `/intake` with four synthetic scenario presets and a developer trace behind a reviewer toggle, a read-only system card, and a staff review workspace at `/staff` with "why flagged" evidence, a review timeline and FHIR export (#41–#43) ([`staff_review_ui.md`](staff_review_ui.md))
 * Intake validation, PHI keyword detection and consent gate
 * Schema-validated structuring and reports; opt-in real OpenAI provider (`LLM_MODE=real`) with strict JSON-schema output and no fallback to mock
 * Deterministic safety guard: diagnosis/prescription blocking, PHI masking, emergency guidance
@@ -30,16 +30,13 @@ Phases 1–6 are complete (Phase 6: security and data-handling notes #34, hosted
 * Staff bearer-token authentication, server-side role checks and clinic isolation, plus minimal clinic-admin membership management ([`auth.md`](auth.md))
 * Deterministic escalation rules (emergency, blocked output, low confidence → `needs_review`) and a clinic-scoped, audited review-queue API ([`data_model.md`](data_model.md), [`review_queue_api.md`](review_queue_api.md))
 * Signed escalation webhook (HMAC-SHA256, idempotency key, bounded retries, delivery log; PHI-minimal payload) ([`escalation_webhook.md`](escalation_webhook.md))
-* Labelled safety & escalation evaluation set in CI. Its 1.00 match rates mean agreement with the labelled current baseline, not safety accuracy; known gaps are recorded ([`evaluation_benchmark.md`](evaluation_benchmark.md))
+* Rule-based extraction baseline in mock mode with an extraction evaluation (#40; P/R 1.00 on six in-sample synthetic cases only) and a labelled safety & escalation evaluation set in CI. Its 1.00 match rates mean agreement with the labelled current baseline, not safety accuracy; known gaps are recorded ([`evaluation_benchmark.md`](evaluation_benchmark.md))
 * Retrieval agent and vector store abstraction (mock embeddings; not wired into the API)
 * Deterministic benchmark harness, per-run audit events, stage-level latency metrics
+* Export-only FHIR R4 Bundle of one intake, validated in CI against the pinned official R4 JSON Schema; no FHIR server, coding or full HL7 validation ([`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md))
 * GitHub Actions CI: backend and PostgreSQL integration tests, mock benchmark (RAG off/on), frontend lint/typecheck/tests/build
 * Security and data-handling notes: data flow, what is masked vs stored (raw intake text is stored unmasked), threat model, HIPAA gap list without a compliance claim; a regression test that pipeline, request and staff-action audit events contain no raw intake text ([`security_data_handling.md`](security_data_handling.md))
-* One hosted demo on Render free plans (API, frontend, PostgreSQL) with migrations, synthetic demo seed and health checks on deploy; the flagged-intake → clinic queue → signed webhook flow verified on 2026-10-09 ([`deployment.md`](deployment.md), [`demo_walkthrough.md`](demo_walkthrough.md))
-
-**Planned**
-
-* Phase 7: deterministic extraction baseline, intake evidence timeline, FHIR R4 export of reviewed intakes, guided demo
+* One hosted demo on Render free plans (API, frontend, PostgreSQL) with migrations, synthetic demo seed and health checks on deploy; the flagged-intake → clinic queue → signed webhook flow verified on 2026-10-09; the Phase 7 redeploy verified at API level on 2026-10-13 (staff browser UI and flagged presets not exercised on the hosted demo; [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4) ([`deployment.md`](deployment.md), [`demo_walkthrough.md`](demo_walkthrough.md))
 
 ---
 
@@ -58,14 +55,15 @@ Phases 1–6 are complete (Phase 6: security and data-handling notes #34, hosted
 | Path | Contents | State |
 | --- | --- | --- |
 | `agents/` | Intake, structuring, retrieval, output agents; escalation rules; pipeline orchestrator | Implemented |
-| `api/` | FastAPI app, routers, middleware, escalation webhook | `ingest`, staff auth / clinic membership endpoints ([`auth.md`](auth.md)), review-queue endpoints ([`review_queue_api.md`](review_queue_api.md)), webhook delivery ([`escalation_webhook.md`](escalation_webhook.md)) and audit middleware implemented; no rate limiting |
+| `api/` | FastAPI app, routers, middleware, escalation webhook | `ingest`, staff auth / clinic membership endpoints ([`auth.md`](auth.md)), review-queue, timeline and FHIR export endpoints ([`review_queue_api.md`](review_queue_api.md)), read-only system card, webhook delivery ([`escalation_webhook.md`](escalation_webhook.md)) and audit middleware implemented; no rate limiting |
 | `llm/` | Prompts, JSON schemas, safety guard | Implemented |
 | `rag/` | Embeddings, vector store, retriever, document loader | Implemented with mock embeddings |
 | `db/` | ORM models (clinics, users, memberships, health records), session, ordered SQL migrations | Implemented ([`data_model.md`](data_model.md)) |
 | `observability/` | Audit logger, tracing context, metrics | Implemented (local) |
-| `evaluation/` | Benchmark runner, metrics, test cases, labelled safety & escalation set | Implemented (mock mode in CI; real mode opt-in) |
+| `interoperability/` | FHIR R4 Bundle exporter and validator, pinned official R4 JSON Schema | Implemented, export only ([`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md)) |
+| `evaluation/` | Benchmark runner, metrics, test cases, labelled safety & escalation set, extraction evaluation, committed system-card snapshot | Implemented (mock mode in CI; real mode opt-in) |
 | `tests/` | Unit, contract, auth/RBAC and PostgreSQL integration tests | Run in CI on every PR and push to `main` |
-| `app/` | Next.js patient intake UI and staff review UI (`/staff`) | Implemented |
+| `app/` | Next.js guided demo landing, patient intake UI (`/intake`), system card (`/system-card`) and staff review UI (`/staff`) | Implemented |
 | `docs/` | Product, architecture, API, evaluation, roadmap, journals | — |
 
 ---
@@ -82,6 +80,7 @@ Phases 1–6 are complete (Phase 6: security and data-handling notes #34, hosted
 | [`evaluation_design.md`](evaluation_design.md), [`evaluation_benchmark.md`](evaluation_benchmark.md) | Evaluation harness design and usage |
 | [`data_model.md`](data_model.md), [`auth.md`](auth.md) | Data model v2 and migrations; escalation rules; staff authentication, roles and clinic isolation |
 | [`review_queue_api.md`](review_queue_api.md), [`staff_review_ui.md`](staff_review_ui.md), [`escalation_webhook.md`](escalation_webhook.md) | Review-queue API, staff review UI, escalation webhook (Phase 5) |
+| [`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md) | FHIR R4 export mapping, validation and limits (Phase 7) |
 | [`project_status.md`](project_status.md) | Evidence-based capability audit |
 | [`project_journal/`](project_journal/) | Historical records of completed phases |
 

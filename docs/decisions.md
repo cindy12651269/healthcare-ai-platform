@@ -6,7 +6,7 @@ Concise records of the main design decisions that are implemented in the code. E
 
 * **Decision:** Build one workflow (patient intake → AI structuring and summary → safety rules → clinic review queue → signed notification) instead of a general healthcare AI platform ([`step3_roadmap.md`](step3_roadmap.md) §1, §8).
 * **Why:** A complete, tested, deployed workflow is stronger evidence than many partial AI components.
-* **Consequences:** FHIR export, HL7, EHR routing, voice and extra agents are out of scope or deferred (#42).
+* **Consequences:** HL7, EHR routing, voice and extra agents are out of scope; FHIR is limited to an export-only R4 Bundle of one intake, with no server or EHR connectivity (#42).
 
 ## ADR-2 — Deterministic mock LLM mode by default; real mode opt-in (#20/PR #21, #22)
 
