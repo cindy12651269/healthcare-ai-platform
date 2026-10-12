@@ -14,14 +14,15 @@ VAGUE_TEXT = "I just don't feel right and wanted to check in."
 A = "/api/clinics/default/intakes"
 
 
-def _record(id, text, *, reasons, status, safety, confidence, clinic="default", metadata=True):
+def _record(id, text, *, reasons, status, safety, confidence, clinic="default", metadata=True,
+            submitted="2026-01-01T09:00:00"):
     structured = {"clinical_structuring": {"symptoms": [], "clinical_summary": "s", "confidence_level": confidence}}
     if metadata:
         structured["output_metadata"] = {"generated_at": "2025-01-01T00:00:00Z", "model_version": "mock",
                                          "prompt_version": "deterministic_rule_based_baseline_v1"}
     return HealthRecord(
         id=id, trace_id=f"run-{id}", pipeline_version="v0.1.0",
-        intake_json={"raw_text": text, "timestamp": "2026-01-01T09:00:00"},
+        intake_json={"raw_text": text, "timestamp": submitted},
         structured_output_json=structured,
         report_json={"report_sections": {"overview": "o"}}, report_text="overview: o",
         safety_audit_json=safety, clinic_id=clinic, review_status=status,
@@ -51,6 +52,9 @@ def seeded(sessions):  # noqa: F811
                     safety=BLOCKED_SAFETY, confidence=0.1),
             _record("lc", VAGUE_TEXT, reasons=["low_confidence"], status="needs_review",
                     safety=CLEAN_SAFETY, confidence=0.1),
+            # Submitted with a +08:00 offset: 08:30Z, before the 09:00:01Z record time although "16:30" > "09:00" as text
+            _record("tz", VAGUE_TEXT, reasons=["low_confidence"], status="needs_review",
+                    safety=CLEAN_SAFETY, confidence=0.1, submitted="2026-01-01T16:30:00+08:00"),
             # Legacy record: no metadata, no timestamp, status changed before review_events existed
             HealthRecord(id="legacy", trace_id="run-legacy", pipeline_version="v0.0.1", intake_json={},
                          structured_output_json={}, report_json={"report_sections": {}}, report_text="",
@@ -149,6 +153,20 @@ def test_timeline_matches_persisted_delivery_and_transitions_in_order(client, se
     assert safety["actions"] == ["add_emergency_guidance"] and safety["severity"] == "high"
     assert by_kind["escalation_decision"]["details"]["reasons"] == ["emergency_signal"]
     assert body["review_status"] == "escalated" and body["notes"] == []
+
+
+def test_timestamps_are_normalized_to_utc(client, seeded, audit_events):  # noqa: F811
+    events = _timeline(client, "em").json()["events"]
+    # Naive intake.timestamp (datetime.utcnow()) is UTC
+    assert events[0]["kind"] == "submitted" and events[0]["at"] == "2026-01-01T09:00:00+00:00"
+    assert all(e["at"].endswith("+00:00") for e in events)
+    assert events[1]["at"] == "2026-01-01T09:00:01+00:00"
+
+
+def test_mixed_timezone_timestamps_sort_chronologically(client, seeded, audit_events):  # noqa: F811
+    events = _timeline(client, "tz").json()["events"]
+    assert [e["kind"] for e in events][:2] == ["submitted", "processed"]
+    assert events[0]["at"] == "2026-01-01T08:30:00+00:00"
 
 
 def test_legacy_record_returns_nulls_and_notes_not_fabrications(client, seeded, audit_events):  # noqa: F811

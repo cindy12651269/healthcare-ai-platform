@@ -49,10 +49,21 @@ def _obj(v: Any) -> Dict[str, Any]:
     return v if isinstance(v, dict) else {}
 
 
+def _parse(v: Any) -> Optional[datetime]:
+    # Naive values are UTC: intake.timestamp comes from datetime.utcnow(), SQLite returns naive UTC
+    if isinstance(v, str) and v:
+        try:
+            v = datetime.fromisoformat(v)
+        except ValueError:
+            return None
+    if not isinstance(v, datetime):
+        return None
+    return (v if v.tzinfo else v.replace(tzinfo=timezone.utc)).astimezone(timezone.utc)
+
+
 def _iso(v: Any) -> Optional[str]:
-    if isinstance(v, datetime):
-        return (v if v.tzinfo else v.replace(tzinfo=timezone.utc)).isoformat()
-    return v if isinstance(v, str) and v else None
+    dt = _parse(v)
+    return dt.isoformat() if dt else None
 
 
 def _execution_mode(model_version: Optional[str]) -> Optional[str]:
@@ -164,8 +175,8 @@ def _timeline(record: HealthRecord, ev: Dict[str, Any], deliveries, transitions)
         ))
 
     # Chronological; events without a recorded time keep their lifecycle position via the tie-break
-    anchor = stored_at or ""
-    return sorted(events, key=lambda e: (e["at"] or anchor, _KIND_ORDER[e["kind"]]))
+    anchor = _parse(stored_at) or datetime.min.replace(tzinfo=timezone.utc)
+    return sorted(events, key=lambda e: (_parse(e["at"]) or anchor, _KIND_ORDER[e["kind"]]))
 
 
 @router.get("/clinics/{clinic_id}/intakes/{intake_id}/timeline")
