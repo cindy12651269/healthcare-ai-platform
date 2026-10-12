@@ -15,7 +15,7 @@ curl -s https://healthcare-ai-api-tovn.onrender.com/health
 curl -s -o /dev/null -w "%{http_code}\n" https://healthcare-ai-frontend-1s23.onrender.com/
 ```
 
-> **Phase 7 (#43) status.** Steps 0–2 below describe the guided demo added in #43. They are verified by automated tests (frontend and in-process backend) but **have not yet been re-run against the hosted demo**; the hosted services must be redeployed from `main` first (frontend rebuild with `NEXT_PUBLIC_DEMO_MODE=true`, API restart to seed the demo intakes). Record the hosted result here once performed.
+> **Phase 7 (#43) status.** Steps 0–2 below describe the guided demo added in #43. They are verified by automated tests (frontend and in-process backend) but **have not yet been re-run against the hosted demo**. As of 2026-10-12 the hosted frontend serves the #43 pages, but the hosted API is still the Phase 6 build (no timeline, FHIR export or system-card routes); the API must be redeployed from `main` (migration 004 and the demo seed run on start) before steps 0–2 can work end to end. Record the hosted result here once performed.
 
 ## 0. Guided demo landing (anyone)
 

@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 7 (2026-10-12)
 Scope: Issues #40, #41, #42, #43
-Status: In progress — #40–#42 merged and closed; #43 in review (PR open). This journal is updated when #43 merges.
+Status: Implemented and merged — #40–#43 closed (2026-10-12). Hosted deployment **not verified** for Phase 7 (§4).
 
 ---
 
@@ -27,7 +27,7 @@ Out of scope throughout: real LLM mode on the hosted demo, real patient data, co
 | #60 Deterministic extraction baseline & extraction evaluation | #40 | `cfac44b` | `ba2aa3f` | 38234168161 — success |
 | #61 Intake evidence & review timeline | #41 | `63001bd`, `efd4a17` | `428fbf9` | 38235577805 — success |
 | #62 FHIR R4 export of reviewed intakes | #42 | `8c962a4`, `47d4023` | `b91d6ea` | 38237316553 — success |
-| #63 Guided demo, system card & Phase 7 close-out | #43 | in review | not merged | — |
+| #63 Guided demo, system card & Phase 7 close-out | #43 | `8946ec4`, `5fd759b` | `2afdb4b` | 38238842122 — success |
 
 Merged with merge commits after a final review gate. Two gates were blocked and fixed on the branch before merge: #61 (naive intake timestamps displayed in the browser's local time → normalised to UTC, sorted on parsed datetimes) and #62 (Questionnaire consent wording did not match the intake form → exact wording plus a regression test).
 
@@ -53,9 +53,9 @@ Merged with merge commits after a final review gate. Two gates were blocked and 
 **Evidence:** official HL7 FHIR R4 4.0.1 JSON Schema vendored and SHA-256 pinned, plus required-primitive and reference checks; committed synthetic example must equal exporter output; isolation and ids-only audit tests.
 **Limitations:** not the full HL7 validator (no profiles/invariants/terminology); reviewer is a staff user id only; `reviewed`/`escalated` both map to `Task.status = completed` (kept in `businessStatus`); downloaded files leave platform control.
 
-### Issue 43 — Guided Demo, System Card & Phase 7 Close-out (in review)
+### Issue 43 — Guided Demo, System Card & Phase 7 Close-out
 
-**Delivered on the branch:** landing page with Patient / Staff / System card entry points and the workflow (`app/pages/index.tsx`, intake moved to `/intake`); four scenario presets that fill text only (`app/services/demo.ts`); developer trace behind a reviewer toggle; seeded synthetic intakes in two clinics covering every status, refused unless `APP_ENV=demo` (`db/seed_demo.py`); read-only `GET /api/system-card` and `/system-card` page serving the committed snapshot `evaluation/system_card_results.json`; demo staff identities (never tokens) shown only when `NEXT_PUBLIC_DEMO_MODE=true`.
+**Delivered:** landing page with Patient / Staff / System card entry points and the workflow (`app/pages/index.tsx`, intake moved to `/intake`); four scenario presets that fill text only (`app/services/demo.ts`); developer trace behind a reviewer toggle; seeded synthetic intakes in two clinics covering every status, refused unless `APP_ENV=demo` (`db/seed_demo.py`); read-only `GET /api/system-card` and `/system-card` page serving the committed snapshot `evaluation/system_card_results.json`; demo staff identities (never tokens) shown only when `NEXT_PUBLIC_DEMO_MODE=true`.
 **Evidence:** the snapshot is re-computed and compared in CI (`tests/test_system_card.py`); preset outcomes pinned through the real pipeline; seed idempotency, status coverage and clinic isolation tests; frontend tests for presets, toggle, system card and demo-flag visibility.
 **Limitations:** hosted demo not yet redeployed or re-verified for #43; tokens still require the operator (no self-service sign-in, by design); seeded transitions are synthetic demo history.
 
@@ -65,6 +65,7 @@ Merged with merge commits after a final review gate. Two gates were blocked and 
 
 * Every Phase 7 PR passed the three CI jobs (backend + PostgreSQL, deterministic benchmark incl. extraction and safety suites, frontend lint/typecheck/test/build) on its final head and on `main` after merge (runs in §2).
 * Hosted-demo verification for Phase 7 has **not** been performed; [`demo_walkthrough.md`](../demo_walkthrough.md) marks the Phase 7 steps accordingly.
+* Hosted state observed on 2026-10-12 after the #63 merge (read-only requests): the frontend had redeployed (landing page, `/intake` presets, `/system-card` page and the demo staff panel are served), but the API was still the Phase 6 build — `/openapi.json` lists no `…/timeline`, `…/fhir` or `/api/system-card` route, and `/api/system-card` returns 404 (the API service has `autoDeployTrigger: off`). Until the API is redeployed from `main` (which also applies migration 004 and seeds the demo intakes), the hosted System Card shows its error state and the staff detail view cannot load the evidence timeline or FHIR export. No scenario was submitted to the hosted demo, because flagged submissions send a real webhook.
 
 ---
 
