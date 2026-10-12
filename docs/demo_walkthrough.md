@@ -15,7 +15,7 @@ curl -s https://healthcare-ai-api-tovn.onrender.com/health
 curl -s -o /dev/null -w "%{http_code}\n" https://healthcare-ai-frontend-1s23.onrender.com/
 ```
 
-> **Phase 7 (#43) status.** Steps 0–2 below describe the guided demo added in #43. They are verified by automated tests (frontend and in-process backend) but **have not yet been re-run against the hosted demo**. As of 2026-10-12 the hosted frontend serves the #43 pages, but the hosted API is still the Phase 6 build (no timeline, FHIR export or system-card routes); the API must be redeployed from `main` (migration 004 and the demo seed run on start) before steps 0–2 can work end to end. Record the hosted result here once performed.
+> **Phase 7 (#43) status.** Verified against the hosted demo on 2026-10-13 after the API was redeployed from `2afdb4b` (migration 004 applied, 8 demo intakes seeded). Verified: the landing page, the four preset buttons, the System Card, both seeded queues with every status, cross-clinic denial, evidence timelines and FHIR R4 export, via the API with operator-issued tokens. Only the routine preset was submitted. The flagged presets were not re-submitted (each sends a real webhook), and the staff browser UI was not driven. Details: [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4.
 
 ## 0. Guided demo landing (anyone)
 

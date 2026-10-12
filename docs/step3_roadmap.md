@@ -42,7 +42,7 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | 4 | Foundation & Provider Integration | **COMPLETE** — Issues #22, #25–#28 |
 | 5 | Clinical Review & Escalation Workflow | **COMPLETE** — Issues #29–#33 |
 | 6 | Security, Deployment & Handover | **COMPLETE** — Issues #34–#36 |
-| 7 | Demo Experience, AI Evidence & FHIR Interoperability | **COMPLETE** (implemented and merged) — Issues #40–#43; hosted deployment not yet verified |
+| 7 | Demo Experience, AI Evidence & FHIR Interoperability | **COMPLETE** — Issues #40–#43; hosted API redeployed and verified 2026-10-13 |
 | — | Optional enhancements | Not required for portfolio completion |
 
 Each phase is tracked as a GitHub Project of the same name, and GitHub Issues remain authoritative wherever this document and an issue differ. The work items in §5–§6 were written on 2026-10-02, before the issues existed; they are now delivered by Phases 3–6 as mapped below.

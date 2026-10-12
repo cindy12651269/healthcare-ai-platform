@@ -4,7 +4,7 @@ AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient
 
 > **Portfolio demo, not a medical device and not production software.** Synthetic data only. It gives no medical advice, makes **no HIPAA compliance claim**, and must not process real patient data ([`docs/security_data_handling.md`](docs/security_data_handling.md)).
 
-**Status:** Phases 1–6 complete (closed 2026-10-09). Phase 7 (demo experience, AI evidence & FHIR, #40–#43) is merged; its hosted deployment has not been verified yet (the hosted API still runs the Phase 6 build, see [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md)). Evidence per capability: [`docs/project_status.md`](docs/project_status.md).
+**Status:** Phases 1–6 complete (closed 2026-10-09). Phase 7 (demo experience, AI evidence & FHIR, #40–#43) is merged and deployed; the hosted API was redeployed from `2afdb4b` and verified on 2026-10-13 (queues, clinic isolation, timeline, FHIR export, system card; flagged scenarios not re-submitted, see the [Phase 7 journal](docs/project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4). Evidence per capability: [`docs/project_status.md`](docs/project_status.md).
 
 ## Hosted demo
 
@@ -12,7 +12,7 @@ AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient
 | --- | --- |
 | Guided demo (landing) | https://healthcare-ai-frontend-1s23.onrender.com |
 | Patient intake UI | https://healthcare-ai-frontend-1s23.onrender.com/intake |
-| System card | https://healthcare-ai-frontend-1s23.onrender.com/system-card (needs the API redeployed from `main`) |
+| System card | https://healthcare-ai-frontend-1s23.onrender.com/system-card |
 | Staff review UI | https://healthcare-ai-frontend-1s23.onrender.com/staff (needs an operator-issued token) |
 | API health | https://healthcare-ai-api-tovn.onrender.com/health |
 
