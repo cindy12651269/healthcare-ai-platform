@@ -27,7 +27,7 @@ Out of scope throughout: real LLM mode on the hosted demo, real patient data, co
 | #60 Deterministic extraction baseline & extraction evaluation | #40 | `cfac44b` | `ba2aa3f` | 38234168161 — success |
 | #61 Intake evidence & review timeline | #41 | `63001bd`, `efd4a17` | `428fbf9` | 38235577805 — success |
 | #62 FHIR R4 export of reviewed intakes | #42 | `8c962a4`, `47d4023` | `b91d6ea` | 38237316553 — success |
-| #43 PR (guided demo, system card, close-out) | #43 | — | not merged | — |
+| #63 Guided demo, system card & Phase 7 close-out | #43 | in review | not merged | — |
 
 Merged with merge commits after a final review gate. Two gates were blocked and fixed on the branch before merge: #61 (naive intake timestamps displayed in the browser's local time → normalised to UTC, sorted on parsed datetimes) and #62 (Questionnaire consent wording did not match the intake form → exact wording plus a regression test).
 
