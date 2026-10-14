@@ -1,0 +1,1098 @@
+{
+  "cold": {
+    "samples": [
+      {
+        "at": "2026-10-14T10:15:44.473Z",
+        "state": "checking",
+        "text": "Checking the demo API…",
+        "api": "Checking…"
+      },
+      {
+        "at": "2026-10-14T10:15:46.742Z",
+        "state": "waking",
+        "text": "Waking Waking the demo server (can take up to a minute).The free hosted demo sleeps when i",
+        "api": "Checking…"
+      },
+      {
+        "at": "2026-10-14T10:16:27.397Z",
+        "state": "ready",
+        "text": "Reachable The demo API answered GET /health.",
+        "api": "Reachable"
+      }
+    ]
+  },
+  "results": [
+    {
+      "page": "dashboard",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T10:16:28.611Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": {
+          "state": "ready",
+          "api": "Reachable",
+          "env": "demo",
+          "mode": "mock"
+        },
+        "stages": [
+          "intake",
+          "structuring",
+          "report",
+          "escalation",
+          "queue",
+          "timeline",
+          "fhir"
+        ],
+        "webhookBranch": "Conditional branch Signed webhookEscalated intakes trigger one HMAC-signed, PHI-free notification with bounded retries, only when a receiver is configured.Disabled on the hosted demo (no receiver configured).",
+        "webhookBranchIn": "escalation",
+        "webhookCondition": null,
+        "evidence": [
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/auth.md#roles-and-clinic-isolation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_auth_rbac.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_review_queue.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#safety-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_safety_guard.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md#safety--escalation-evaluation-issue-32",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#escalation-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/data_model.md#escalation-rules-29",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#allowed-transitions",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_escalation.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#intake-evidence--timeline-41",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_timeline.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md#deliberately-not-mapped",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_fhir_export.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md#limitations",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_webhook.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#evaluation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/.github/workflows/ci.yml",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_system_card.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md"
+        ],
+        "accessPolicy": "Demo accessStaff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password.Demo staff accountsSynthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every review status; staff see only their own clinic.UserClinicRoledemo-staff-adefaultclinic_staffdemo-admin-adefaultclinic_admindemo-admin-bdemo-clinic-bclinic_adminSign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not published on this page or in the site code; ask the person who shared this demo.",
+        "demoStaff": true,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "intake",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T10:16:29.763Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "system-card",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T10:16:30.528Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": "Conditional Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee.",
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [
+          "Diagnosis seeking44/4 · 1.004/4 · 1.001",
+          "Emergency language44/4 · 1.004/4 · 1.000",
+          "PHI44/4 · 1.004/4 · 1.001",
+          "Prescription request44/4 · 1.004/4 · 1.001",
+          "Total1616/16 · 1.0016/16 · 1.003"
+        ],
+        "safetyCaveat": "Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed.",
+        "extraction": "6 cases · micro precision 1.00 · micro recall 1.00 · macro precision 1.00 · macro recall 1.00",
+        "extractionCaveat": "In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality.",
+        "h1": 1
+      }
+    },
+    {
+      "page": "staff-signin",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T10:16:31.120Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "dashboard",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T10:16:32.011Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": {
+          "state": "ready",
+          "api": "Reachable",
+          "env": "demo",
+          "mode": "mock"
+        },
+        "stages": [
+          "intake",
+          "structuring",
+          "report",
+          "escalation",
+          "queue",
+          "timeline",
+          "fhir"
+        ],
+        "webhookBranch": "Conditional branch Signed webhookEscalated intakes trigger one HMAC-signed, PHI-free notification with bounded retries, only when a receiver is configured.Disabled on the hosted demo (no receiver configured).",
+        "webhookBranchIn": "escalation",
+        "webhookCondition": null,
+        "evidence": [
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/auth.md#roles-and-clinic-isolation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_auth_rbac.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_review_queue.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#safety-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_safety_guard.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md#safety--escalation-evaluation-issue-32",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#escalation-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/data_model.md#escalation-rules-29",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#allowed-transitions",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_escalation.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#intake-evidence--timeline-41",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_timeline.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md#deliberately-not-mapped",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_fhir_export.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md#limitations",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_webhook.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#evaluation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/.github/workflows/ci.yml",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_system_card.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md"
+        ],
+        "accessPolicy": "Demo accessStaff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password.Demo staff accountsSynthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every review status; staff see only their own clinic.UserClinicRoledemo-staff-adefaultclinic_staffdemo-admin-adefaultclinic_admindemo-admin-bdemo-clinic-bclinic_adminSign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not published on this page or in the site code; ask the person who shared this demo.",
+        "demoStaff": true,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "intake",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T10:16:33.067Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "system-card",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T10:16:33.815Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": "Conditional Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee.",
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [
+          "Diagnosis seeking44/4 · 1.004/4 · 1.001",
+          "Emergency language44/4 · 1.004/4 · 1.000",
+          "PHI44/4 · 1.004/4 · 1.001",
+          "Prescription request44/4 · 1.004/4 · 1.001",
+          "Total1616/16 · 1.0016/16 · 1.003"
+        ],
+        "safetyCaveat": "Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed.",
+        "extraction": "6 cases · micro precision 1.00 · micro recall 1.00 · macro precision 1.00 · macro recall 1.00",
+        "extractionCaveat": "In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality.",
+        "h1": 1
+      }
+    },
+    {
+      "page": "staff-signin",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T10:16:34.432Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "dashboard",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T10:16:35.198Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": {
+          "state": "ready",
+          "api": "Reachable",
+          "env": "demo",
+          "mode": "mock"
+        },
+        "stages": [
+          "intake",
+          "structuring",
+          "report",
+          "escalation",
+          "queue",
+          "timeline",
+          "fhir"
+        ],
+        "webhookBranch": "Conditional branch Signed webhookEscalated intakes trigger one HMAC-signed, PHI-free notification with bounded retries, only when a receiver is configured.Disabled on the hosted demo (no receiver configured).",
+        "webhookBranchIn": "escalation",
+        "webhookCondition": null,
+        "evidence": [
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/auth.md#roles-and-clinic-isolation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_auth_rbac.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_review_queue.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#safety-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_safety_guard.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md#safety--escalation-evaluation-issue-32",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#escalation-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/data_model.md#escalation-rules-29",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#allowed-transitions",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_escalation.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#intake-evidence--timeline-41",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_timeline.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md#deliberately-not-mapped",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_fhir_export.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md#limitations",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_webhook.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#evaluation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/.github/workflows/ci.yml",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_system_card.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md"
+        ],
+        "accessPolicy": "Demo accessStaff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password.Demo staff accountsSynthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every review status; staff see only their own clinic.UserClinicRoledemo-staff-adefaultclinic_staffdemo-admin-adefaultclinic_admindemo-admin-bdemo-clinic-bclinic_adminSign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not published on this page or in the site code; ask the person who shared this demo.",
+        "demoStaff": true,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "intake",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T10:16:36.269Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "system-card",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T10:16:37.003Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": "Conditional Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee.",
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [
+          "Diagnosis seeking44/4 · 1.004/4 · 1.001",
+          "Emergency language44/4 · 1.004/4 · 1.000",
+          "PHI44/4 · 1.004/4 · 1.001",
+          "Prescription request44/4 · 1.004/4 · 1.001",
+          "Total1616/16 · 1.0016/16 · 1.003"
+        ],
+        "safetyCaveat": "Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed.",
+        "extraction": "6 cases · micro precision 1.00 · micro recall 1.00 · macro precision 1.00 · macro recall 1.00",
+        "extractionCaveat": "In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality.",
+        "h1": 1
+      }
+    },
+    {
+      "page": "staff-signin",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T10:16:37.619Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "dashboard",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:38.399Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": {
+          "state": "ready",
+          "api": "Reachable",
+          "env": "demo",
+          "mode": "mock"
+        },
+        "stages": [
+          "intake",
+          "structuring",
+          "report",
+          "escalation",
+          "queue",
+          "timeline",
+          "fhir"
+        ],
+        "webhookBranch": "Conditional branch Signed webhookEscalated intakes trigger one HMAC-signed, PHI-free notification with bounded retries, only when a receiver is configured.Disabled on the hosted demo (no receiver configured).",
+        "webhookBranchIn": "escalation",
+        "webhookCondition": null,
+        "evidence": [
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/auth.md#roles-and-clinic-isolation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_auth_rbac.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_review_queue.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#safety-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_safety_guard.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md#safety--escalation-evaluation-issue-32",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#escalation-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/data_model.md#escalation-rules-29",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#allowed-transitions",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_escalation.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#intake-evidence--timeline-41",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_timeline.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md#deliberately-not-mapped",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_fhir_export.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md#limitations",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_webhook.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#evaluation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/.github/workflows/ci.yml",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_system_card.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md"
+        ],
+        "accessPolicy": "Demo accessStaff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password.Demo staff accountsSynthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every review status; staff see only their own clinic.UserClinicRoledemo-staff-adefaultclinic_staffdemo-admin-adefaultclinic_admindemo-admin-bdemo-clinic-bclinic_adminSign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not published on this page or in the site code; ask the person who shared this demo.",
+        "demoStaff": true,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "intake",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:39.441Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "system-card",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:40.204Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": "Conditional Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee.",
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [
+          "Diagnosis seeking44/4 · 1.004/4 · 1.001",
+          "Emergency language44/4 · 1.004/4 · 1.000",
+          "PHI44/4 · 1.004/4 · 1.001",
+          "Prescription request44/4 · 1.004/4 · 1.001",
+          "Total1616/16 · 1.0016/16 · 1.003"
+        ],
+        "safetyCaveat": "Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed.",
+        "extraction": "6 cases · micro precision 1.00 · micro recall 1.00 · macro precision 1.00 · macro recall 1.00",
+        "extractionCaveat": "In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality.",
+        "h1": 1
+      }
+    },
+    {
+      "page": "staff-signin",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:40.802Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "dashboard",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:41.544Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": {
+          "state": "ready",
+          "api": "Reachable",
+          "env": "demo",
+          "mode": "mock"
+        },
+        "stages": [
+          "intake",
+          "structuring",
+          "report",
+          "escalation",
+          "queue",
+          "timeline",
+          "fhir"
+        ],
+        "webhookBranch": "Conditional branch Signed webhookEscalated intakes trigger one HMAC-signed, PHI-free notification with bounded retries, only when a receiver is configured.Disabled on the hosted demo (no receiver configured).",
+        "webhookBranchIn": "escalation",
+        "webhookCondition": null,
+        "evidence": [
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/auth.md#roles-and-clinic-isolation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_auth_rbac.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_review_queue.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#safety-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_safety_guard.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md#safety--escalation-evaluation-issue-32",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#escalation-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/data_model.md#escalation-rules-29",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#allowed-transitions",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_escalation.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#intake-evidence--timeline-41",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_timeline.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md#deliberately-not-mapped",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_fhir_export.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md#limitations",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_webhook.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#evaluation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/.github/workflows/ci.yml",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_system_card.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md"
+        ],
+        "accessPolicy": "Demo accessStaff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password.Demo staff accountsSynthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every review status; staff see only their own clinic.UserClinicRoledemo-staff-adefaultclinic_staffdemo-admin-adefaultclinic_admindemo-admin-bdemo-clinic-bclinic_adminSign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not published on this page or in the site code; ask the person who shared this demo.",
+        "demoStaff": true,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "intake",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:42.586Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "system-card",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:43.323Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": "Conditional Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee.",
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [
+          "Diagnosis seeking44/4 · 1.004/4 · 1.001",
+          "Emergency language44/4 · 1.004/4 · 1.000",
+          "PHI44/4 · 1.004/4 · 1.001",
+          "Prescription request44/4 · 1.004/4 · 1.001",
+          "Total1616/16 · 1.0016/16 · 1.003"
+        ],
+        "safetyCaveat": "Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed.",
+        "extraction": "6 cases · micro precision 1.00 · micro recall 1.00 · macro precision 1.00 · macro recall 1.00",
+        "extractionCaveat": "In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality.",
+        "h1": 1
+      }
+    },
+    {
+      "page": "staff-signin",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:43.917Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "dashboard",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:44.658Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": {
+          "state": "ready",
+          "api": "Reachable",
+          "env": "demo",
+          "mode": "mock"
+        },
+        "stages": [
+          "intake",
+          "structuring",
+          "report",
+          "escalation",
+          "queue",
+          "timeline",
+          "fhir"
+        ],
+        "webhookBranch": "Conditional branch Signed webhookEscalated intakes trigger one HMAC-signed, PHI-free notification with bounded retries, only when a receiver is configured.Disabled on the hosted demo (no receiver configured).",
+        "webhookBranchIn": "escalation",
+        "webhookCondition": null,
+        "evidence": [
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/auth.md#roles-and-clinic-isolation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_auth_rbac.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_review_queue.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#safety-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_safety_guard.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md#safety--escalation-evaluation-issue-32",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#escalation-rules",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/data_model.md#escalation-rules-29",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#allowed-transitions",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_escalation.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/review_queue_api.md#intake-evidence--timeline-41",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_timeline.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/interoperability/fhir_mapping.md#deliberately-not-mapped",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_fhir_export.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/escalation_webhook.md#limitations",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_webhook.py",
+          "https://healthcare-ai-frontend-1s23.onrender.com/system-card#evaluation",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/.github/workflows/ci.yml",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/tests/test_system_card.py",
+          "https://github.com/cindy12651269/healthcare-ai-platform/blob/main/docs/evaluation_benchmark.md"
+        ],
+        "accessPolicy": "Demo accessStaff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password.Demo staff accountsSynthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every review status; staff see only their own clinic.UserClinicRoledemo-staff-adefaultclinic_staffdemo-admin-adefaultclinic_admindemo-admin-bdemo-clinic-bclinic_adminSign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not published on this page or in the site code; ask the person who shared this demo.",
+        "demoStaff": true,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "intake",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:45.715Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    },
+    {
+      "page": "system-card",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:46.467Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": "Conditional Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee.",
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [
+          "Diagnosis seeking44/4 · 1.004/4 · 1.001",
+          "Emergency language44/4 · 1.004/4 · 1.000",
+          "PHI44/4 · 1.004/4 · 1.001",
+          "Prescription request44/4 · 1.004/4 · 1.001",
+          "Total1616/16 · 1.0016/16 · 1.003"
+        ],
+        "safetyCaveat": "Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed.",
+        "extraction": "6 cases · micro precision 1.00 · micro recall 1.00 · macro precision 1.00 · macro recall 1.00",
+        "extractionCaveat": "In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality.",
+        "h1": 1
+      }
+    },
+    {
+      "page": "staff-signin",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T10:16:47.063Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true,
+      "clipped": 0,
+      "facts": {
+        "status": null,
+        "stages": [],
+        "webhookBranch": null,
+        "webhookBranchIn": null,
+        "webhookCondition": null,
+        "evidence": [],
+        "accessPolicy": null,
+        "demoStaff": false,
+        "safetyRows": [],
+        "safetyCaveat": null,
+        "extraction": null,
+        "extractionCaveat": null,
+        "h1": 1
+      }
+    }
+  ],
+  "nav": {
+    "collapsedHidden": true,
+    "tabOrderStart": [
+      {
+        "el": "a.skip-link 'Skip to main content'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "a.brand 'Healthcare AI Platform'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "button.nav-toggle 'Menu'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "button.btn.btn-secondary.btn-sm 'Routine symptoms'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      }
+    ],
+    "openAfterEnter": true,
+    "firstLinkFocused": {
+      "el": "a 'Dashboard'",
+      "outline": "solid 3px rgb(31, 95, 207)"
+    },
+    "linkSizes": [
+      "358x44",
+      "358x44",
+      "358x44",
+      "358x44"
+    ],
+    "closedAfterEscape": true,
+    "focusReturned": true,
+    "desktopNavVisible": true,
+    "desktopFocus": {
+      "el": "button.btn.btn-primary 'Sign in'",
+      "outline": "solid 3px rgb(138, 184, 255)"
+    },
+    "reducedMotionSpinner": "1e-05s"
+  }
+}

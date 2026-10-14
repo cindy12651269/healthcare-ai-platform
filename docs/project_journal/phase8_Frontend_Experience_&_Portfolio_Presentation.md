@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
 Scope: Issues #67–#69 (items 1–3 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token.
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c).
 
 ---
 
@@ -233,7 +233,7 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 
 ## 4. Issue 69 — Product Dashboard & AI Transparency
 
-**Status:** implemented on branch `feat/issue-69-product-dashboard`; in review. No backend change, no new endpoint, no API-contract, auth, RBAC, clinic-isolation or workflow change; no new dependency (`app/package.json` unchanged). The hosted frontend still serves the #68 build (`ba028df`); nothing here is hosted-verified.
+**Status:** closed (2026-10-14): PR #78 merged (`24d2a6b`, reviewed head `758fb37`; `main` CI run 38547619614 — success); frontend deployed and verified on the hosted demo (§4c). No backend change, no new endpoint, no API-contract, auth, RBAC, clinic-isolation or workflow change; no new dependency (`app/package.json` unchanged).
 
 **Delivered:**
 
@@ -287,9 +287,51 @@ Fixed during the pass: the `phi` category was shown as *Phi* (now *PHI*); nav la
 
 ### 4b. Limitations
 
-* **Hosted validation: pending.** The hosted frontend serves the #68 build; this branch is not deployed and no Render change was made.
+* ~~Hosted validation: pending.~~ Resolved on 2026-10-14 (§4c).
 * The unavailable and waking dashboard states are covered by unit tests, not by browser screenshots (the real wake window is ~75–105 s).
 * The API's pipeline text still states the webhook unconditionally (see wording review); the UI qualifies it in place, the source text is unchanged.
 
 **Review Gate (2026-10-14).** The first candidate (`8dff155`) qualified the webhook only in a small note below the pipeline grid, after the unconditional stage text, and the dashboard's webhook card opened with *"one … notification per escalation"*. Fixed with frontend wording only (above); tests, lint, typecheck, build and the 30-run browser matrix re-run (0 overflow, no target < 44 × 44, no clipped content); screenshots refreshed.
 * Chrome only; Safari/Firefox, physical devices and 200 % zoom are #72.
+
+### 4c. Hosted frontend verification (2026-10-14)
+
+**Deploy.** PR #78 merged with a merge commit (`24d2a6b`, reviewed head `758fb37`; PR CI and `main` CI run 38547619614 — success). Frontend *Manual Deploy* by the account owner: source commit `24d2a6b`, *Live* at 18:12 Taiwan time (10:12 UTC). The API was not redeployed (no backend change) and **was not restarted** for this check. No Render setting was changed.
+
+**Natural cold start (observed, not forced).** The API had been idle since the #68 check (09:42 UTC). The first request of this run was the hosted dashboard in headless Chrome at 1280 px, with no prior API call. Its *Live system status* card moved through:
+
+| Time (UTC) | `data-state` | Card |
+| --- | --- | --- |
+| 10:15:44.5 | `checking` | *Checking the demo API…* |
+| 10:15:46.7 | `waking` | *Waking the demo server (can take up to a minute)… (attempt 1 of 6)*; API *Checking…*, environment and LLM mode *Unknown* (screenshot `cold-start-waking-dashboard-1280-light.jpg`) |
+| 10:16:27.4 | `ready` | *Reachable*; environment `demo`, LLM mode `mock` (screenshot `cold-start-final-dashboard-1280-light.jpg`) |
+
+About 43 s from the first check to *ready*. No environment or mode was shown before `/health` answered. Request-level network timings were not captured, so the attempt that succeeded is not recorded; the unavailable/failure state is still covered by unit tests only.
+
+**Live `/health`** (`curl`, after the run): `{"status":"ok","app":"Healthcare AI Platform","environment":"demo","llm_mode":"mock"}`. The dashboard showed `demo` / `mock` on **6/6** dashboard runs.
+
+**Evaluation metrics, hosted vs. committed.** The hosted `GET /api/system-card` → `evaluation` is **deep-equal** to the committed `evaluation/system_card_results.json` (saved as `hosted-api-system-card.json`; `execution_mode: mock`, threshold 0.5, 6 pipeline stages, 6 limitations). On all **6** system-card runs, the rendered table rows, the extraction line and both caveats equal the values computed from the committed file:
+
+* Safety & escalation (#32): Diagnosis seeking, Emergency language, PHI, Prescription request — 4 cases each, 4/4 · 1.00 guard and escalation, known gaps 1/0/1/1; **Total 16 cases, 16/16 · 1.00, 16/16 · 1.00, 3 known gaps**; caveat *"Match rates measure agreement with the labelled current rule baseline on 16 synthetic cases, not safety accuracy or recall. Known gaps are recorded, not fixed."*
+* Extraction (#40): *"6 cases · micro precision 1.00 · micro recall 1.00 · macro precision 1.00 · macro recall 1.00"*; caveat *"In-sample: the rule-based lexicon was written with these 6 synthetic cases in view, so 1.00 is agreement with a tiny set, not a measure of real-world extraction quality."*
+
+**Responsive matrix (hosted, 10:16:28–10:16:47 UTC).** `capture-cdp-hosted.mjs` (no sign-in, no bearer token): `/`, `/system-card`, `/intake`, `/staff` (signed out) × **390 / 768 / 1280 px × light / dark = 24 runs**.
+
+| Check | Result (hosted) |
+| --- | --- |
+| Horizontal page overflow | **0 px in all 24 runs** |
+| Touch targets ≥ 44 × 44 | **No smaller target** |
+| Clipped content (workflow steps, capability cards, stats, rule/stage cards, real-vs-mock rows) | **None** |
+| One `h1` per page; demo indicator | 24/24; 24/24 |
+| Workflow | Seven stages in order (`intake`, `structuring`, `report`, `escalation`, `queue`, `timeline`, `fhir`) on 6/6 dashboard runs; the webhook branch is inside the `escalation` step: *"Conditional branch · Signed webhook … only when a receiver is configured. Disabled on the hosted demo (no receiver configured)."* |
+| System-card webhook wording | Inside the *Persistence + notification* stage: *"Conditional · Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee."* |
+| Demo access | #67 wording present (*"Tokens are issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password."*); demo staff table shown (`NEXT_PUBLIC_DEMO_MODE` on) on 6/6 dashboard runs |
+| Mobile nav, focus, Escape, reduced motion | Pass (first link *Dashboard*; links 358 × 44 px; Escape returns focus to *Menu*) |
+
+**Capability evidence links.** All **22** links on the hosted dashboard return HTTP 200 (`evidence-links-status.txt`): 19 GitHub files on `main` and 3 in-app `/system-card#…` links. The GitHub `#anchors` are checked against the files' headings by `app/tests/Dashboard.test.tsx`. The in-app section ids are checked by the same tests on this commit, not by a separate probe of the hosted page.
+
+**Evidence:** [`evidence/phase8_issue69_hosted_frontend_2026-10-14/`](evidence/phase8_issue69_hosted_frontend_2026-10-14/) — `{dashboard,system-card}-{390,768,1280}-{light,dark}.jpg`, `cold-start-waking-dashboard-1280-light.jpg`, `cold-start-final-dashboard-1280-light.jpg`, `nav-mobile-open-390-light.jpg`, `measurements.json` (cold-start samples + 24 runs; its captured page text includes the public policy sentence about bearer tokens, no token), `hosted-api-system-card.json`, `evidence-links-status.txt`, `capture-cdp-hosted.mjs`.
+
+**Not verified on the hosted demo:** the *unavailable* state and *Try again* (unit tests only); per-request `/health` timings during the wake; Safari/Firefox, physical devices and 200 % zoom (#72). The signed-in staff workspace is unchanged by #69 and remains pending hosted validation (§3c).
+
+**Verdict for #69 on the hosted demo:** the deployed build is `24d2a6b`; the dashboard and system card pass the responsive and accessibility checks at 390, 768 and 1280 px in both themes; live status reports the real `/health` values through a natural cold start; the system card's numbers, sample sizes and caveats match the committed snapshot exactly; the webhook is presented as conditional; the access policy and demo gating are intact; all evidence links resolve.
