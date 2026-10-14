@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Button } from "./ui";
-import { ApiReadiness, WAKE_POLICY, WaitForApiOptions, waitForApi } from "../services/api";
+import { ApiReadiness, HealthInfo, WAKE_POLICY, WaitForApiOptions, waitForApi } from "../services/api";
 
 // Cold-start notice (#67). The hosted demo runs on free instances that sleep when idle, so the first
 // request can take up to about a minute. This polls GET /health (bounded) and explains the wait
 // instead of leaving the visitor with a silent page or a generic error. It renders nothing once the
 // server answers quickly.
 
-type Wait = (options: Pick<WaitForApiOptions, "signal" | "onAttempt">) => Promise<ApiReadiness>;
+export type Wait = (options: Pick<WaitForApiOptions, "signal" | "onAttempt" | "onHealth">) => Promise<ApiReadiness>;
 
-type State =
+export type ApiState =
   | { status: "checking" }
   | { status: "waking"; attempt: number; maxAttempts: number }
-  | { status: "ready"; afterWake: boolean }
+  | { status: "ready"; afterWake: boolean; health: HealthInfo | null }
   | { status: "unavailable" };
 
 interface ApiStatusProps {
@@ -20,14 +20,17 @@ interface ApiStatusProps {
   slowAfterMs?: number; // show the waking notice if the first check has not answered by then
 }
 
-export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: ApiStatusProps) {
-  const [state, setState] = useState<State>({ status: "checking" });
+// The #67 readiness state machine, shared by this notice and the dashboard's system status (#69) so a
+// page polls /health once. "ready" carries the healthy /health body when the wait reported it.
+export function useApiReadiness(wait: Wait = waitForApi, slowAfterMs = 1500) {
+  const [state, setState] = useState<ApiState>({ status: "checking" });
   const [run, setRun] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
     // After a visible failure, a successful retry is confirmed rather than silently cleared
     let woke = run > 0;
+    let health: HealthInfo | null = null;
     const showWaking = (attempt: number, maxAttempts: number) => {
       woke = true;
       setState({ status: "waking", attempt, maxAttempts });
@@ -41,10 +44,13 @@ export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: Api
         attemptInfo = { attempt, maxAttempts };
         if (attempt > 1) showWaking(attempt, maxAttempts);
       },
+      onHealth: (h) => {
+        health = h;
+      },
     }).then((result) => {
       clearTimeout(slowTimer);
       if (controller.signal.aborted) return;
-      setState(result === "ready" ? { status: "ready", afterWake: woke } : { status: "unavailable" });
+      setState(result === "ready" ? { status: "ready", afterWake: woke, health } : { status: "unavailable" });
     });
     return () => {
       clearTimeout(slowTimer);
@@ -56,6 +62,12 @@ export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: Api
     setState({ status: "checking" });
     setRun((n) => n + 1);
   }, []);
+
+  return { state, retry };
+}
+
+export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: ApiStatusProps) {
+  const { state, retry } = useApiReadiness(wait, slowAfterMs);
 
   if (state.status === "checking" || (state.status === "ready" && !state.afterWake)) return null;
 
