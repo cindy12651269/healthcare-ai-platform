@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
 Scope: Issue #67 (item 1 of 7) so far
-Status: In progress — #67 implemented and validated on the hosted demo on 2026-10-14 (§2); PR open, not merged.
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c).
 
 ---
 
@@ -50,10 +50,39 @@ API https://healthcare-ai-api-tovn.onrender.com, `main` build of Phase 7 (the #6
 
 ### 2b. Limitations and follow-ups
 
-* **The #67 frontend is not on the hosted demo yet.** Cold-start and staff-policy UI are verified by tests and a production build only. After merge, the frontend needs *Manual Deploy* (Render `autoDeployTrigger` is off); then confirm the waking notice on a cold `/`.
+* ~~The #67 frontend is not on the hosted demo yet.~~ Resolved: deployed from `f84a1da` and verified on 2026-10-14 (§2c).
 * **Log evidence for flagged submissions.** The `disabled` warning was confirmed in the API logs for the routine probe (08:08:32). Equivalent lines for the three flagged presets (08:21:26–27) and the `hosted_check` intake (08:30:17) are expected; the timelines (no delivery row) are the recorded evidence for them.
 * Presets were submitted through the API with the UI's exact request body, not by clicking in the browser.
 * The routine preset text was a `duplicate` on the hosted database (de-duplicated by `input_hash`), so its own timeline could not be checked; the unique routine probe covers that path.
 * Four new synthetic intakes (three presets + `hosted_check`) and the probe now sit in clinic `default`'s queue; they are disposable and disappear when the database is recreated.
 * The database's exact creation and expiry dates were not read from the dashboard in this session; the runbook states the upper bound (2026-11-08).
 * Out of scope, recorded as options only: paid database (no expiry), paid instances (no cold start), rate limiting the public intake endpoint.
+
+### 2c. Hosted frontend verification (2026-10-14)
+
+**Deploy.** PR #74 merged with a merge commit (`f84a1da`, reviewed head `9c77172`; PR CI and `main` CI run 38537057498 — success). Frontend *Manual Deploy* by the account owner: source commit `f84a1da`, *Live* at 16:46 Taiwan time (08:46 UTC). The API was not redeployed (no backend change) and was not restarted for this check.
+
+**Served pages and bundle** (`curl`, 08:48 UTC): `/`, `/intake`, `/staff`, `/system-card` → 200. The prerendered HTML of `/` contains the Staff entry text *"Needs an access token issued on request by the demo operator."*; `/staff` contains the *"Visiting the public demo?"* card (*"issued on request by the demo operator and are never published: there is no public sign-up, guest login or shared password"*) above *Staff sign-in*. The 16 deployed JS chunks reference only `https://healthcare-ai-api-tovn.onrender.com` (no `localhost:8000` fallback), contain the reviewed cold-start strings (*"Waking the demo server"*, *"Demo server is awake"*, *"We kept checking for over a minute"*), and no secret names, receiver/database URLs, keys or bearer tokens.
+
+**Live cold start (observed in Chrome, not forced).** The API had been idle since 08:30 UTC (the `hosted_check` run). Opening `/` at about 08:49 UTC:
+
+| Time (UTC) | Banner |
+| --- | --- |
+| 08:49:08–17 | *"Waking the demo server (can take up to a minute)." … "(attempt 1 of 6)"* (screenshot 01) |
+| 08:49:32 | same, *"attempt 2 of 6"* (attempt 1 had ended without success) |
+| 08:49:47 | *"Demo server is awake."* (screenshot 02) |
+
+Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/health` → **503**, then → **200** (exactly two cold-session requests captured). Verified: the deployed component recovered from a 503 during the cold start, retried within its bounds and reached *"Demo server is awake"*. Not determinable: tracking started while attempt 1 was in flight, so it is unknown whether attempt 1 is the captured 503 (then attempt 2 was held until the instance was up and returned 200) or timed out uncaptured (then attempt 2 was the 503 and attempt 3 the 200). Per-request timestamps were not captured, so the timeout path and the spacing after the 503 were not measured on the hosted demo.
+
+**Warm behaviour.** Reloading `/` and opening `/staff` with the API awake: one `GET …/health` → 200 per page, no banner (screenshot 03 for `/staff`). Without a token `/staff` makes no other API call.
+
+**Evidence:** [`evidence/phase8_issue67_hosted_frontend_2026-10-14/`](evidence/phase8_issue67_hosted_frontend_2026-10-14/) — `01-cold-start-waking-attempt-1-of-6.jpg`, `02-cold-start-demo-server-awake.jpg`, `03-staff-access-policy.jpg`. No token, secret or personal data visible.
+
+**Not verified on the hosted demo:**
+
+* The **failure state** (*"The demo server did not respond"* + *Try again*): it needs the API to stay down for the whole ~75–105 s window, which was not induced (no forced restart or outage). Covered by `app/tests/ApiStatus.test.tsx` only.
+* The waking notice on `/intake` and `/system-card` (same component; observed on `/` only).
+* A cold start longer than the observed ~40 s, and behaviour on mobile browsers.
+* `/intake` makes a second `/health` call for the LLM-mode badge (pre-existing); not a functional issue.
+
+**Verdict for #67 on the hosted demo:** webhook isolation, the four presets, `hosted_check`, staff-access messaging, the correct API host and the waking → awake path are verified; the failure state is test-only.
