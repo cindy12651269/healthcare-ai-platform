@@ -1,9 +1,11 @@
 import Head from "next/head";
+import ApiStatus from "../components/ApiStatus";
 import SiteNav from "../components/SiteNav";
 import StaffReview from "../components/StaffReview";
+import { waitForApi } from "../services/api";
 
 // Staff review workspace (Issue #31). Separate from the patient intake page at "/intake".
-export default function StaffPage() {
+export default function StaffPage({ checkApi = waitForApi }: { checkApi?: typeof waitForApi }) {
   return (
     <>
       <Head>
@@ -24,6 +26,7 @@ export default function StaffPage() {
       </header>
 
       <main className="container">
+        <ApiStatus wait={checkApi} />
         <section className="intro">
           <h1>Clinic review queue</h1>
           <p>Review intakes flagged by the escalation rules and mark them reviewed or escalated.</p>

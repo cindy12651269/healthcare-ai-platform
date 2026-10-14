@@ -144,6 +144,25 @@ async function openFirst(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("StaffReview sign-in", () => {
+  it("explains to public visitors that tokens are operator-issued on request and never published (#67)", () => {
+    render(<StaffReview api={makeApi()} />);
+    const policy = screen.getByTestId("staff-access-policy");
+    expect(policy).toHaveTextContent("issued on request by the demo operator");
+    expect(policy).toHaveTextContent("never published");
+    expect(policy).toHaveTextContent("no public sign-up, guest login or shared password");
+    expect(within(policy).getByRole("link", { name: "Patient intake" })).toHaveAttribute("href", "/intake");
+    expect(within(policy).getByRole("link", { name: "System card" })).toHaveAttribute("href", "/system-card");
+    // Still a token sign-in only: no username/password or "request a token" form
+    expect(document.querySelectorAll("input")).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: /request|guest/i })).not.toBeInTheDocument();
+  });
+
+  it("hides the visitor policy once signed in", async () => {
+    await signIn(makeApi());
+    expect(await screen.findByText("staff-a@example.test")).toBeInTheDocument();
+    expect(screen.queryByTestId("staff-access-policy")).not.toBeInTheDocument();
+  });
+
   it("signs in with the staff token and loads the own-clinic needs_review queue", async () => {
     const api = makeApi();
     await signIn(api);
@@ -361,7 +380,7 @@ describe("client bundle hygiene", () => {
     files.push(join(root, "next.config.mjs"));
     const code = files.map((f) => readFileSync(f, "utf8")).join("\n");
 
-    expect(code).not.toMatch(/AUTH_TOKEN_SECRET|OPENAI_API_KEY|DATABASE_URL/);
+    expect(code).not.toMatch(/AUTH_TOKEN_SECRET|OPENAI_API_KEY|DATABASE_URL|WEBHOOK_SECRET|WEBHOOK_URL/);
     expect(code).not.toMatch(/localStorage|sessionStorage|document\.cookie/);
     // NEXT_PUBLIC_DEMO_MODE (#43) is a display-only boolean, never a credential
     expect(new Set(code.match(/NEXT_PUBLIC_[A-Z_]+/g))).toEqual(

@@ -4,6 +4,7 @@ import InputForm from "../components/InputForm";
 import ReportView from "../components/ReportView";
 import DeveloperTracePanel from "../components/DeveloperTracePanel";
 import SiteNav from "../components/SiteNav";
+import ApiStatus from "../components/ApiStatus";
 import { SCENARIO_PRESETS } from "../services/demo";
 import {
   FailureDiagnostics,
@@ -13,6 +14,7 @@ import {
   PipelineResult,
   fetchLlmMode,
   submitIntake,
+  waitForApi,
 } from "../services/api";
 
 type PageState =
@@ -41,11 +43,13 @@ function toPageState(outcome: IngestOutcome): PageState {
 interface IntakePageProps {
   submit?: typeof submitIntake; // injectable for tests
   loadLlmMode?: () => Promise<LlmMode | null>; // injectable for tests
+  checkApi?: typeof waitForApi; // injectable for tests (#67 cold start)
 }
 
 export default function IntakePage({
   submit = submitIntake,
   loadLlmMode = fetchLlmMode,
+  checkApi = waitForApi,
 }: IntakePageProps) {
   const [state, setState] = useState<PageState>({ status: "idle" });
   const [llmMode, setLlmMode] = useState<LlmMode | null>(null);
@@ -104,6 +108,7 @@ export default function IntakePage({
       </header>
 
       <main className="container">
+        <ApiStatus wait={checkApi} />
         <section className="intro">
           <h1>Pre-visit symptom intake</h1>
           <p>

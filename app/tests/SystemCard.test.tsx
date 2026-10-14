@@ -5,6 +5,9 @@ import { render, screen, within } from "@testing-library/react";
 import SystemCardPage from "../pages/system-card";
 import Landing from "../pages/index";
 
+// The API answers /health at once; cold-start behaviour is covered in ApiStatus.test.tsx
+const apiReady = async () => "ready" as const;
+
 // The committed snapshot served by GET /api/system-card (evaluation/system_card_results.json)
 const SNAPSHOT = JSON.parse(
   readFileSync(join(__dirname, "..", "..", "evaluation", "system_card_results.json"), "utf8"),
@@ -26,7 +29,7 @@ const CARD = {
 
 describe("System card page", () => {
   it("shows the not-a-medical-device statement, mode, rules and the committed evaluation numbers", async () => {
-    render(<SystemCardPage load={vi.fn().mockResolvedValue(CARD)} />);
+    render(<SystemCardPage checkApi={apiReady} load={vi.fn().mockResolvedValue(CARD)} />);
 
     expect(screen.getByTestId("not-a-medical-device")).toHaveTextContent("Not a medical device");
     expect(await screen.findByTestId("execution-mode")).toHaveTextContent("mock");
@@ -46,7 +49,7 @@ describe("System card page", () => {
   });
 
   it("shows loading and then an error state when the API is unavailable", async () => {
-    render(<SystemCardPage load={vi.fn().mockResolvedValue(null)} />);
+    render(<SystemCardPage checkApi={apiReady} load={vi.fn().mockResolvedValue(null)} />);
     expect(screen.getByText("Loading system card…")).toBeInTheDocument();
     expect(await screen.findByRole("alert")).toHaveTextContent("could not be loaded");
     // The statement does not depend on the API
@@ -56,10 +59,12 @@ describe("System card page", () => {
 
 describe("Guided demo landing", () => {
   it("offers patient, staff and system card entry points and explains the workflow", () => {
-    render(<Landing demoMode={false} />);
+    render(<Landing checkApi={apiReady} demoMode={false} />);
     const entry = within(screen.getByRole("heading", { name: "Start here" }).closest("section")!);
     expect(entry.getByRole("link", { name: /^Patient/ })).toHaveAttribute("href", "/intake");
     expect(entry.getByRole("link", { name: /^Staff/ })).toHaveAttribute("href", "/staff");
+    // #67: visitors are told up front that staff access needs an operator-issued token
+    expect(entry.getByRole("link", { name: /^Staff/ })).toHaveTextContent("access token issued on request by the demo operator");
     expect(entry.getByRole("link", { name: /^System card/ })).toHaveAttribute("href", "/system-card");
     expect(within(screen.getByRole("navigation", { name: "Demo sections" })).getAllByRole("link")).toHaveLength(4);
     const steps = within(screen.getByTestId("workflow")).getAllByRole("listitem").map((li) => li.textContent);
@@ -69,11 +74,11 @@ describe("Guided demo landing", () => {
   });
 
   it("shows demo staff identities only when the demo flag is set, and never a token", () => {
-    const { unmount } = render(<Landing demoMode={false} />);
+    const { unmount } = render(<Landing checkApi={apiReady} demoMode={false} />);
     expect(screen.queryByTestId("demo-staff")).not.toBeInTheDocument();
     unmount();
 
-    render(<Landing demoMode />);
+    render(<Landing checkApi={apiReady} demoMode />);
     const panel = screen.getByTestId("demo-staff");
     expect(panel).toHaveTextContent("demo-staff-a");
     expect(panel).toHaveTextContent("demo-clinic-b");

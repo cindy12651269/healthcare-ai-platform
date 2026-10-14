@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import FhirExport from "./FhirExport";
 import IntakeEvidence from "./IntakeEvidence";
@@ -126,33 +127,56 @@ function SignIn({
   }
 
   return (
-    <form className="card" onSubmit={handleSubmit} aria-labelledby="signin-heading">
-      <h2 id="signin-heading">Staff sign-in</h2>
-      <p className="muted small">
-        Paste the access token issued to you by your operator (<code>python -m api.auth issue-token</code>).
-        It is kept only in this browser tab and is cleared when you sign out or reload.
+    <>
+      <StaffAccessPolicy />
+      <form className="card" onSubmit={handleSubmit} aria-labelledby="signin-heading">
+        <h2 id="signin-heading">Staff sign-in</h2>
+        <p className="muted small">
+          Paste the access token issued to you by your operator (<code>python -m api.auth issue-token</code>).
+          It is kept only in this browser tab and is cleared when you sign out or reload.
+        </p>
+        <label className="field-label" htmlFor="staff-token">
+          Access token
+        </label>
+        <input
+          id="staff-token"
+          className="staff-input"
+          type="password"
+          autoComplete="off"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          disabled={pending}
+        />
+        {error && (
+          <div className="alert alert-error" role="alert">
+            {error}
+          </div>
+        )}
+        <button type="submit" className="primary" disabled={pending}>
+          {pending ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+    </>
+  );
+}
+
+// Staff-access policy for public visitors (#67). Tokens are issued on request by the demo operator;
+// there is deliberately no public token endpoint, guest login or shared password.
+function StaffAccessPolicy() {
+  return (
+    <section className="card" aria-labelledby="staff-access-heading" data-testid="staff-access-policy">
+      <h2 id="staff-access-heading">Visiting the public demo?</h2>
+      <p>
+        Staff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued
+        on request by the demo operator and are never published: there is no public sign-up, guest login or shared
+        password.
       </p>
-      <label className="field-label" htmlFor="staff-token">
-        Access token
-      </label>
-      <input
-        id="staff-token"
-        className="staff-input"
-        type="password"
-        autoComplete="off"
-        value={token}
-        onChange={(e) => setToken(e.target.value)}
-        disabled={pending}
-      />
-      {error && (
-        <div className="alert alert-error" role="alert">
-          {error}
-        </div>
-      )}
-      <button type="submit" className="primary" disabled={pending}>
-        {pending ? "Signing in…" : "Sign in"}
-      </button>
-    </form>
+      <p className="muted small">
+        Without a token you can still submit a scenario on <Link href="/intake">Patient intake</Link> and read the{" "}
+        <Link href="/system-card">System card</Link>. To see the staff queue, evidence timeline and FHIR export, ask the
+        person who shared this demo for a token or a guided walkthrough.
+      </p>
+    </section>
   );
 }
 
