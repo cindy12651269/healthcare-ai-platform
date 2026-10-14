@@ -255,18 +255,18 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 | Clinic-scoped RBAC status | Labelled *Complete*, but the card covers RBAC (**COMPLETE**) and tenant isolation (**PARTIAL**) | Status *RBAC complete · isolation partial*; limits note one seeded clinic and no SSO |
 | Safety guard, escalation | Matrix: **COMPLETE (rule-based scope)** | Same status; limits say keyword/regex rules and recorded gaps |
 | Evidence timeline, FHIR, webhook, evaluation | Matrix: **PARTIAL** (explainability; export only; integration; AI/LLM evaluation) | Shown as *Partial* with the matrix's limits (no stage timings/citations; no FHIR server; single receiver, no resend, disabled on hosted; mock-only tiny sets, in-sample) |
-| Webhook in the workflow | Must not read as unconditional | Drawn as a conditional branch; the system card adds a client-side note under the pipeline because the API's stage text (*"escalated intakes trigger a signed, PHI-free webhook"*) states it unconditionally. **Not fixed at the source**: changing `api/routers/system_card.py` is a backend change, out of scope |
+| Webhook wording | Must not read as unconditional or as a delivery guarantee | Dashboard: drawn as a conditional branch; the capability card opens *"When a receiver is configured, …"*; the timeline lists *"any webhook delivery attempts"*. System card: the API's stage text (*"escalated intakes trigger a signed, PHI-free webhook"*) is qualified **inside that stage card** with a *Conditional* tag (*"Sent only when a receiver is configured on the server; disabled on the hosted demo. Not a delivery guarantee."*). **Not fixed at the source**: changing `api/routers/system_card.py` is a backend change, out of scope |
 | Real mode, RAG, embeddings | Matrix: OpenAI opt-in, never in CI; RAG not wired; mock embeddings | Stated as such in the real-vs-mock panel |
 | Forbidden claims | No clinical validation, accuracy, HIPAA/compliance or production-readiness claim | Stated as *not claimed*; a test rejects positive compliance/accuracy phrases on the dashboard |
 
-**Tests.** `app/tests/Dashboard.test.tsx` (new, 33 including one per evidence path):
+**Tests.** `app/tests/Dashboard.test.tsx` (new, 34 including one per evidence path):
 * `waitForApi` health info.
 * `SystemStatus`: healthy mock, healthy real, missing fields, unreachable → *Try again* → ready, a 502 cold start showing *attempt 2 of 3* then ready, and the slow first check.
-* Dashboard: a single `/health` poller and the CTAs; seven stages in order with the webhook as a branch of escalation; the real-vs-mock statements and forbidden-claim guard; seven capability cards with links.
+* Dashboard: a single `/health` poller and the CTAs; seven stages in order with the webhook as a branch of escalation; the real-vs-mock statements and forbidden-claim guard; the webhook card is conditional; seven capability cards with links.
 * Every repository evidence path exists and every `#anchor` matches a heading (GitHub slug rules); system-card anchors exist.
 * Demo-mode gating and the #67 wording.
 
-`app/tests/SystemCard.test.tsx` was updated: exact committed values per category and total, stats, caveats, source, *Not reported* for missing data, section navigation, the review rule and the webhook note. The two landing tests that lived there moved to `Dashboard.test.tsx`. Total **139 passed**. `npm run lint`, `typecheck`, `test` and `build` pass locally.
+`app/tests/SystemCard.test.tsx` was updated: exact committed values per category and total, stats, caveats, source, *Not reported* for missing data, section navigation, the review rule, and the webhook qualifier inside the stage that states it. The two landing tests that lived there moved to `Dashboard.test.tsx`. Total **140 passed**. `npm run lint`, `typecheck`, `test` and `build` pass locally.
 
 ### 4a. Local browser validation (2026-10-14)
 
@@ -289,5 +289,7 @@ Fixed during the pass: the `phi` category was shown as *Phi* (now *PHI*); nav la
 
 * **Hosted validation: pending.** The hosted frontend serves the #68 build; this branch is not deployed and no Render change was made.
 * The unavailable and waking dashboard states are covered by unit tests, not by browser screenshots (the real wake window is ~75–105 s).
-* The API's pipeline text still states the webhook unconditionally (see wording review); the UI qualifies it, the source text is unchanged.
+* The API's pipeline text still states the webhook unconditionally (see wording review); the UI qualifies it in place, the source text is unchanged.
+
+**Review Gate (2026-10-14).** The first candidate (`8dff155`) qualified the webhook only in a small note below the pipeline grid, after the unconditional stage text, and the dashboard's webhook card opened with *"one … notification per escalation"*. Fixed with frontend wording only (above); tests, lint, typecheck, build and the 30-run browser matrix re-run (0 overflow, no target < 44 × 44, no clipped content); screenshots refreshed.
 * Chrome only; Safari/Firefox, physical devices and 200 % zoom are #72.

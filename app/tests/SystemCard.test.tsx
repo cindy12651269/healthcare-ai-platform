@@ -15,7 +15,11 @@ const SNAPSHOT = JSON.parse(
 const CARD = {
   not_a_medical_device: "Not a medical device. Portfolio demonstration.",
   execution_mode: "mock",
-  pipeline_stages: [{ stage: "Intake", description: "Validates the submission." }],
+  pipeline_stages: [
+    { stage: "Intake", description: "Validates the submission." },
+    // As served by api/routers/system_card.py: states the webhook without its condition
+    { stage: "Persistence + notification", description: "Stores the record; escalated intakes trigger a signed, PHI-free webhook (#33)." },
+  ],
   safety_rules: [{ action: "block_diagnosis", description: "Blocks diagnostic certainty." }],
   escalation_rules: [
     { reason: "emergency_signal", rule: "Emergency language" },
@@ -49,7 +53,13 @@ describe("System card page", () => {
     expect(within(rules).getByText("low_confidence")).toBeInTheDocument();
     expect(within(rules).getByText("Low structuring confidence")).toBeInTheDocument();
     expect(screen.getByTestId("review-rules")).toHaveTextContent("Every other transition is rejected");
-    expect(screen.getByTestId("webhook-condition")).toHaveTextContent("only when a receiver is configured");
+    // The unconditional served wording is qualified inside the stage that states it, and only there
+    const condition = screen.getByTestId("webhook-condition");
+    expect(condition).toHaveTextContent("Conditional");
+    expect(condition).toHaveTextContent("only when a receiver is configured");
+    expect(condition).toHaveTextContent("Not a delivery guarantee");
+    expect(condition.closest("li")).toHaveTextContent("Persistence + notification");
+    expect(screen.getAllByTestId("webhook-condition")).toHaveLength(1);
     expect(within(screen.getByTestId("limitations")).getAllByRole("listitem").map((li) => li.textContent)).toEqual(
       CARD.known_limitations,
     );

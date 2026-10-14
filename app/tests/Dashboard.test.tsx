@@ -171,6 +171,15 @@ describe("Dashboard", () => {
     expect(page).not.toMatch(/HIPAA[- ]compliant|clinically (proven|validated and)|production[- ]ready (platform|system)|FDA/i);
   });
 
+  it("never presents the webhook as unconditional", () => {
+    render(<Dashboard checkApi={apiReady} demoMode={false} />);
+    const card = screen.getByRole("heading", { name: "Signed webhook", level: 3 }).closest("li")!;
+    expect(card).toHaveTextContent("When a receiver is configured");
+    expect(card).toHaveTextContent("Disabled on the hosted demo");
+    expect(card).toHaveTextContent("not a delivery guarantee");
+    expect(document.body.textContent).not.toMatch(/webhook delivery and/i);
+  });
+
   it("renders every capability card with evidence links", () => {
     render(<Dashboard checkApi={apiReady} demoMode={false} />);
     const cards = within(screen.getByTestId("capabilities")).getAllByRole("listitem").filter((li) => li.dataset.capability);

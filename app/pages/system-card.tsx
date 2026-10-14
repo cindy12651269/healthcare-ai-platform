@@ -146,14 +146,17 @@ function CardBody({ card }: { card: SystemCard }) {
               <div>
                 <strong>{String(s.stage)}</strong>
                 <p>{String(s.description)}</p>
+                {/webhook/i.test(String(s.description)) && (
+                  // The served stage text states the webhook unconditionally; qualify it where it is read
+                  <p className="stage-condition" data-testid="webhook-condition">
+                    <Tag tone="escalated">Conditional</Tag> Sent only when a receiver is configured on the server;
+                    disabled on the hosted demo. Not a delivery guarantee.
+                  </p>
+                )}
               </div>
             </li>
           ))}
         </ol>
-        <p className="muted small" data-testid="webhook-condition">
-          The escalation webhook is sent only when a receiver is configured on the server; it is disabled on the hosted
-          demo.
-        </p>
       </Section>
 
       <Section id="safety-rules" title="Safety rules">

@@ -239,6 +239,7 @@ a.btn-secondary, a.btn-secondary:visited { color: var(--color-text); }
 .stage-grid, .rule-grid { list-style: none; padding: 0; margin: var(--space-3) 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
 .stage-grid li { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .stage-grid p, .rule-grid p { margin: var(--space-1) 0 0; }
+.stage-condition { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); font-size: var(--text-sm); color: var(--color-text-muted); }
 .rule-grid li { padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-sunken); min-width: 0; }
 .rule-grid code { overflow-wrap: anywhere; }
 .stat-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); margin: var(--space-3) 0; }

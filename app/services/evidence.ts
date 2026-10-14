@@ -69,7 +69,7 @@ export const WORKFLOW: WorkflowStage[] = [
   {
     id: "timeline",
     title: "Evidence timeline",
-    summary: "Why the intake was flagged, recorded guard matches in the input, processing provenance, webhook delivery and staff actions.",
+    summary: "Why the intake was flagged, recorded guard matches in the input, processing provenance, any webhook delivery attempts and staff actions.",
     tags: ["implemented"],
     note: "Shows persisted records only; no model reasoning is stored or shown.",
   },
@@ -191,7 +191,7 @@ export const CAPABILITIES: Capability[] = [
     title: "Evidence timeline",
     status: "Partial · explainability",
     statusTone: "warning",
-    summary: "Per intake: the triggered rule, recorded matches highlighted in the input, processing provenance, webhook delivery and staff transitions.",
+    summary: "Per intake: the triggered rule, recorded matches highlighted in the input, processing provenance, any webhook delivery attempts and staff transitions.",
     limits: "Stage timings are not persisted and the report does not cite retrieval sources.",
     evidence: [
       { label: "Evidence & timeline API (#41)", href: "docs/review_queue_api.md#intake-evidence--timeline-41" },
@@ -216,7 +216,7 @@ export const CAPABILITIES: Capability[] = [
     title: "Signed webhook",
     status: "Partial · conditional",
     statusTone: "warning",
-    summary: "One HMAC-SHA256-signed, PHI-free notification per escalation, with an idempotency key, bounded retries and a delivery log.",
+    summary: "When a receiver is configured, an escalation triggers one HMAC-SHA256-signed, PHI-free notification, with an idempotency key, bounded retries and a delivery log.",
     limits: "Single receiver, no automatic resend, not a delivery guarantee. Disabled on the hosted demo.",
     evidence: [
       { label: "Webhook design", href: "docs/escalation_webhook.md" },
