@@ -158,7 +158,7 @@ Run against the URLs above from `main` at `3e984e3`, following §6:
 * Receiver: exactly one POST with `Idempotency-Key: intake.escalated:<intake id>`; `scripts/verify_webhook.py` → `VALID signature`, a tampered signature is rejected; `webhook_deliveries` row `delivered`, 1 attempt, HTTP 200.
 * Payload limited to `event`, `schema_version`, `idempotency_key`, `intake_id`, `clinic_id`. API logs contain no intake text and no tracebacks. The browser bundle contains only the API URL and no secret names.
 
-Phase 7 redeploy (2026-10-13, `main` at `2afdb4b`: migration 004, demo seed, read-only staff checks; flagged presets, staff browser UI and a new webhook delivery not exercised): [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4. Staff browser UI verified on the same deployment on 2026-10-14 (one seeded intake; no submission or webhook): §4a. The flagged presets and a new webhook delivery remain unverified.
+Phase 7 redeploy (2026-10-13, `main` at `2afdb4b`: migration 004, demo seed, read-only staff checks; flagged presets, staff browser UI and a new webhook delivery not exercised): [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4. Staff browser UI verified on the same deployment on 2026-10-14 (one seeded intake; no submission or webhook): §4a. The flagged presets and a new webhook delivery remain unverified. Issue #67 (2026-10-14): with `WEBHOOK_URL` unset, all four presets and `scripts/hosted_check.py` were run on the hosted demo with delivery `disabled` (§9.5).
 
 ## 8. Tear-down
 
@@ -246,4 +246,4 @@ Options not taken (billing decisions for the account owner, #67 out of scope): a
 
 ### 9.5 Hosted validation
 
-Evidence for the four presets on the hosted demo with delivery disabled is recorded in the [Phase 8 journal](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md) (Issue 67).
+Run on 2026-10-14 after the owner confirmed the `disabled` log line for a non-flagged probe: routine → `submitted`; emergency → `needs_review` (`emergency_signal`); prescription → `needs_review` (`blocked_prescription`); vague → `needs_review` (`low_confidence`), matching CI and the system card. No new intake has a `webhook_delivery` event. `scripts/hosted_check.py`: all 8 checks `[PASS]`. Details and limitations (the #67 frontend still needs a frontend *Manual Deploy* after merge): [Phase 8 journal](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md) §2a–§2b.
