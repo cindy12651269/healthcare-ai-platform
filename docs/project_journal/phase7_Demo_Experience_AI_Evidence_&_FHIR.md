@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 7 (2026-10-12 – 2026-10-13)
 Scope: Issues #40, #41, #42, #43
-Status: Completed (2026-10-13) — #40–#43 closed (2026-10-12); PRs #60–#64 merged. Hosted API redeployed from `2afdb4b` and verified on 2026-10-13 (read-only staff checks; flagged scenarios not re-submitted, §4).
+Status: Completed (2026-10-13) — #40–#43 closed (2026-10-12); PRs #60–#64 merged. Hosted API redeployed from `2afdb4b` and verified on 2026-10-13 (read-only staff checks; flagged scenarios not re-submitted, §4). Staff browser UI verified on the hosted demo on 2026-10-14 (§4a).
 
 ---
 
@@ -58,7 +58,7 @@ Out of scope throughout: real LLM mode on the hosted demo, real patient data, co
 
 **Delivered:** landing page with Patient / Staff / System card entry points and the workflow (`app/pages/index.tsx`, intake moved to `/intake`); four scenario presets that fill text only (`app/services/demo.ts`); developer trace behind a reviewer toggle; seeded synthetic intakes in two clinics covering every status, refused unless `APP_ENV=demo` (`db/seed_demo.py`); read-only `GET /api/system-card` and `/system-card` page serving the committed snapshot `evaluation/system_card_results.json`; demo staff identities (never tokens) shown only when `NEXT_PUBLIC_DEMO_MODE=true`.
 **Evidence:** the snapshot is re-computed and compared in CI (`tests/test_system_card.py`); preset outcomes pinned through the real pipeline; seed idempotency, status coverage and clinic isolation tests; frontend tests for presets, toggle, system card and demo-flag visibility.
-**Limitations:** hosted verification (§4) is API-level plus public pages; the staff browser UI and the three flagged presets were not exercised on the hosted demo; tokens still require the operator (no self-service sign-in, by design); seeded transitions are synthetic demo history.
+**Limitations:** the 2026-10-13 hosted verification (§4) is API-level plus public pages; the staff browser UI was verified on the hosted demo on 2026-10-14 (§4a); the three flagged presets were not exercised on the hosted demo; tokens still require the operator (no self-service sign-in, by design); seeded transitions are synthetic demo history.
 
 ---
 
@@ -76,7 +76,58 @@ Out of scope throughout: real LLM mode on the hosted demo, real patient data, co
   * **FHIR.** All ten intakes in both queues return `application/fhir+json` collection Bundles (6 entries; 7 with a seeded transition) that pass `interoperability.fhir_validation.validate_bundle` (R4 JSON schema per resource, required fields, internal references resolve).
   * **Audit.** The Render logs show one `intake.fhir_export` event per export with `actor_id`, `action`, `clinic_id` and `resource_id` only, no intake text. Denied (403) requests appear only in the request log; no audit event is written for a denial.
   * **Observed limitation.** In the seeded intakes' timelines, `submitted` is listed after processing and the seeded transition. PostgreSQL `NOW()` gives every row created in the one seed transaction the same `created_at`, which is earlier than the intake timestamps. Live intakes (one transaction each) list `submitted` first.
-  * **Not verified on the hosted demo:** the staff browser UI (token entry, queue, evidence and FHIR preview/download in the page), the three flagged presets, and a new signed webhook delivery. The 2026-10-09 Phase 6 acceptance remains the hosted webhook evidence.
+  * **Not verified on the hosted demo (2026-10-13):** the staff browser UI (token entry, queue, evidence and FHIR preview/download in the page), the three flagged presets, and a new signed webhook delivery. The 2026-10-09 Phase 6 acceptance remains the hosted webhook evidence. The staff browser UI was verified on 2026-10-14 (§4a).
+
+
+### 4a. Hosted Staff Browser UI Verification (2026-10-14)
+
+Manual run of the staff review UI at `https://healthcare-ai-frontend-1s23.onrender.com/staff` against the hosted API deployed from `2afdb4b` (§4). No application code, configuration or deployment changed. Synthetic data only; mock mode. Signed in as `demo-admin-a` (`admin-a@demo.example.test`, `clinic_admin` of clinic `default`, "Clinic A") with an operator-issued token; the token is masked in every screenshot and is not recorded here. No intake was submitted and no webhook was sent: the only write was a staff status transition, and the webhook fires only when ingest stores a new `needs_review` intake ([`escalation_webhook.md`](../escalation_webhook.md#trigger)).
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Staff token authentication | PASS | Screenshots 1–2: masked token entered; "Signed in as admin-a@demo.example.test · clinic default (clinic_admin)"; Network tab shows `me` and `intakes?review_status=…` → 200 |
+| Clinic A review queue | PASS | Screenshots 3–4: "Needs review" filter lists `demo-intake-a2` (seeded, `emergency_signal`) and `77c8cd97…` (Phase 6 acceptance intake of 2026-10-09); no `demo-clinic-b` intake |
+| Intake details and structured report | PASS | Screenshot 5: review status, escalation reason, received time, structured summary (confidence 0.85, "Rule-based baseline (not LLM-generated)") and report sections with emergency guidance |
+| Safety evidence and processing provenance | PASS | Screenshots 6–7: safety result (severity high, `add_emergency_guidance`), "Why flagged" `emergency_signal` with recorded guard evidence, extracted fields; provenance mode/model `mock`, prompt `deterministic_rule_based_baseline_v1`, pipeline `v0.1.0`, run `demo-seed:demo-intake-a2` |
+| Review timeline | PASS | Screenshot 7: Processed → Safety evaluated → Escalation decision (`emergency_signal`) → Submitted |
+| FHIR R4 export preview | PASS | Screenshot 8: "FHIR R4 — Synthetic Demo Data" label; Bundle preview after "Load FHIR export" |
+| FHIR JSON download | PASS | "Download JSON" saved the file below (valid JSON, identical to the downloaded original) |
+| Mark reviewed status transition | PASS | Operator-observed: `demo-intake-a2` moved from `needs_review` to `reviewed`. No screenshot of the post-transition state was captured |
+| Staff sign-out | PASS | Screenshot 9: sign-in form shown again with an empty access-token field |
+
+**Screenshots** (copied unchanged from the session; times are the browser's local zone, UTC+8):
+
+1. Staff sign-in with the token entered (masked)
+
+   ![Staff sign-in, token masked](evidence/phase7_hosted_browser_2026-10-14/01-staff-sign-in-token-entered.png)
+2. Signed in; Network tab shows the `me` and queue requests returning 200
+
+   ![Signed in with Network tab](evidence/phase7_hosted_browser_2026-10-14/02-staff-signed-in-network-me-intakes-200.png)
+3. Clinic A review queue filtered to "Needs review"
+
+   ![Clinic A review queue](evidence/phase7_hosted_browser_2026-10-14/03-clinic-a-review-queue-needs-review.png)
+4. Opening `demo-intake-a2` from the queue
+
+   ![Open demo-intake-a2](evidence/phase7_hosted_browser_2026-10-14/04-open-intake-demo-intake-a2.png)
+5. Intake detail: structured summary and report
+
+   ![Intake detail and report](evidence/phase7_hosted_browser_2026-10-14/05-intake-detail-structured-summary-report.png)
+6. Safety result, "Why flagged" evidence and extracted fields
+
+   ![Safety evidence](evidence/phase7_hosted_browser_2026-10-14/06-safety-result-why-flagged-evidence.png)
+7. Processing provenance, review timeline and the FHIR export panel before loading
+
+   ![Provenance and timeline](evidence/phase7_hosted_browser_2026-10-14/07-processing-provenance-timeline-fhir-panel.png)
+8. FHIR R4 export preview with "Download JSON"
+
+   ![FHIR R4 preview](evidence/phase7_hosted_browser_2026-10-14/08-fhir-r4-export-preview-download-json.png)
+9. After sign-out
+
+   ![Signed out](evidence/phase7_hosted_browser_2026-10-14/09-staff-signed-out.png)
+
+**Downloaded artifact:** [`intake-demo-intake-a2-fhir-r4.json`](evidence/phase7_hosted_browser_2026-10-14/intake-demo-intake-a2-fhir-r4.json), a `collection` Bundle tagged `synthetic-demo` with six entries: `QuestionnaireResponse` (identifier `demo-intake-a2`, the synthetic intake text and consent `true`), `Questionnaire` (the static pre-visit intake form), `Task` (`status: ready`, `businessStatus: needs_review`, reason `emergency_signal`; exported before the transition), `Organization` (clinic `default`), `Device` (model `mock`, prompt `deterministic_rule_based_baseline_v1`, pipeline `v0.1.0`) and `Provenance` (targets the QuestionnaireResponse and Task, agent the Device). It contains no token, real person or contact data. Locally it parses as JSON and `interoperability.fhir_validation.validate_bundle` returns no errors (R4 JSON Schema per resource, required fields, internal references). It was not run through the official HL7 validator.
+
+**Limits of this evidence:** one seeded intake in one clinic, one browser session, no automated browser E2E test; "Mark escalated" and the cross-clinic view were not exercised in the browser (cross-clinic denial is verified at API level, §4); the emergency, prescription and vague presets remain unverified on the hosted demo because the webhook destination has not been isolated. This is not full hosted E2E coverage and not a FHIR conformance claim.
 
 ---
 
@@ -85,7 +136,7 @@ Out of scope throughout: real LLM mode on the hosted demo, real patient data, co
 * Rule-based safety, escalation and extraction: paraphrases and out-of-lexicon text are missed; evaluation sets are tiny, synthetic and partly in-sample.
 * Raw intake text is stored unmasked and returned to authorized staff (timeline, FHIR export).
 * No real-mode measurements; the hosted demo stays in mock mode.
-* Hosted demo gaps (§4): the staff browser UI and the emergency, prescription and vague presets were not exercised on the hosted demo; the last hosted signed-webhook evidence is the Phase 6 acceptance of 2026-10-09. Render free tier limits are unchanged ([`deployment.md`](../deployment.md) §5).
+* Hosted demo gaps (§4, §4a): the emergency, prescription and vague presets were not exercised on the hosted demo, because the webhook destination has not been isolated and each flagged submission sends a real webhook; the staff browser UI was verified on 2026-10-14 for one seeded intake in clinic `default` only; the last hosted signed-webhook evidence is the Phase 6 acceptance of 2026-10-09. Render free tier limits are unchanged ([`deployment.md`](../deployment.md) §5).
 * FHIR export is checked against the R4 JSON Schema plus local required-element and reference checks only, not the official HL7 validator, profiles or terminology. Exports carry raw intake text ([`security_data_handling.md`](../security_data_handling.md)).
 
 ---

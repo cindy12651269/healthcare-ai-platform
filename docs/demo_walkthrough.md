@@ -15,7 +15,7 @@ curl -s https://healthcare-ai-api-tovn.onrender.com/health
 curl -s -o /dev/null -w "%{http_code}\n" https://healthcare-ai-frontend-1s23.onrender.com/
 ```
 
-> **Phase 7 (#43) status.** Verified against the hosted demo on 2026-10-13 after the API was redeployed from `2afdb4b` (migration 004 applied, 8 demo intakes seeded). Verified: the landing page, the four preset buttons, the System Card, both seeded queues with every status, cross-clinic denial, evidence timelines and FHIR R4 export, via the API with operator-issued tokens. Only the routine preset was submitted. The flagged presets were not re-submitted (each sends a real webhook), and the staff browser UI was not driven. Details: [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4.
+> **Phase 7 (#43) status.** Verified against the hosted demo on 2026-10-13 after the API was redeployed from `2afdb4b` (migration 004 applied, 8 demo intakes seeded). Verified: the landing page, the four preset buttons, the System Card, both seeded queues with every status, cross-clinic denial, evidence timelines and FHIR R4 export, via the API with operator-issued tokens. Only the routine preset was submitted. The flagged presets were not re-submitted (each sends a real webhook), and the staff browser UI was not driven. On 2026-10-14 the staff browser UI was driven on the same deployment for the seeded `demo-intake-a2` (sign-in, queue, evidence, timeline, FHIR preview/download, mark reviewed, sign-out; screenshots in §4a); the flagged presets remain unverified. Details: [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4.
 
 ## 0. Guided demo landing (anyone)
 

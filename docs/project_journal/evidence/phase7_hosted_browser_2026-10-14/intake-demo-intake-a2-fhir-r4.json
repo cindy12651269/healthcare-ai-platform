@@ -1,0 +1,187 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "meta": {
+    "tag": [
+      {
+        "system": "urn:healthcare-ai-platform:data",
+        "code": "synthetic-demo",
+        "display": "FHIR R4 — Synthetic Demo Data"
+      }
+    ]
+  },
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:6dffabc5-aaf1-5d09-a4a0-2c9eaaf5a079",
+      "resource": {
+        "resourceType": "QuestionnaireResponse",
+        "identifier": {
+          "system": "urn:healthcare-ai-platform:intake",
+          "value": "demo-intake-a2"
+        },
+        "questionnaire": "urn:healthcare-ai-platform:fhir:Questionnaire:pre-visit-intake",
+        "status": "completed",
+        "authored": "2026-10-12T17:35:42.090835+00:00",
+        "item": [
+          {
+            "linkId": "symptoms",
+            "text": "Your symptoms",
+            "answer": [
+              {
+                "valueString": "I have chest pain and shortness of breath since this morning."
+              }
+            ]
+          },
+          {
+            "linkId": "consent",
+            "text": "I consent to this information being processed to prepare a summary for my care team.",
+            "answer": [
+              {
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:08d7812d-a265-59d2-9bb5-81fecddf9be4",
+      "resource": {
+        "resourceType": "Questionnaire",
+        "url": "urn:healthcare-ai-platform:fhir:Questionnaire:pre-visit-intake",
+        "version": "1",
+        "name": "PreVisitIntake",
+        "title": "Pre-visit symptom intake (synthetic demo)",
+        "status": "active",
+        "description": "Static definition of the platform's pre-visit intake form (app/components/InputForm.tsx): one free-text symptoms field and one consent checkbox. Synthetic demo data only.",
+        "item": [
+          {
+            "linkId": "symptoms",
+            "text": "Your symptoms",
+            "type": "text",
+            "required": true
+          },
+          {
+            "linkId": "consent",
+            "text": "I consent to this information being processed to prepare a summary for my care team.",
+            "type": "boolean",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e754c153-6c7a-5354-bb12-408aac63a35f",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:healthcare-ai-platform:intake-review",
+            "value": "demo-intake-a2"
+          }
+        ],
+        "status": "ready",
+        "businessStatus": {
+          "coding": [
+            {
+              "system": "urn:healthcare-ai-platform:review-status",
+              "code": "needs_review"
+            }
+          ],
+          "text": "needs_review"
+        },
+        "intent": "order",
+        "description": "Staff review of a pre-visit intake",
+        "focus": {
+          "reference": "urn:uuid:6dffabc5-aaf1-5d09-a4a0-2c9eaaf5a079"
+        },
+        "authoredOn": "2026-10-12T17:35:40.903007+00:00",
+        "lastModified": "2026-10-12T17:35:40.903007+00:00",
+        "owner": {
+          "reference": "urn:uuid:06a2f1de-2bc2-5f5f-aaa4-ab0ce645406d"
+        },
+        "reasonCode": {
+          "text": "emergency_signal"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:06a2f1de-2bc2-5f5f-aaa4-ab0ce645406d",
+      "resource": {
+        "resourceType": "Organization",
+        "identifier": [
+          {
+            "system": "urn:healthcare-ai-platform:clinic",
+            "value": "default"
+          }
+        ],
+        "name": "Default Clinic"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3d7d1efe-4a83-5e53-9e05-120d11244ace",
+      "resource": {
+        "resourceType": "Device",
+        "deviceName": [
+          {
+            "name": "Healthcare AI Platform intake pipeline",
+            "type": "user-friendly-name"
+          }
+        ],
+        "version": [
+          {
+            "type": {
+              "text": "model"
+            },
+            "value": "mock"
+          },
+          {
+            "type": {
+              "text": "prompt"
+            },
+            "value": "deterministic_rule_based_baseline_v1"
+          },
+          {
+            "type": {
+              "text": "pipeline"
+            },
+            "value": "v0.1.0"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f54c9975-1b39-54db-894e-7c765482a076",
+      "resource": {
+        "resourceType": "Provenance",
+        "target": [
+          {
+            "reference": "urn:uuid:6dffabc5-aaf1-5d09-a4a0-2c9eaaf5a079"
+          },
+          {
+            "reference": "urn:uuid:e754c153-6c7a-5354-bb12-408aac63a35f"
+          }
+        ],
+        "recorded": "2026-10-12T17:35:40.903007+00:00",
+        "activity": {
+          "text": "AI structuring, safety check and escalation decision (run demo-seed:demo-intake-a2)"
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "assembler"
+                }
+              ]
+            },
+            "who": {
+              "reference": "urn:uuid:3d7d1efe-4a83-5e53-9e05-120d11244ace"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
