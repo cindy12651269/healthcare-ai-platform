@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
 Scope: Issues #67 and #68 (items 1–2 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c).
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token.
 
 ---
 
@@ -91,7 +91,7 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 
 ## 3. Issue 68 — Design System, App Shell & Responsive Layout
 
-**Status:** implemented on branch `feat/issue-68-design-system-app-shell`; in review. No API, backend, auth, RBAC, clinic-isolation or workflow change; no new dependency (`app/package.json` unchanged).
+**Status:** closed (2026-10-14): PR #76 merged (`ba028df`, reviewed head `8231d9e`; `main` CI run 38543008087 — success); frontend deployed and verified on the hosted demo (§3c), signed-in staff workspace pending. No API, backend, auth, RBAC, clinic-isolation or workflow change; no new dependency (`app/package.json` unchanged).
 
 **Delivered:**
 
@@ -190,9 +190,41 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 
 ### 3b. Limitations
 
-* **Hosted visual validation: pending.** The #68 frontend is not deployed; no deploy or Render change was made. The checks above ran on a local production build only.
+* ~~Hosted visual validation: pending.~~ Resolved for the public pages on 2026-10-14 (§3c); the signed-in staff workspace remains validated on synthetic fixtures only.
 * Chrome only (headless, emulated viewports, not physical devices); Safari/Firefox and 200 % zoom are #72.
 * Contrast verified on token pairs plus visual review, not per-element with a scanner.
 * The *"mock mode"* text in the indicator is static (hosted demo and CI run mock only); a locally run real-mode API still shows the live *LLM Mode: Real* badge on `/intake`.
 * Dates use the browser locale (`toLocaleString`, pre-existing); explicit locale/timezone formatting is #71. Screenshots pin `en-US`/UTC.
 * Theme follows the OS setting; there is no in-app toggle.
+
+### 3c. Hosted frontend verification (2026-10-14)
+
+**Deploy.** PR #76 merged with a merge commit (`ba028df`, reviewed head `8231d9e`; PR CI and `main` CI run 38543008087 — success). Frontend *Manual Deploy* by the account owner: source commit `ba028df`, *Live* at about 17:38 Taiwan time (09:38 UTC). The API was not redeployed (no backend change) and was not restarted for this check. No Render setting was changed.
+
+**Served build** (`curl`, 09:41 UTC): `/`, `/intake`, `/staff`, `/system-card` → 200. Every page's HTML contains the *"Demo · synthetic data · mock mode"* indicator, the skip link and the menu toggle (`aria-controls="site-nav"`); the pre-#68 *"Demo · synthetic data only"* badge is gone. `/` and `/staff` contain the #67 wording *"issued on request by the demo operator"*; `/` contains the demo staff table (`NEXT_PUBLIC_DEMO_MODE` on). API `GET /health` → 200 in 0.2 s (`environment: demo`, `llm_mode: mock`).
+
+**Responsive matrix (hosted, 09:42:14–09:42:38 UTC).** Same headless-Chrome DevTools-Protocol method as §3a (`capture-cdp-hosted.mjs`), pointed at `https://healthcare-ai-frontend-1s23.onrender.com`: 4 public views (`/`, `/intake`, `/system-card`, `/staff` signed out) × 390 / 768 / 1280 / 1440 px × light / dark = **32 runs**, locale `en-US`, timezone UTC. Each page waited for live API data before measuring (`/intake`: the *LLM Mode* badge from `/health`; `/system-card`: the evaluation table from `/api/system-card`). The harness sends **no bearer token** and performs no sign-in.
+
+| Check | Result (hosted) |
+| --- | --- |
+| Horizontal page overflow | **0 px in all 32 runs** |
+| Touch targets ≥ 44 × 44 | **No smaller target in any run** |
+| Demo indicator | Present with the exact text on **32/32** runs |
+| Tables | Demo-staff and system-card evaluation tables stack at 390 px; none scrolls at any width |
+| Mobile nav (390 px) | Collapsed by default; Tab order skip link → brand → *Menu*; Enter opens; next Tab focuses *Guided demo*; links 358 × 44 px; Escape closes and returns focus to *Menu* |
+| Desktop nav (1280 px) | Horizontal, *Menu* hidden |
+| Focus visibility | 3 px solid ring (`#1f5fcf` light on *Guided demo*, `#8ab8ff` dark on *Sign in*) |
+| Reduced motion | Spinner animation 0.01 ms |
+| #67 staff-access card | Above *Staff sign-in* on **8/8** `/staff` runs |
+
+**#67 cold-start integration.** Observed warm only: the API answered `/health` at once, so no notice was rendered on any of the 32 runs (expected: `ApiStatus` renders nothing when the first check is fast). The owner reported seeing the waking notice *"(attempt 1 of 6)"* in the new shell on the hosted homepage just after the deploy; that observation is the owner's, with no screenshot in this folder. No restart was forced to reproduce it.
+
+**Evidence:** [`evidence/phase8_issue68_hosted_frontend_2026-10-14/`](evidence/phase8_issue68_hosted_frontend_2026-10-14/) — `{landing,intake,system-card,staff-signin}-{390,768,1280,1440}-{light,dark}.jpg`, `nav-mobile-open-390-light.jpg`, `focus-visible-nav-link-390-light.jpg`, `focus-visible-signin-button-1280-dark.jpg`, `measurements.json`, `capture-cdp-hosted.mjs`. No token, secret or personal data visible.
+
+**Not verified on the hosted demo:**
+
+* **Signed-in staff workspace** (queue, status badges, reason labels, detail, timeline, FHIR panel): **pending**. No securely issued short-lived token was available for this check, and none was generated. Covered on a local production build with synthetic fixtures (§3a) and by unit tests.
+* The cold-start waking → awake sequence in the new shell, beyond the owner's report above; the failure state remains test-only (§2c).
+* Physical devices, Safari/Firefox and 200 % zoom (#72).
+
+**Verdict for #68 on the hosted demo:** the deployed build is `ba028df`; all four public pages pass the overflow, touch-target, indicator, navigation, focus and reduced-motion checks at all four widths in both themes, and the #67 staff-access messaging is intact. Only the signed-in staff workspace is still pending hosted validation.

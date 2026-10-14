@@ -1,0 +1,572 @@
+{
+  "results": [
+    {
+      "page": "landing",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T09:42:14.770Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T09:42:15.760Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T09:42:16.529Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-14T09:42:17.122Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    },
+    {
+      "page": "landing",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T09:42:17.663Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T09:42:18.658Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T09:42:19.528Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-14T09:42:20.115Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    },
+    {
+      "page": "landing",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T09:42:20.660Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T09:42:21.661Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T09:42:22.439Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-14T09:42:23.039Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    },
+    {
+      "page": "landing",
+      "width": 1440,
+      "theme": "light",
+      "at": "2026-10-14T09:42:23.587Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 1440,
+      "theme": "light",
+      "at": "2026-10-14T09:42:24.583Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 1440,
+      "theme": "light",
+      "at": "2026-10-14T09:42:25.342Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 1440,
+      "theme": "light",
+      "at": "2026-10-14T09:42:25.945Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    },
+    {
+      "page": "landing",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:26.531Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:27.544Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:28.306Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:28.884Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    },
+    {
+      "page": "landing",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:29.436Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:30.403Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:31.176Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:31.779Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    },
+    {
+      "page": "landing",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:32.343Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:33.345Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:34.113Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:34.716Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    },
+    {
+      "page": "landing",
+      "width": 1440,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:35.278Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "intake",
+      "width": 1440,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:36.268Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "system-card",
+      "width": 1440,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:37.028Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": false
+    },
+    {
+      "page": "staff-signin",
+      "width": 1440,
+      "theme": "dark",
+      "at": "2026-10-14T09:42:37.631Z",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [],
+      "indicator": "Demo · synthetic data · mock mode",
+      "apiStatus": null,
+      "staffPolicy": true
+    }
+  ],
+  "nav": {
+    "collapsedHidden": true,
+    "tabOrderStart": [
+      {
+        "el": "a.skip-link 'Skip to main content'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "a.brand 'Healthcare AI Platform'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "button.nav-toggle 'Menu'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "button.btn.btn-secondary.btn-sm 'Routine symptoms'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      }
+    ],
+    "openAfterEnter": true,
+    "firstLinkFocused": {
+      "el": "a 'Guided demo'",
+      "outline": "solid 3px rgb(31, 95, 207)"
+    },
+    "linkSizes": [
+      "358x44",
+      "358x44",
+      "358x44",
+      "358x44"
+    ],
+    "closedAfterEscape": true,
+    "focusReturned": true,
+    "desktopNavVisible": true,
+    "desktopFocus": {
+      "el": "button.btn.btn-primary 'Sign in'",
+      "outline": "solid 3px rgb(138, 184, 255)"
+    },
+    "reducedMotionSpinner": "1e-05s"
+  }
+}
