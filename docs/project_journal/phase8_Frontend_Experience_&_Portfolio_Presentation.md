@@ -69,10 +69,10 @@ API https://healthcare-ai-api-tovn.onrender.com, `main` build of Phase 7 (the #6
 | Time (UTC) | Banner |
 | --- | --- |
 | 08:49:08–17 | *"Waking the demo server (can take up to a minute)." … "(attempt 1 of 6)"* (screenshot 01) |
-| 08:49:32 | same, *"attempt 2 of 6"* (attempt 1 hit its 15 s timeout while Render held the request) |
+| 08:49:32 | same, *"attempt 2 of 6"* (attempt 1 had ended without success) |
 | 08:49:47 | *"Demo server is awake."* (screenshot 02) |
 
-Network log of that session (tracking started after attempt 1 was in flight): `GET https://healthcare-ai-api-tovn.onrender.com/health` → **503**, then → **200**. So the deployed component handled both cold-start shapes in one run: a held request that timed out, and a fast 503 while the instance started, followed by success. Per-request timestamps were not captured, so the exact spacing after the 503 (paced to the rest of its 15 s slot) is inferred from the banner times, not measured.
+Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/health` → **503**, then → **200** (exactly two cold-session requests captured). Verified: the deployed component recovered from a 503 during the cold start, retried within its bounds and reached *"Demo server is awake"*. Not determinable: tracking started while attempt 1 was in flight, so it is unknown whether attempt 1 is the captured 503 (then attempt 2 was held until the instance was up and returned 200) or timed out uncaptured (then attempt 2 was the 503 and attempt 3 the 200). Per-request timestamps were not captured, so the timeout path and the spacing after the 503 were not measured on the hosted demo.
 
 **Warm behaviour.** Reloading `/` and opening `/staff` with the API awake: one `GET …/health` → 200 per page, no banner (screenshot 03 for `/staff`). Without a token `/staff` makes no other API call.
 
