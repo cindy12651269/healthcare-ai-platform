@@ -204,3 +204,66 @@ export async function fetchSystemCard(
     return null;
   }
 }
+
+// Cold start (#67): free hosted services sleep when idle, and the first request can take up to about a
+// minute. Poll the existing GET /health with a per-attempt timeout and a bounded number of attempts.
+export const WAKE_POLICY = { maxAttempts: 6, attemptTimeoutMs: 15_000, retryDelayMs: 3_000 } as const;
+
+export type ApiReadiness = "ready" | "unavailable";
+
+export interface WaitForApiOptions extends Pick<SubmitOptions, "baseUrl" | "fetchImpl"> {
+  maxAttempts?: number;
+  attemptTimeoutMs?: number;
+  retryDelayMs?: number;
+  signal?: AbortSignal; // cancels the wait (e.g. the page was left)
+  onAttempt?: (attempt: number, maxAttempts: number) => void;
+  sleep?: (ms: number, signal?: AbortSignal) => Promise<void>; // injectable for tests
+}
+
+function abortableSleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(done, ms);
+    function done() {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", done);
+      resolve();
+    }
+    signal?.addEventListener("abort", done);
+  });
+}
+
+// Never throws. "ready" as soon as /health answers 200 with status "ok"; "unavailable" after
+// maxAttempts failed or timed-out attempts, or when cancelled.
+export async function waitForApi(options: WaitForApiOptions = {}): Promise<ApiReadiness> {
+  const {
+    baseUrl = API_BASE_URL,
+    fetchImpl = fetch,
+    maxAttempts = WAKE_POLICY.maxAttempts,
+    attemptTimeoutMs = WAKE_POLICY.attemptTimeoutMs,
+    retryDelayMs = WAKE_POLICY.retryDelayMs,
+    signal,
+    onAttempt,
+    sleep = abortableSleep,
+  } = options;
+  const url = `${baseUrl.replace(/\/$/, "")}/health`;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (signal?.aborted) return "unavailable";
+    onAttempt?.(attempt, maxAttempts);
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    const timer = setTimeout(cancel, attemptTimeoutMs);
+    signal?.addEventListener("abort", cancel);
+    try {
+      const response = await fetchImpl(url, { signal: controller.signal });
+      if (response.ok && ((await response.json()) as JsonObject).status === "ok") return "ready";
+    } catch {
+      // Unreachable, timed out, or not JSON yet (e.g. a 502 page while the instance starts): retry
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", cancel);
+    }
+    if (attempt < maxAttempts) await sleep(retryDelayMs, signal);
+  }
+  return "unavailable";
+}

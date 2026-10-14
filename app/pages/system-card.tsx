@@ -1,7 +1,8 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import ApiStatus from "../components/ApiStatus";
 import SiteNav from "../components/SiteNav";
-import { SystemCard, fetchSystemCard } from "../services/api";
+import { SystemCard, fetchSystemCard, waitForApi } from "../services/api";
 
 // Read-only system card (#43). All content comes from GET /api/system-card, which serves the
 // existing rules and the committed evaluation snapshot (evaluation/system_card_results.json).
@@ -15,9 +16,10 @@ const rate = (v: unknown) => (typeof v === "number" ? v.toFixed(2) : "—");
 
 interface SystemCardPageProps {
   load?: () => Promise<SystemCard | null>; // injectable for tests
+  checkApi?: typeof waitForApi; // injectable for tests (#67 cold start)
 }
 
-export default function SystemCardPage({ load = fetchSystemCard }: SystemCardPageProps) {
+export default function SystemCardPage({ load = fetchSystemCard, checkApi = waitForApi }: SystemCardPageProps) {
   const [state, setState] = useState<Load>({ status: "loading" });
 
   useEffect(() => {
@@ -50,6 +52,7 @@ export default function SystemCardPage({ load = fetchSystemCard }: SystemCardPag
       </header>
 
       <main className="container">
+        <ApiStatus wait={checkApi} />
         <div className="alert alert-urgent" role="note" data-testid="not-a-medical-device">
           <strong>Not a medical device.</strong> Portfolio demonstration on synthetic data. Not clinically validated; no
           diagnosis, prescription or medical advice; no compliance claim.

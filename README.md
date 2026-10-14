@@ -13,10 +13,10 @@ AI-assisted pre-visit symptom intake for an outpatient clinic: free-text patient
 | Guided demo (landing) | https://healthcare-ai-frontend-1s23.onrender.com |
 | Patient intake UI | https://healthcare-ai-frontend-1s23.onrender.com/intake |
 | System card | https://healthcare-ai-frontend-1s23.onrender.com/system-card |
-| Staff review UI | https://healthcare-ai-frontend-1s23.onrender.com/staff (needs an operator-issued token) |
+| Staff review UI | https://healthcare-ai-frontend-1s23.onrender.com/staff (needs a token issued on request by the demo operator; tokens are never published) |
 | API health | https://healthcare-ai-api-tovn.onrender.com/health |
 
-Render free plans: services sleep after ~15 minutes idle (first request can take about a minute) and the free database expires 30 days after creation. Step-by-step walkthrough: [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md). Deployment procedure and verification evidence: [`docs/deployment.md`](docs/deployment.md).
+Render free plans: services sleep after ~15 minutes idle (first request can take about a minute; the UI shows a waking notice) and the free database expires 30 days after creation (current one: no later than 2026-11-08). On the public demo the escalation webhook is disabled (`WEBHOOK_URL` unset), so submissions never reach a third-party system. Step-by-step walkthrough: [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md). Deployment procedure, verification evidence and the demo lifecycle runbook: [`docs/deployment.md`](docs/deployment.md) (§9).
 
 ## What is implemented
 

@@ -27,7 +27,8 @@ services:
         generateValue: true
       - key: WEBHOOK_SECRET
         generateValue: true
-      # Receiver URL for the signed escalation webhook; entered at Blueprint creation.
+      # Receiver URL for the signed escalation webhook (sync: false, dashboard only). Leave it unset on the
+      # public demo so delivery is recorded as disabled and no visitor submission reaches a third party (#67).
       - key: WEBHOOK_URL
         sync: false
       # The frontend's public origin, copied from its service page, e.g. https://healthcare-ai-frontend-1s23.onrender.com

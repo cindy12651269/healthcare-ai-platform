@@ -6,6 +6,9 @@ import { IngestOutcome, MESSAGES } from "../services/api";
 import { pipelineResult } from "./fixtures";
 import { SCENARIO_PRESETS } from "../services/demo";
 
+// The API answers /health at once; cold-start behaviour is covered in ApiStatus.test.tsx
+const apiReady = async () => "ready" as const;
+
 const VALID_TEXT = "I have had a sore throat and a mild fever for two days.";
 
 function deferred<T>() {
@@ -24,7 +27,7 @@ async function fillAndSubmit(text = VALID_TEXT) {
 
 describe("IntakePage", () => {
   it("renders the intake form with consent as the only checkbox and no feature toggles", () => {
-    render(<IntakePage submit={vi.fn()} />);
+    render(<IntakePage checkApi={apiReady} submit={vi.fn()} />);
     expect(screen.getByRole("heading", { name: "Pre-visit symptom intake" })).toBeInTheDocument();
     expect(screen.getByLabelText("Your symptoms")).toBeInTheDocument();
 
@@ -38,7 +41,7 @@ describe("IntakePage", () => {
 
   it("blocks submission of too-short input on the client", async () => {
     const submit = vi.fn();
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     await fillAndSubmit("short");
     expect(submit).not.toHaveBeenCalled();
     expect(screen.getByText(/at least 10 characters/)).toBeInTheDocument();
@@ -47,7 +50,7 @@ describe("IntakePage", () => {
   it("shows a loading state and prevents duplicate submissions", async () => {
     const pending = deferred<IngestOutcome>();
     const submit = vi.fn().mockReturnValue(pending.promise);
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
 
     const user = await fillAndSubmit();
     const button = screen.getByRole("button", { name: "Submitting…" });
@@ -66,7 +69,7 @@ describe("IntakePage", () => {
 
   it("renders the structured summary and report on success", async () => {
     const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     await fillAndSubmit();
 
     await screen.findByRole("heading", { name: "Your intake has been received" });
@@ -92,7 +95,7 @@ describe("IntakePage", () => {
         output_metadata: { generated_at: "2025-01-01T00:00:00Z", model_version: "mock", prompt_version: "v1" },
       },
     });
-    render(<IntakePage submit={vi.fn().mockResolvedValue({ kind: "success", status: 200, data })} />);
+    render(<IntakePage checkApi={apiReady} submit={vi.fn().mockResolvedValue({ kind: "success", status: 200, data })} />);
     await fillAndSubmit();
 
     await screen.findByRole("heading", { name: "Your intake has been received" });
@@ -101,7 +104,7 @@ describe("IntakePage", () => {
   });
 
   it("does not show the baseline label for non-mock output", async () => {
-    render(<IntakePage submit={vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() })} />);
+    render(<IntakePage checkApi={apiReady} submit={vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() })} />);
     await fillAndSubmit();
     await screen.findByRole("heading", { name: "Your intake has been received" });
     expect(screen.queryByTestId("extraction-baseline-note")).not.toBeInTheDocument();
@@ -111,7 +114,7 @@ describe("IntakePage", () => {
     const submit = vi
       .fn()
       .mockResolvedValue({ kind: "success", status: 200, data: pipelineResult({ report: null }) });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     await fillAndSubmit();
     expect(await screen.findByTestId("report-unavailable")).toBeInTheDocument();
   });
@@ -121,14 +124,14 @@ describe("IntakePage", () => {
       safety: { allowed: true, actions: ["add_emergency_guidance"], reasons: [], severity: "high" },
     });
     const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     await fillAndSubmit();
     expect(await screen.findByRole("alert")).toHaveTextContent(/seek urgent medical care/);
   });
 
   it("renders the developer trace collapsed by default with metrics, retrieval, safety and JSON", async () => {
     const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     const user = await fillAndSubmit();
 
     await user.click(await screen.findByRole("checkbox", { name: /Reviewer \/ developer/ }));
@@ -152,7 +155,7 @@ describe("IntakePage", () => {
   it("does not fabricate trace data the backend did not return", async () => {
     const data = pipelineResult({ metrics: undefined, rag: undefined, safety: undefined, report: null });
     const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     const user = await fillAndSubmit();
     await user.click(await screen.findByRole("checkbox", { name: /Reviewer \/ developer/ }));
     await screen.findByText("Developer trace");
@@ -167,7 +170,7 @@ describe("IntakePage", () => {
       message: MESSAGES.consentRequired,
       diagnostics: { status: 400, body: { detail: "PHI detected but patient consent has not been granted." } },
     });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     await fillAndSubmit();
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("Please check your intake");
@@ -180,7 +183,7 @@ describe("IntakePage", () => {
       message: MESSAGES.processing,
       diagnostics: { status: 500, body: "Traceback (most recent call last): secret internals" },
     });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     const user = await fillAndSubmit();
 
     const alert = await screen.findByRole("alert");
@@ -201,7 +204,7 @@ describe("IntakePage", () => {
     ["mock", "LLM Mode: Mock"],
     ["real", "LLM Mode: Real"],
   ] as const)("shows the backend %s mode read-only", async (mode, label) => {
-    render(<IntakePage submit={vi.fn()} loadLlmMode={() => Promise.resolve(mode)} />);
+    render(<IntakePage checkApi={apiReady} submit={vi.fn()} loadLlmMode={() => Promise.resolve(mode)} />);
     expect(await screen.findByTestId("llm-mode")).toHaveTextContent(label);
     expect(screen.getAllByRole("checkbox")).toHaveLength(1);
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
@@ -211,7 +214,7 @@ describe("IntakePage", () => {
 
   it("hides the developer trace from the patient view by default", async () => {
     const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() });
-    render(<IntakePage submit={submit} />);
+    render(<IntakePage checkApi={apiReady} submit={submit} />);
     await fillAndSubmit();
     await screen.findByRole("heading", { name: "Your intake has been received" });
     expect(screen.queryByText("Developer trace")).not.toBeInTheDocument();
@@ -222,7 +225,7 @@ describe("IntakePage", () => {
     "preset %s fills the form but keeps consent and the normal submission",
     async (_label, preset) => {
       const submit = vi.fn().mockResolvedValue({ kind: "success", status: 200, data: pipelineResult() });
-      render(<IntakePage submit={submit} />);
+      render(<IntakePage checkApi={apiReady} submit={submit} />);
       const user = userEvent.setup();
 
       await user.click(screen.getByRole("button", { name: preset.label }));

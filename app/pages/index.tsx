@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
+import ApiStatus from "../components/ApiStatus";
 import SiteNav from "../components/SiteNav";
+import { waitForApi } from "../services/api";
 import { DEMO_MODE, DEMO_STAFF, SCENARIO_PRESETS } from "../services/demo";
 
 // Guided demo landing page (#43): entry points and the end-to-end workflow.
@@ -15,9 +17,10 @@ const WORKFLOW: Array<[string, string]> = [
 
 interface LandingProps {
   demoMode?: boolean; // injectable for tests; defaults to NEXT_PUBLIC_DEMO_MODE
+  checkApi?: typeof waitForApi; // injectable for tests (#67 cold start)
 }
 
-export default function Landing({ demoMode = DEMO_MODE }: LandingProps) {
+export default function Landing({ demoMode = DEMO_MODE, checkApi = waitForApi }: LandingProps) {
   return (
     <>
       <Head>
@@ -38,6 +41,8 @@ export default function Landing({ demoMode = DEMO_MODE }: LandingProps) {
       </header>
 
       <main className="container">
+        {/* Starts waking the API while the visitor reads this page (#67) */}
+        <ApiStatus wait={checkApi} />
         <section className="intro">
           <h1>Pre-visit intake with human review — guided demo</h1>
           <p>
@@ -55,7 +60,10 @@ export default function Landing({ demoMode = DEMO_MODE }: LandingProps) {
             </Link>
             <Link className="entry" href="/staff">
               <strong>Staff</strong>
-              <span>Review your clinic&apos;s queue, evidence timeline and FHIR export.</span>
+              <span>
+                Review your clinic&apos;s queue, evidence timeline and FHIR export. Needs an access token issued on
+                request by the demo operator.
+              </span>
             </Link>
             <Link className="entry" href="/system-card">
               <strong>System card</strong>
