@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Alert, LoadingMessage, ReasonLabel, ReasonList } from "./ui";
+import { Alert, LoadingMessage, ReasonLabel, ReasonList, StatusBadge } from "./ui";
 import { IntakeTimeline, RecordedMatch, StaffApi, TimelineEvent } from "../services/staffApi";
 
 // "Why flagged" evidence and review timeline for one intake (#41). Shows persisted data only:
@@ -91,7 +91,7 @@ function EventDetails({ event }: { event: TimelineEvent }) {
     case "staff_transition":
       return (
         <>
-          {show(d.actor_id)}: {show(d.from_status)} → {show(d.to_status)}
+          {show(d.actor_id)}: <StatusBadge status={show(d.from_status)} /> → <StatusBadge status={show(d.to_status)} />
         </>
       );
   }

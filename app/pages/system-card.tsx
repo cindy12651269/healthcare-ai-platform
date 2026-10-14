@@ -111,6 +111,7 @@ function CardBody({ card }: { card: SystemCard }) {
         <DataTable
           label="Safety and escalation evaluation by category"
           testId="safety-table"
+          layout="stack"
           rows={[...categories, ["Total", agg] as [string, unknown]]}
           rowKey={([name]) => name}
           columns={[

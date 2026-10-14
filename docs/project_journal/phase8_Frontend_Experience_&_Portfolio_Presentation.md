@@ -101,11 +101,11 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 * **Components** (`app/components/ui/`): `Button` (primary/secondary/danger/ghost, sm/md), `Card`, `Alert`, `StatusBadge`, `ReasonLabel`/`ReasonList` (label + visible code; splits the stored comma-separated `escalation_reason`), `PageHeader`, `DataTable` (scrolls inside a labelled, focusable region, or stacks rows as labelled blocks below 768 px), `EmptyState`, `Spinner`/`Skeleton`/`LoadingMessage`.
 * **Where statuses and reasons now use the shared components:** staff queue (status + reason columns), intake detail (status, escalation reason), *Why flagged* rules, timeline *escalation decision* reasons, system-card escalation rules.
 * **Widths:** `/intake` and `/system-card` reading width; `/` and `/staff` workspace width, with two-column grids at ≥ 1280 px (landing workflow + scenarios; staff access policy + sign-in). The staff queue/detail side-by-side layout is left to #71.
-* **Accessibility basics:** visible `:focus-visible` ring (focus colour ≥ 3:1 in both themes), 44 px minimum height for buttons, nav links, inputs and selects (small buttons are 36 px on ≥ 768 px only), `prefers-reduced-motion` disables spinner/skeleton animation and transitions.
+* **Accessibility basics:** visible `:focus-visible` ring (focus colour ≥ 3:1 in both themes), 44 px minimum height for buttons, nav links, inputs and selects, `prefers-reduced-motion` disables spinner/skeleton animation and transitions.
 
-**Deliberate exception:** timeline *staff action* lines still show the recorded `from_status → to_status` codes verbatim (an existing test pins this audit text, and #71 redesigns the timeline). Safety *guard action* codes (`add_emergency_guidance`, …) are not escalation reasons and are unchanged.
+**Statuses and reasons, everywhere they appear:** the staff queue, intake detail, *Why flagged*, timeline *escalation decision* reasons and *staff action* statuses (from → to), and the system-card escalation rules all use `StatusBadge` / `ReasonLabel`. Not in scope for these components: safety *guard action* codes (`add_emergency_guidance`, …), which are not review statuses or escalation reasons, and the prose preset expectations on the landing page (copy owned by #70).
 
-**Tests:** `app/tests/ui.test.tsx` (30 new: variants, roles, accessible names, reason/status mapping, DataTable, AppShell nav/indicator/widths, keyboard menu toggle + Escape). All 76 existing tests pass unchanged → 106 total. `npm run lint`, `typecheck`, `test`, `build` pass locally.
+**Tests:** `app/tests/ui.test.tsx` (30 new: variants, roles, accessible names, reason/status mapping, DataTable, AppShell nav/indicator/widths, keyboard menu toggle + Escape). 106 total. All 76 existing tests pass; one assertion was updated deliberately: the timeline staff-action line in `StaffReview.test.tsx` now expects the readable labels (*"admin-a: Needs review → Escalated"*) and checks both recorded codes via `data-status`, instead of the raw `needs_review → escalated` text. `npm run lint`, `typecheck`, `test`, `build` pass locally.
 
 **Contrast** (token pairs, WCAG 2.x formula, computed from `tokens.css`; 47 pairs × 2 themes, 0 failures; text ≥ 4.5:1, focus ring / control borders / primary ≥ 3:1):
 
@@ -161,8 +161,38 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 
 47 pairs × 2 themes; failures: 0
 
-**Pending (not done in this change):**
+### 3a. Local responsive and accessibility validation (2026-10-14)
 
-* Responsive visual check and screenshots at 390 / 768 / 1280 / 1440 px in light and dark, the measured horizontal-overflow check and touch-target measurement in a real browser: **pending**. Layout rules were written for these widths but have not been verified visually yet.
-* Hosted verification: **pending** — the new code is not deployed; no deploy or Render change was made.
-* The *mock mode* text in the indicator is static (the hosted demo and CI run mock mode only); a locally run real-mode API would still show the live *LLM Mode: Real* badge on `/intake`.
+**Setup.** Production build (`next build` + `next start`) of the branch against a local **synthetic fixture API** (`fixtures-server.mjs`: fixed JSON for `/health`, `/api/system-card` — generated from the committed `system_card()` handler — and the staff endpoints, with synthetic intakes for clinic `default`). The fixture server accepts any bearer string; sign-in used the placeholder `synthetic-fixture-not-a-token`. **No real token was generated or used** and no hosted service was called. Headless Chrome driven over the DevTools Protocol (`capture-cdp.mjs`, no dependency): viewport width × `prefers-color-scheme` emulated, locale `en-US`, timezone UTC, device scale 1.
+
+**Matrix:** 5 views (`/`, `/intake`, `/system-card`, `/staff` signed out, `/staff` signed in with an intake open) × 390 / 768 / 1280 / 1440 px × light / dark = **40 full-page screenshots** plus 3 interaction shots. Results per run in `measurements.json`.
+
+| Check | Method | Result |
+| --- | --- | --- |
+| Horizontal page overflow | `scrollWidth − clientWidth` and any element past the viewport (outside table scroll regions) | **0 px in all 40 runs** |
+| Tables | DataTable regions | Queue, demo-staff and safety tables stack below 768 px; none scrolls at ≥ 768 px |
+| Touch targets | every visible link/button/input/select/textarea/summary except inline text links; checkbox measured by its label | **No target under 44 × 44 px in all 40 runs** (after fixes below) |
+| Mobile nav (390 px) | real key events | Collapsed by default (`display: none`); Tab order skip link → brand → *Menu*; Enter opens (`aria-expanded="true"`); next Tab focuses *Guided demo*; links 358 × 44 px; Escape closes and returns focus to *Menu* |
+| Desktop nav (1280 px) | computed style | Horizontal nav visible, *Menu* hidden |
+| Focus visibility | computed style of the focused element | 3 px solid focus ring on every element tabbed (`#1f5fcf` light, `#8ab8ff` dark) |
+| Reduced motion | `prefers-reduced-motion: reduce` | Spinner animation duration 0.01 ms |
+| Contrast | token pairs (table above) | 0 failures; screenshots show no low-contrast text on review |
+
+**Defects found and fixed in this pass:**
+
+* `btn-sm` (scenario presets, queue *Open* buttons) was 36 px tall at ≥ 768 px → now 44 px at all widths (smaller text only). Skip link 41 → 44 px.
+* Card `h3` headings in the intake detail sat flush against the preceding list (`margin-top: 0`) → spacing restored.
+* System-card evaluation table hid two columns behind horizontal scroll at 390 px → stacked layout.
+* Stacked-table label column (9 rem) squeezed reason pills at 390 px, breaking `blocked_prescription` mid-word → 6.5 rem.
+* Timeline staff-action statuses now use `StatusBadge` (acceptance criterion: shared components everywhere).
+
+**Evidence:** [`evidence/phase8_issue68_responsive_2026-10-14/`](evidence/phase8_issue68_responsive_2026-10-14/) — `{landing,intake,system-card,staff-signin,staff-workspace}-{390,768,1280,1440}-{light,dark}.jpg`, `nav-mobile-open-390-light.jpg`, `focus-visible-nav-link-390-light.jpg`, `focus-visible-signin-button-1280-dark.jpg`, `measurements.json`, and the two scripts. All data shown is synthetic; no token is visible.
+
+### 3b. Limitations
+
+* **Hosted visual validation: pending.** The #68 frontend is not deployed; no deploy or Render change was made. The checks above ran on a local production build only.
+* Chrome only (headless, emulated viewports, not physical devices); Safari/Firefox and 200 % zoom are #72.
+* Contrast verified on token pairs plus visual review, not per-element with a scanner.
+* The *"mock mode"* text in the indicator is static (hosted demo and CI run mock only); a locally run real-mode API still shows the live *LLM Mode: Real* badge on `/intake`.
+* Dates use the browser locale (`toLocaleString`, pre-existing); explicit locale/timezone formatting is #71. Screenshots pin `en-US`/UTC.
+* Theme follows the OS setting; there is no in-app toggle.
