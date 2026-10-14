@@ -14,12 +14,6 @@ type State =
   | { status: "ready"; afterWake: boolean }
   | { status: "unavailable" };
 
-// Worst case for the default policy, rounded for the failure message
-const MAX_WAIT_SECONDS = Math.round(
-  (WAKE_POLICY.maxAttempts * WAKE_POLICY.attemptTimeoutMs + (WAKE_POLICY.maxAttempts - 1) * WAKE_POLICY.retryDelayMs) /
-    1000,
-);
-
 interface ApiStatusProps {
   wait?: Wait; // injectable for tests
   slowAfterMs?: number; // show the waking notice if the first check has not answered by then
@@ -88,7 +82,7 @@ export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: Api
     <div className="alert alert-error" role="alert" data-testid="api-status">
       <strong>The demo server did not respond.</strong>
       <p>
-        We checked for about {MAX_WAIT_SECONDS} seconds without an answer. It may still be starting, being redeployed,
+        We kept checking for over a minute without an answer. It may still be starting, being redeployed,
         or offline for maintenance. Try again in a minute; if it keeps failing, contact the person who shared this demo.
       </p>
       <button type="button" className="secondary" onClick={retry}>

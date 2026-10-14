@@ -201,7 +201,7 @@ Verify before any flagged submission:
 
 ### 9.2 Cold start
 
-Every page (`/`, `/intake`, `/staff`, `/system-card`) runs a bounded wake check on the existing `GET /health` (`app/components/ApiStatus.tsx`, `waitForApi` in `app/services/api.ts`): up to 6 attempts, 15 s timeout each, 3 s between attempts (worst case ≈ 105 s). A fast answer shows nothing. If the first check is slow (> 1.5 s) or fails, the page shows *"Waking the demo server (can take up to a minute)"* with the attempt count, then *"Demo server is awake"*. If every attempt fails, it shows an actionable error (still starting, redeploying or offline; try again in a minute or contact the person who shared the demo) with a *Try again* button. The landing page starts the check too, so the server wakes while the visitor reads. Tests: `app/tests/ApiStatus.test.tsx`.
+Every page (`/`, `/intake`, `/staff`, `/system-card`) runs a bounded wake check on the existing `GET /health` (`app/components/ApiStatus.tsx`, `waitForApi` in `app/services/api.ts`): up to 6 attempts, each with a 15 s timeout, started at most once every 15 s (at least 3 s after a timed-out attempt), so the window is about 75–105 s even when attempts fail instantly. A fast answer shows nothing. If the first check is slow (> 1.5 s) or fails, the page shows *"Waking the demo server (can take up to a minute)"* with the attempt count, then *"Demo server is awake"*. If every attempt fails, it shows an actionable error (checked for over a minute; still starting, redeploying or offline; try again in a minute or contact the person who shared the demo) with a *Try again* button. The landing page starts the check too, so the server wakes while the visitor reads. Tests: `app/tests/ApiStatus.test.tsx`.
 
 ### 9.3 Staff access policy
 
@@ -226,7 +226,7 @@ Staff tokens are **issued on request by the demo operator** (§6 step 2, short T
 4. Logs: `Migrations complete (N applied)` with N = all migration files, `Demo seed complete (… rows created)`, `Application startup complete`.
 5. Update the *Created* / *Expires* rows above and run the live-link check.
 
-**Re-seed only** (database still valid, seed rows missing or changed): *Manual Deploy* (or *Restart*) of the API runs `python -m db.seed_demo` again; it inserts missing rows with fixed ids and never changes existing ones. From a checkout: `APP_ENV=demo DATABASE_URL='<external url, postgresql+psycopg2://…>' python -m db.seed_demo` (it refuses to run unless `APP_ENV=demo`). It does not reset seeded intakes whose status a visitor changed; to restore exactly, recreate the database.
+**Re-seed only** (database still valid, seed rows missing or changed): *Manual Deploy* (or *Restart*) of the API runs `python -m db.seed_demo` again; it inserts missing rows with fixed ids and never changes existing ones. From a checkout: `APP_ENV=demo DATABASE_URL='<external url, postgresql+psycopg2://…>' python -m db.seed_demo` (it refuses to run unless `APP_ENV=demo`). It does not reset seeded intakes whose status staff changed; to restore exactly, recreate the database.
 
 `AUTH_TOKEN_SECRET` and `WEBHOOK_SECRET` live on the API service, not in the database, so recreating the database does not change them; tokens are re-issued as in §6 step 2.
 

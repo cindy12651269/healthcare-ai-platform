@@ -207,6 +207,8 @@ export async function fetchSystemCard(
 
 // Cold start (#67): free hosted services sleep when idle, and the first request can take up to about a
 // minute. Poll the existing GET /health with a per-attempt timeout and a bounded number of attempts.
+// Attempts start at most once per attemptTimeoutMs, so fast failures (e.g. a 502 without CORS headers
+// while the instance restarts) cannot use up the attempts in a few seconds: the window is ~75–105 s.
 export const WAKE_POLICY = { maxAttempts: 6, attemptTimeoutMs: 15_000, retryDelayMs: 3_000 } as const;
 
 export type ApiReadiness = "ready" | "unavailable";
@@ -250,6 +252,7 @@ export async function waitForApi(options: WaitForApiOptions = {}): Promise<ApiRe
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     if (signal?.aborted) return "unavailable";
     onAttempt?.(attempt, maxAttempts);
+    const startedAt = Date.now();
     const controller = new AbortController();
     const cancel = () => controller.abort();
     const timer = setTimeout(cancel, attemptTimeoutMs);
@@ -263,7 +266,9 @@ export async function waitForApi(options: WaitForApiOptions = {}): Promise<ApiRe
       clearTimeout(timer);
       signal?.removeEventListener("abort", cancel);
     }
-    if (attempt < maxAttempts) await sleep(retryDelayMs, signal);
+    if (attempt < maxAttempts) {
+      await sleep(Math.max(retryDelayMs, attemptTimeoutMs - (Date.now() - startedAt)), signal);
+    }
   }
   return "unavailable";
 }

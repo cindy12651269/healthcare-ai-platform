@@ -55,7 +55,21 @@ describe("waitForApi", () => {
     expect(result).toBe("unavailable");
     expect(fetchImpl).toHaveBeenCalledTimes(4);
     expect(sleep).toHaveBeenCalledTimes(3);
-    expect(sleep).toHaveBeenCalledWith(3000, undefined);
+  });
+
+  it("paces fast failures so the attempts span the whole wake-up window", async () => {
+    // An instant failure must not be retried after only retryDelayMs: the next attempt waits for
+    // the rest of its attemptTimeoutMs slot, so 6 attempts always cover more than a minute.
+    const fetchImpl = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const sleep = vi.fn(async () => {});
+
+    await waitForApi({ baseUrl: BASE, fetchImpl, sleep, maxAttempts: 3, attemptTimeoutMs: 15_000, retryDelayMs: 3_000 });
+
+    expect(sleep).toHaveBeenCalledTimes(2);
+    for (const [ms] of sleep.mock.calls as unknown as Array<[number]>) {
+      expect(ms).toBeGreaterThan(14_000);
+      expect(ms).toBeLessThanOrEqual(15_000);
+    }
   });
 
   it("times out an attempt that hangs and counts it as failed", async () => {
@@ -65,15 +79,19 @@ describe("waitForApi", () => {
           init?.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError"))),
         ),
     );
+    const sleep = vi.fn(async () => {});
     const result = await waitForApi({
       baseUrl: BASE,
       fetchImpl: hanging as unknown as typeof fetch,
-      sleep: noSleep,
+      sleep,
       maxAttempts: 2,
       attemptTimeoutMs: 5,
+      retryDelayMs: 3000,
     });
     expect(result).toBe("unavailable");
     expect(hanging).toHaveBeenCalledTimes(2);
+    // The attempt used its whole slot, so only the fixed retry delay follows
+    expect(sleep).toHaveBeenCalledWith(3000, undefined);
   });
 
   it("does not treat a 200 without status ok as ready", async () => {
@@ -128,6 +146,7 @@ describe("ApiStatus", () => {
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("The demo server did not respond");
+    expect(alert).toHaveTextContent("We kept checking for over a minute");
     expect(alert).toHaveTextContent("Try again in a minute");
     expect(alert).toHaveTextContent("contact the person who shared this demo");
     expect(fetchImpl).toHaveBeenCalledTimes(3);
