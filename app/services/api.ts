@@ -213,12 +213,25 @@ export const WAKE_POLICY = { maxAttempts: 6, attemptTimeoutMs: 15_000, retryDela
 
 export type ApiReadiness = "ready" | "unavailable";
 
+// What the dashboard shows from a successful GET /health (#69). Values are passed through as reported;
+// a missing or non-string field stays null rather than being guessed.
+export interface HealthInfo {
+  environment: string | null;
+  llmMode: string | null;
+}
+
+export function parseHealth(body: JsonObject): HealthInfo {
+  const text = (v: unknown) => (typeof v === "string" && v ? v : null);
+  return { environment: text(body.environment), llmMode: text(body.llm_mode) };
+}
+
 export interface WaitForApiOptions extends Pick<SubmitOptions, "baseUrl" | "fetchImpl"> {
   maxAttempts?: number;
   attemptTimeoutMs?: number;
   retryDelayMs?: number;
   signal?: AbortSignal; // cancels the wait (e.g. the page was left)
   onAttempt?: (attempt: number, maxAttempts: number) => void;
+  onHealth?: (health: HealthInfo) => void; // called once with the healthy /health body (#69)
   sleep?: (ms: number, signal?: AbortSignal) => Promise<void>; // injectable for tests
 }
 
@@ -245,6 +258,7 @@ export async function waitForApi(options: WaitForApiOptions = {}): Promise<ApiRe
     retryDelayMs = WAKE_POLICY.retryDelayMs,
     signal,
     onAttempt,
+    onHealth,
     sleep = abortableSleep,
   } = options;
   const url = `${baseUrl.replace(/\/$/, "")}/health`;
@@ -259,7 +273,13 @@ export async function waitForApi(options: WaitForApiOptions = {}): Promise<ApiRe
     signal?.addEventListener("abort", cancel);
     try {
       const response = await fetchImpl(url, { signal: controller.signal });
-      if (response.ok && ((await response.json()) as JsonObject).status === "ok") return "ready";
+      if (response.ok) {
+        const body = (await response.json()) as JsonObject;
+        if (body.status === "ok") {
+          onHealth?.(parseHealth(body));
+          return "ready";
+        }
+      }
     } catch {
       // Unreachable, timed out, or not JSON yet (e.g. a 502 page while the instance starts): retry
     } finally {

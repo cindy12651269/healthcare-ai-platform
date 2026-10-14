@@ -4,7 +4,7 @@ import { KeyboardEvent, ReactNode, useRef, useState } from "react";
 
 // Shared layout (#68): brand, primary navigation, persistent demo indicator and footer for every page.
 const LINKS: Array<[string, string]> = [
-  ["/", "Guided demo"],
+  ["/", "Dashboard"],
   ["/intake", "Patient intake"],
   ["/staff", "Staff review"],
   ["/system-card", "System card"],

@@ -8,3 +8,5 @@ export { default as PageHeader } from "./PageHeader";
 export { default as ReasonLabel, ReasonList, REASON_LABELS } from "./ReasonLabel";
 export { LoadingMessage, Skeleton, Spinner } from "./Spinner";
 export { default as StatusBadge, STATUS_LABELS, statusLabel } from "./StatusBadge";
+export type { StatusTone } from "./StatusBadge";
+export { default as Tag } from "./Tag";
