@@ -2,7 +2,7 @@
 
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
-Scope: Issue #67 (item 1 of 7) so far
+Scope: Issues #67 and #68 (items 1–2 of 7) so far
 Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c).
 
 ---
@@ -86,3 +86,113 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 * `/intake` makes a second `/health` call for the LLM-mode badge (pre-existing); not a functional issue.
 
 **Verdict for #67 on the hosted demo:** webhook isolation, the four presets, `hosted_check`, staff-access messaging, the correct API host and the waking → awake path are verified; the failure state is test-only.
+
+---
+
+## 3. Issue 68 — Design System, App Shell & Responsive Layout
+
+**Status:** implemented on branch `feat/issue-68-design-system-app-shell`; in review. No API, backend, auth, RBAC, clinic-isolation or workflow change; no new dependency (`app/package.json` unchanged).
+
+**Delivered:**
+
+* **Tokens** (`app/styles/tokens.css`): colour palette with semantic status colours (submitted, needs review, reviewed, escalated, blocked, emergency, neutral), type scale, spacing, radius, elevation, reading (832 px) and workspace (1248 px) widths; light and dark themes. Decision: plain CSS, [ADR-10](../decisions.md).
+* **AppShell** (`app/components/AppShell.tsx`): brand, primary navigation (`aria-current`), skip link, persistent *"Demo · synthetic data · mock mode"* indicator, footer, document title and viewport. All four pages render through it; the per-page header/footer markup and `SiteNav.tsx` are removed. The intake page's live *LLM Mode* badge is passed into the shell's indicator bar.
+* **Responsive navigation:** horizontal from 768 px; below that a *Menu* button (`aria-expanded`, `aria-controls`) collapses it; Escape closes it and returns focus to the button; following a link closes it.
+* **Components** (`app/components/ui/`): `Button` (primary/secondary/danger/ghost, sm/md), `Card`, `Alert`, `StatusBadge`, `ReasonLabel`/`ReasonList` (label + visible code; splits the stored comma-separated `escalation_reason`), `PageHeader`, `DataTable` (scrolls inside a labelled, focusable region, or stacks rows as labelled blocks below 768 px), `EmptyState`, `Spinner`/`Skeleton`/`LoadingMessage`.
+* **Where statuses and reasons now use the shared components:** staff queue (status + reason columns), intake detail (status, escalation reason), *Why flagged* rules, timeline *escalation decision* reasons, system-card escalation rules.
+* **Widths:** `/intake` and `/system-card` reading width; `/` and `/staff` workspace width, with two-column grids at ≥ 1280 px (landing workflow + scenarios; staff access policy + sign-in). The staff queue/detail side-by-side layout is left to #71.
+* **Accessibility basics:** visible `:focus-visible` ring (focus colour ≥ 3:1 in both themes), 44 px minimum height for buttons, nav links, inputs and selects, `prefers-reduced-motion` disables spinner/skeleton animation and transitions.
+
+**Statuses and reasons, everywhere they appear:** the staff queue, intake detail, *Why flagged*, timeline *escalation decision* reasons and *staff action* statuses (from → to), and the system-card escalation rules all use `StatusBadge` / `ReasonLabel`. Not in scope for these components: safety *guard action* codes (`add_emergency_guidance`, …), which are not review statuses or escalation reasons, and the prose preset expectations on the landing page (copy owned by #70).
+
+**Tests:** `app/tests/ui.test.tsx` (30 new: variants, roles, accessible names, reason/status mapping, DataTable, AppShell nav/indicator/widths, keyboard menu toggle + Escape). 106 total. All 76 existing tests pass; one assertion was updated deliberately: the timeline staff-action line in `StaffReview.test.tsx` now expects the readable labels (*"admin-a: Needs review → Escalated"*) and checks both recorded codes via `data-status`, instead of the raw `needs_review → escalated` text. `npm run lint`, `typecheck`, `test`, `build` pass locally.
+
+**Contrast** (token pairs, WCAG 2.x formula, computed from `tokens.css`; 47 pairs × 2 themes, 0 failures; text ≥ 4.5:1, focus ring / control borders / primary ≥ 3:1):
+
+| Pair | Min | Light | Dark |
+| --- | --- | --- | --- |
+| `--color-text` on `--color-bg` | 4.5:1 | 14.72 | 15.56 |
+| `--color-text` on `--color-surface` | 4.5:1 | 15.93 | 13.82 |
+| `--color-text` on `--color-surface-sunken` | 4.5:1 | 14.16 | 14.91 |
+| `--color-text-muted` on `--color-bg` | 4.5:1 | 6.24 | 8.77 |
+| `--color-text-muted` on `--color-surface` | 4.5:1 | 6.76 | 7.79 |
+| `--color-text-muted` on `--color-surface-sunken` | 4.5:1 | 6.01 | 8.40 |
+| `--color-link` on `--color-surface` | 4.5:1 | 7.06 | 9.17 |
+| `--color-link` on `--color-bg` | 4.5:1 | 6.52 | 10.32 |
+| `--color-on-primary` on `--color-primary` | 4.5:1 | 5.96 | 7.54 |
+| `--color-on-primary` on `--color-primary-hover` | 4.5:1 | 7.92 | 9.36 |
+| `--color-on-danger` on `--color-danger` | 4.5:1 | 6.57 | 8.03 |
+| `--color-on-danger` on `--color-danger-hover` | 4.5:1 | 8.83 | 10.14 |
+| `--color-danger` on `--color-surface` | 4.5:1 | 6.57 | 7.21 |
+| `--color-text` on `--color-highlight` | 4.5:1 | 14.16 | 9.28 |
+| `--color-focus` on `--color-surface` | 3:1 | 5.84 | 8.13 |
+| `--color-focus` on `--color-bg` | 3:1 | 5.39 | 9.16 |
+| `--color-border-strong` on `--color-surface` | 3:1 | 3.49 | 4.00 |
+| `--color-border-strong` on `--color-bg` | 3:1 | 3.22 | 4.51 |
+| `--color-primary` on `--color-surface` | 3:1 | 5.96 | 6.96 |
+| `--status-neutral-fg` on `--status-neutral-bg` | 4.5:1 | 7.95 | 9.05 |
+| `--status-neutral-fg` on `--color-surface` | 4.5:1 | 8.94 | 10.21 |
+| `--color-text` on `--status-neutral-bg` | 4.5:1 | 14.16 | 12.25 |
+| `--color-text-muted` on `--status-neutral-bg` | 4.5:1 | 6.01 | 6.90 |
+| `--status-info-fg` on `--status-info-bg` | 4.5:1 | 7.14 | 8.45 |
+| `--status-info-fg` on `--color-surface` | 4.5:1 | 8.20 | 9.23 |
+| `--color-text` on `--status-info-bg` | 4.5:1 | 13.88 | 12.66 |
+| `--color-text-muted` on `--status-info-bg` | 4.5:1 | 5.89 | 7.13 |
+| `--status-warning-fg` on `--status-warning-bg` | 4.5:1 | 6.99 | 9.39 |
+| `--status-warning-fg` on `--color-surface` | 4.5:1 | 7.63 | 10.19 |
+| `--color-text` on `--status-warning-bg` | 4.5:1 | 14.60 | 12.74 |
+| `--color-text-muted` on `--status-warning-bg` | 4.5:1 | 6.20 | 7.18 |
+| `--status-success-fg` on `--status-success-bg` | 4.5:1 | 6.58 | 8.96 |
+| `--status-success-fg` on `--color-surface` | 4.5:1 | 7.42 | 9.84 |
+| `--color-text` on `--status-success-bg` | 4.5:1 | 14.13 | 12.60 |
+| `--color-text-muted` on `--status-success-bg` | 4.5:1 | 6.00 | 7.10 |
+| `--status-escalated-fg` on `--status-escalated-bg` | 4.5:1 | 8.09 | 9.01 |
+| `--status-escalated-fg` on `--color-surface` | 4.5:1 | 9.48 | 9.21 |
+| `--color-text` on `--status-escalated-bg` | 4.5:1 | 13.61 | 13.53 |
+| `--color-text-muted` on `--status-escalated-bg` | 4.5:1 | 5.77 | 7.62 |
+| `--status-blocked-fg` on `--status-blocked-bg` | 4.5:1 | 7.23 | 8.74 |
+| `--status-blocked-fg` on `--color-surface` | 4.5:1 | 8.29 | 8.76 |
+| `--color-text` on `--status-blocked-bg` | 4.5:1 | 13.89 | 13.79 |
+| `--color-text-muted` on `--status-blocked-bg` | 4.5:1 | 5.89 | 7.77 |
+| `--status-emergency-fg` on `--status-emergency-bg` | 4.5:1 | 6.88 | 8.44 |
+| `--status-emergency-fg` on `--color-surface` | 4.5:1 | 7.87 | 8.59 |
+| `--color-text` on `--status-emergency-bg` | 4.5:1 | 13.93 | 13.59 |
+| `--color-text-muted` on `--status-emergency-bg` | 4.5:1 | 5.91 | 7.65 |
+
+47 pairs × 2 themes; failures: 0
+
+### 3a. Local responsive and accessibility validation (2026-10-14)
+
+**Setup.** Production build (`next build` + `next start`) of the branch against a local **synthetic fixture API** (`fixtures-server.mjs`: fixed JSON for `/health`, `/api/system-card` — generated from the committed `system_card()` handler — and the staff endpoints, with synthetic intakes for clinic `default`). The fixture server accepts any bearer string; sign-in used the placeholder `synthetic-fixture-not-a-token`. **No real token was generated or used** and no hosted service was called. Headless Chrome driven over the DevTools Protocol (`capture-cdp.mjs`, no dependency): viewport width × `prefers-color-scheme` emulated, locale `en-US`, timezone UTC, device scale 1.
+
+**Matrix:** 5 views (`/`, `/intake`, `/system-card`, `/staff` signed out, `/staff` signed in with an intake open) × 390 / 768 / 1280 / 1440 px × light / dark = **40 full-page screenshots** plus 3 interaction shots. Results per run in `measurements.json`.
+
+| Check | Method | Result |
+| --- | --- | --- |
+| Horizontal page overflow | `scrollWidth − clientWidth` and any element past the viewport (outside table scroll regions) | **0 px in all 40 runs** |
+| Tables | DataTable regions | Queue, demo-staff and safety tables stack below 768 px; none scrolls at ≥ 768 px |
+| Touch targets | every visible link/button/input/select/textarea/summary except inline text links; checkbox measured by its label | **No target under 44 × 44 px in all 40 runs** (after fixes below) |
+| Mobile nav (390 px) | real key events | Collapsed by default (`display: none`); Tab order skip link → brand → *Menu*; Enter opens (`aria-expanded="true"`); next Tab focuses *Guided demo*; links 358 × 44 px; Escape closes and returns focus to *Menu* |
+| Desktop nav (1280 px) | computed style | Horizontal nav visible, *Menu* hidden |
+| Focus visibility | computed style of the focused element | 3 px solid focus ring on every element tabbed (`#1f5fcf` light, `#8ab8ff` dark) |
+| Reduced motion | `prefers-reduced-motion: reduce` | Spinner animation duration 0.01 ms |
+| Contrast | token pairs (table above) | 0 failures; screenshots show no low-contrast text on review |
+
+**Defects found and fixed in this pass:**
+
+* `btn-sm` (scenario presets, queue *Open* buttons) was 36 px tall at ≥ 768 px → now 44 px at all widths (smaller text only). Skip link 41 → 44 px.
+* Card `h3` headings in the intake detail sat flush against the preceding list (`margin-top: 0`) → spacing restored.
+* System-card evaluation table hid two columns behind horizontal scroll at 390 px → stacked layout.
+* Stacked-table label column (9 rem) squeezed reason pills at 390 px, breaking `blocked_prescription` mid-word → 6.5 rem.
+* Timeline staff-action statuses now use `StatusBadge` (acceptance criterion: shared components everywhere).
+
+**Evidence:** [`evidence/phase8_issue68_responsive_2026-10-14/`](evidence/phase8_issue68_responsive_2026-10-14/) — `{landing,intake,system-card,staff-signin,staff-workspace}-{390,768,1280,1440}-{light,dark}.jpg`, `nav-mobile-open-390-light.jpg`, `focus-visible-nav-link-390-light.jpg`, `focus-visible-signin-button-1280-dark.jpg`, `measurements.json`, and the two scripts. All data shown is synthetic; no token is visible.
+
+### 3b. Limitations
+
+* **Hosted visual validation: pending.** The #68 frontend is not deployed; no deploy or Render change was made. The checks above ran on a local production build only.
+* Chrome only (headless, emulated viewports, not physical devices); Safari/Firefox and 200 % zoom are #72.
+* Contrast verified on token pairs plus visual review, not per-element with a scanner.
+* The *"mock mode"* text in the indicator is static (hosted demo and CI run mock only); a locally run real-mode API still shows the live *LLM Mode: Real* badge on `/intake`.
+* Dates use the browser locale (`toLocaleString`, pre-existing); explicit locale/timezone formatting is #71. Screenshots pin `en-US`/UTC.
+* Theme follows the OS setting; there is no in-app toggle.

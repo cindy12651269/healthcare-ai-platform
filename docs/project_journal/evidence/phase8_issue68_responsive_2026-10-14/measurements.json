@@ -1,0 +1,564 @@
+{
+  "results": [
+    {
+      "page": "landing",
+      "width": 390,
+      "theme": "light",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 390,
+      "theme": "light",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 390,
+      "theme": "light",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 390,
+      "theme": "light",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 390,
+      "theme": "light",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "landing",
+      "width": 768,
+      "theme": "light",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 768,
+      "theme": "light",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 768,
+      "theme": "light",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 768,
+      "theme": "light",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 768,
+      "theme": "light",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "landing",
+      "width": 1280,
+      "theme": "light",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 1280,
+      "theme": "light",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 1280,
+      "theme": "light",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 1280,
+      "theme": "light",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 1280,
+      "theme": "light",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "landing",
+      "width": 1440,
+      "theme": "light",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 1440,
+      "theme": "light",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 1440,
+      "theme": "light",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 1440,
+      "theme": "light",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 1440,
+      "theme": "light",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "landing",
+      "width": 390,
+      "theme": "dark",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 390,
+      "theme": "dark",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 390,
+      "theme": "dark",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 390,
+      "theme": "dark",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 390,
+      "theme": "dark",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "landing",
+      "width": 768,
+      "theme": "dark",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 768,
+      "theme": "dark",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 768,
+      "theme": "dark",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 768,
+      "theme": "dark",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 768,
+      "theme": "dark",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "landing",
+      "width": 1280,
+      "theme": "dark",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 1280,
+      "theme": "dark",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 1280,
+      "theme": "dark",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 1280,
+      "theme": "dark",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 1280,
+      "theme": "dark",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "landing",
+      "width": 1440,
+      "theme": "dark",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Demo staff accounts",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "intake",
+      "width": 1440,
+      "theme": "dark",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "system-card",
+      "width": 1440,
+      "theme": "dark",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Safety and escalation evaluation by category",
+          "scrolls": false
+        }
+      ]
+    },
+    {
+      "page": "staff-signin",
+      "width": 1440,
+      "theme": "dark",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": []
+    },
+    {
+      "page": "staff-workspace",
+      "width": 1440,
+      "theme": "dark",
+      "vw": 1440,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "scrollRegions": [
+        {
+          "label": "Review queue",
+          "scrolls": false
+        }
+      ]
+    }
+  ],
+  "nav": {
+    "collapsedHidden": true,
+    "tabOrderStart": [
+      {
+        "el": "a.skip-link 'Skip to main content'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "a.brand 'Healthcare AI Platform'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "button.nav-toggle 'Menu'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      },
+      {
+        "el": "button.btn.btn-secondary.btn-sm 'Routine symptoms'",
+        "outline": "solid 3px rgb(31, 95, 207)"
+      }
+    ],
+    "openAfterEnter": true,
+    "firstLinkFocused": {
+      "el": "a 'Guided demo'",
+      "outline": "solid 3px rgb(31, 95, 207)"
+    },
+    "linkSizes": [
+      "358x44",
+      "358x44",
+      "358x44",
+      "358x44"
+    ],
+    "closedAfterEscape": true,
+    "focusReturned": true,
+    "desktopNavVisible": true,
+    "desktopFocus": {
+      "el": "button.btn.btn-primary 'Sign in'",
+      "outline": "solid 3px rgb(138, 184, 255)"
+    },
+    "reducedMotionSpinner": "1e-05s"
+  }
+}

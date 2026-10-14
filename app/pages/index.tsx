@@ -1,7 +1,7 @@
-import Head from "next/head";
 import Link from "next/link";
 import ApiStatus from "../components/ApiStatus";
-import SiteNav from "../components/SiteNav";
+import AppShell from "../components/AppShell";
+import { Card, DataTable, PageHeader } from "../components/ui";
 import { waitForApi } from "../services/api";
 import { DEMO_MODE, DEMO_STAFF, SCENARIO_PRESETS } from "../services/demo";
 
@@ -22,36 +22,15 @@ interface LandingProps {
 
 export default function Landing({ demoMode = DEMO_MODE, checkApi = waitForApi }: LandingProps) {
   return (
-    <>
-      <Head>
-        <title>Guided Demo | Healthcare AI Platform</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-
-      <header className="site-header">
-        <div className="container">
-          <span className="brand">Healthcare AI Platform</span>
-          <span className="badges">
-            <span className="badge">Demo · synthetic data only</span>
-          </span>
-        </div>
-        <div className="container">
-          <SiteNav current="/" />
-        </div>
-      </header>
-
-      <main className="container">
+    <AppShell title="Guided Demo" current="/" width="workspace">
         {/* Starts waking the API while the visitor reads this page (#67) */}
         <ApiStatus wait={checkApi} />
-        <section className="intro">
-          <h1>Pre-visit intake with human review — guided demo</h1>
-          <p>
-            A patient-facing intake that is structured, safety-checked and escalated to clinic staff when needed. Every
-            step runs on synthetic data in deterministic mock mode.
-          </p>
-        </section>
+        <PageHeader
+          title="Pre-visit intake with human review — guided demo"
+          description="A patient-facing intake that is structured, safety-checked and escalated to clinic staff when needed. Every step runs on synthetic data in deterministic mock mode."
+        />
 
-        <section className="card" aria-labelledby="entry-heading">
+        <Card aria-labelledby="entry-heading">
           <h2 id="entry-heading">Start here</h2>
           <div className="entry-points">
             <Link className="entry" href="/intake">
@@ -70,9 +49,10 @@ export default function Landing({ demoMode = DEMO_MODE, checkApi = waitForApi }:
               <span>Pipeline, safety and escalation rules, evaluation results, limitations.</span>
             </Link>
           </div>
-        </section>
+        </Card>
 
-        <section className="card" aria-labelledby="workflow-heading">
+        <div className="landing-grid">
+        <Card aria-labelledby="workflow-heading">
           <h2 id="workflow-heading">How it works</h2>
           <ol className="workflow" data-testid="workflow">
             {WORKFLOW.map(([title, body]) => (
@@ -81,9 +61,9 @@ export default function Landing({ demoMode = DEMO_MODE, checkApi = waitForApi }:
               </li>
             ))}
           </ol>
-        </section>
+        </Card>
 
-        <section className="card" aria-labelledby="scenarios-heading">
+        <Card aria-labelledby="scenarios-heading">
           <h2 id="scenarios-heading">Four scenarios to try</h2>
           <ul>
             {SCENARIO_PRESETS.map((p) => (
@@ -93,46 +73,33 @@ export default function Landing({ demoMode = DEMO_MODE, checkApi = waitForApi }:
             ))}
           </ul>
           <p className="muted">Then sign in as staff to see the intake in the queue, its evidence timeline and FHIR export.</p>
-        </section>
+        </Card>
+        </div>
 
         {demoMode && (
-          <section className="card" aria-labelledby="demo-staff-heading" data-testid="demo-staff">
+          <Card aria-labelledby="demo-staff-heading" data-testid="demo-staff">
             <h2 id="demo-staff-heading">Demo staff accounts</h2>
             <p className="muted">
               Synthetic staff users seeded in this demo environment. Each clinic is pre-loaded with intakes in every
               review status; staff see only their own clinic.
             </p>
-            <table>
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Clinic</th>
-                  <th>Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {DEMO_STAFF.map((u) => (
-                  <tr key={u.userId}>
-                    <td>
-                      <code>{u.userId}</code>
-                    </td>
-                    <td>{u.clinicId}</td>
-                    <td>{u.role}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              label="Demo staff accounts"
+              layout="stack"
+              rows={DEMO_STAFF}
+              rowKey={(u) => u.userId}
+              columns={[
+                { key: "user", header: "User", render: (u) => <code>{u.userId}</code> },
+                { key: "clinic", header: "Clinic", render: (u) => u.clinicId },
+                { key: "role", header: "Role", render: (u) => u.role },
+              ]}
+            />
             <p className="muted">
               Sign-in uses a short-lived bearer token issued by the demo operator for one of these users. Tokens are not
               published on this page or in the site code; ask the person who shared this demo.
             </p>
-          </section>
+          </Card>
         )}
-      </main>
-
-      <footer className="site-footer container">
-        Portfolio demonstration. Not a medical device; not for real patient data.
-      </footer>
-    </>
+    </AppShell>
   );
 }

@@ -55,3 +55,9 @@ Concise records of the main design decisions that are implemented in the code. E
 * **Decision:** One `render.yaml` with the existing Dockerfiles and managed PostgreSQL on free plans; migrations and an idempotent synthetic seed run in the start command; secrets generated or entered in the platform.
 * **Why:** Lowest-effort hosting for the existing stack without Terraform or multi-service cloud infrastructure (roadmap §8).
 * **Consequences:** Cold starts, a 30-day free database, one environment and one instance ([`deployment.md`](deployment.md)).
+
+## ADR-10 — Plain global CSS with design tokens, no UI or CSS framework (#68)
+
+* **Decision:** Styling is plain CSS imported once in `app/pages/_app.tsx`: `app/styles/tokens.css` (CSS custom properties for colour, semantic status colours, type scale, spacing, radius, elevation and layout widths; light and dark via `prefers-color-scheme`) and `app/styles/globals.css` (base, shell, components, breakpoints). Typed React components in `app/components/ui/` apply the classes. CSS Modules were not used.
+* **Why:** No new dependency or build step; the existing code and 63+ tests already use global class names, tokens must be global anyway, and the component set is small enough that class-name collisions are controlled by a short prefix per component (`btn-`, `status-badge`, `reason`, `table-`).
+* **Consequences:** Breakpoints (mobile < 768 px, tablet 768–1279 px, desktop ≥ 1280 px) are fixed numbers in `@media` rules because custom properties cannot be used there. Theme follows the operating-system setting only; there is no manual theme toggle.

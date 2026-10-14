@@ -418,7 +418,12 @@ describe("StaffReview evidence & timeline (#41)", () => {
     ]);
     expect(items[4]).toHaveTextContent("failed after 3 attempt(s)");
     expect(items[4]).toHaveTextContent("timeout");
-    expect(items[5]).toHaveTextContent("admin-a: needs_review → escalated");
+    // #68: recorded statuses use the shared StatusBadge (readable label; the code stays in data-status)
+    expect(items[5]).toHaveTextContent("admin-a: Needs review → Escalated");
+    expect([...items[5].querySelectorAll("[data-status]")].map((b) => b.getAttribute("data-status"))).toEqual([
+      "needs_review",
+      "escalated",
+    ]);
   });
 
   it("shows loading, then an error state when the timeline cannot be loaded", async () => {

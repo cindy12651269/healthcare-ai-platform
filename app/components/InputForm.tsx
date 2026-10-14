@@ -5,6 +5,7 @@ import {
   validateIntake,
 } from "../services/api";
 import { ScenarioPreset } from "../services/demo";
+import { Button, Card } from "./ui";
 
 interface InputFormProps {
   onSubmit: (req: IngestRequest) => void;
@@ -32,7 +33,7 @@ export default function InputForm({ onSubmit, isSubmitting, presets = [] }: Inpu
   }
 
   return (
-    <form className="card intake-form" onSubmit={handleSubmit} noValidate>
+    <Card as="form" className="intake-form" onSubmit={handleSubmit} noValidate>
       <h2>Tell us what brings you in</h2>
       <p className="muted">
         Describe your symptoms in your own words: what you are feeling, when it
@@ -43,9 +44,9 @@ export default function InputForm({ onSubmit, isSubmitting, presets = [] }: Inpu
         <div className="presets" role="group" aria-label="Synthetic demo scenarios">
           <span className="muted">Try a synthetic scenario:</span>
           {presets.map((p) => (
-            <button
+            <Button
               key={p.id}
-              type="button"
+              size="sm"
               disabled={isSubmitting}
               aria-pressed={activePreset?.id === p.id}
               onClick={() => {
@@ -56,7 +57,7 @@ export default function InputForm({ onSubmit, isSubmitting, presets = [] }: Inpu
               }}
             >
               {p.label}
-            </button>
+            </Button>
           ))}
           {activePreset && (
             <p className="muted" data-testid="preset-expectation">
@@ -105,9 +106,9 @@ export default function InputForm({ onSubmit, isSubmitting, presets = [] }: Inpu
         {localError && <p className="inline-error">{localError}</p>}
       </div>
 
-      <button type="submit" className="primary" disabled={isSubmitting}>
+      <Button type="submit" variant="primary" disabled={isSubmitting}>
         {isSubmitting ? "Submitting…" : "Submit intake"}
-      </button>
-    </form>
+      </Button>
+    </Card>
   );
 }

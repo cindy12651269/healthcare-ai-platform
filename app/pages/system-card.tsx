@@ -1,7 +1,7 @@
-import Head from "next/head";
 import { useEffect, useState } from "react";
 import ApiStatus from "../components/ApiStatus";
-import SiteNav from "../components/SiteNav";
+import AppShell from "../components/AppShell";
+import { Alert, Card, DataTable, LoadingMessage, PageHeader, ReasonLabel, Skeleton } from "../components/ui";
 import { SystemCard, fetchSystemCard, waitForApi } from "../services/api";
 
 // Read-only system card (#43). All content comes from GET /api/system-card, which serves the
@@ -33,48 +33,28 @@ export default function SystemCardPage({ load = fetchSystemCard, checkApi = wait
   }, [load]);
 
   return (
-    <>
-      <Head>
-        <title>System Card | Healthcare AI Platform</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-
-      <header className="site-header">
-        <div className="container">
-          <span className="brand">Healthcare AI Platform · System card</span>
-          <span className="badges">
-            <span className="badge">Demo · synthetic data only</span>
-          </span>
-        </div>
-        <div className="container">
-          <SiteNav current="/system-card" />
-        </div>
-      </header>
-
-      <main className="container">
+    <AppShell title="System Card" current="/system-card">
         <ApiStatus wait={checkApi} />
-        <div className="alert alert-urgent" role="note" data-testid="not-a-medical-device">
+        <PageHeader
+          title="System card"
+          description="How the pipeline works, the safety and escalation rules it applies, how it was evaluated and what it cannot do."
+        />
+        <Alert variant="urgent" role="note" data-testid="not-a-medical-device">
           <strong>Not a medical device.</strong> Portfolio demonstration on synthetic data. Not clinically validated; no
           diagnosis, prescription or medical advice; no compliance claim.
-        </div>
+        </Alert>
 
         {state.status === "loading" && (
-          <p className="status-loading" role="status">
-            Loading system card…
-          </p>
+          <>
+            <LoadingMessage>Loading system card…</LoadingMessage>
+            <Skeleton lines={4} />
+          </>
         )}
         {state.status === "error" && (
-          <div className="alert alert-error" role="alert">
-            The system card could not be loaded from the API. Please try again later.
-          </div>
+          <Alert variant="error">The system card could not be loaded from the API. Please try again later.</Alert>
         )}
         {state.status === "ready" && <CardBody card={state.card} />}
-      </main>
-
-      <footer className="site-footer container">
-        Portfolio demonstration. Not a medical device; not for real patient data.
-      </footer>
-    </>
+    </AppShell>
   );
 }
 
@@ -88,7 +68,7 @@ function CardBody({ card }: { card: SystemCard }) {
 
   return (
     <>
-      <section className="card">
+      <Card>
         <h2>Pipeline</h2>
         <p data-testid="execution-mode">
           Current execution mode: <strong>{String(card.execution_mode)}</strong>
@@ -101,9 +81,9 @@ function CardBody({ card }: { card: SystemCard }) {
             </li>
           ))}
         </ol>
-      </section>
+      </Card>
 
-      <section className="card">
+      <Card>
         <h2>Safety rules</h2>
         <ul>
           {list(card.safety_rules).map((r) => (
@@ -116,7 +96,7 @@ function CardBody({ card }: { card: SystemCard }) {
         <ul data-testid="escalation-rules">
           {list(card.escalation_rules).map((r) => (
             <li key={String(r.reason)}>
-              <code>{String(r.reason)}</code> — {String(r.rule)}
+              <ReasonLabel code={String(r.reason)} /> — {String(r.rule)}
             </li>
           ))}
         </ul>
@@ -124,45 +104,37 @@ function CardBody({ card }: { card: SystemCard }) {
           Low-confidence threshold: <strong data-testid="threshold">{String(card.low_confidence_threshold)}</strong>{" "}
           (strictly below escalates)
         </p>
-      </section>
+      </Card>
 
-      <section className="card">
+      <Card>
         <h2>Safety &amp; escalation evaluation (#32)</h2>
-        <table data-testid="safety-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Cases</th>
-              <th>Guard rate</th>
-              <th>Escalation rate</th>
-              <th>Known gaps</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...categories, ["Total", agg] as [string, unknown]].map(([name, c]) => (
-              <tr key={name}>
-                <td>{name}</td>
-                <td>{String(obj(c).cases)}</td>
-                <td>{rate(obj(c).guard_match_rate)}</td>
-                <td>{rate(obj(c).escalation_match_rate)}</td>
-                <td>{String(obj(c).known_gaps)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <DataTable
+          label="Safety and escalation evaluation by category"
+          testId="safety-table"
+          layout="stack"
+          rows={[...categories, ["Total", agg] as [string, unknown]]}
+          rowKey={([name]) => name}
+          columns={[
+            { key: "category", header: "Category", render: ([name]) => name },
+            { key: "cases", header: "Cases", numeric: true, render: ([, c]) => String(obj(c).cases) },
+            { key: "guard", header: "Guard rate", numeric: true, render: ([, c]) => rate(obj(c).guard_match_rate) },
+            { key: "escalation", header: "Escalation rate", numeric: true, render: ([, c]) => rate(obj(c).escalation_match_rate) },
+            { key: "gaps", header: "Known gaps", numeric: true, render: ([, c]) => String(obj(c).known_gaps) },
+          ]}
+        />
         <p className="muted">{String(safety.limitation)}</p>
-      </section>
+      </Card>
 
-      <section className="card">
+      <Card>
         <h2>Extraction evaluation (#40)</h2>
         <p data-testid="extraction-metrics">
           {String(ext.cases)} cases · micro precision {rate(ext.micro_precision)} · micro recall {rate(ext.micro_recall)} ·
           macro precision {rate(ext.macro_precision)} · macro recall {rate(ext.macro_recall)}
         </p>
         <p className="muted">{String(extraction.limitation)}</p>
-      </section>
+      </Card>
 
-      <section className="card">
+      <Card>
         <h2>Known limitations</h2>
         <ul>
           {(Array.isArray(card.known_limitations) ? card.known_limitations : []).map((l) => (
@@ -170,7 +142,7 @@ function CardBody({ card }: { card: SystemCard }) {
           ))}
         </ul>
         <p className="muted">{String(card.not_a_medical_device)}</p>
-      </section>
+      </Card>
     </>
   );
 }

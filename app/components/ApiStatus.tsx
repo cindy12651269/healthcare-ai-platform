@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Alert, Button } from "./ui";
 import { ApiReadiness, WAKE_POLICY, WaitForApiOptions, waitForApi } from "../services/api";
 
 // Cold-start notice (#67). The hosted demo runs on free instances that sleep when idle, so the first
@@ -60,13 +61,12 @@ export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: Api
 
   if (state.status === "waking") {
     return (
-      <div className="alert alert-warn" role="status" data-testid="api-status">
-        <strong>Waking the demo server (can take up to a minute).</strong>
+      <Alert variant="warning" data-testid="api-status" title="Waking the demo server (can take up to a minute).">
         <p>
           This free hosted demo sleeps when nobody is using it. Checking again… (attempt {state.attempt} of{" "}
           {state.maxAttempts})
         </p>
-      </div>
+      </Alert>
     );
   }
 
@@ -79,15 +79,12 @@ export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: Api
   }
 
   return (
-    <div className="alert alert-error" role="alert" data-testid="api-status">
-      <strong>The demo server did not respond.</strong>
+    <Alert variant="error" data-testid="api-status" title="The demo server did not respond.">
       <p>
         We kept checking for over a minute without an answer. It may still be starting, being redeployed,
         or offline for maintenance. Try again in a minute; if it keeps failing, contact the person who shared this demo.
       </p>
-      <button type="button" className="secondary" onClick={retry}>
-        Try again
-      </button>
-    </div>
+      <Button onClick={retry}>Try again</Button>
+    </Alert>
   );
 }

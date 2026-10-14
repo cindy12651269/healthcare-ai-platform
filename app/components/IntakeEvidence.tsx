@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
+import { Alert, LoadingMessage, ReasonLabel, ReasonList, StatusBadge } from "./ui";
 import { IntakeTimeline, RecordedMatch, StaffApi, TimelineEvent } from "../services/staffApi";
 
 // "Why flagged" evidence and review timeline for one intake (#41). Shows persisted data only:
@@ -72,7 +73,13 @@ function EventDetails({ event }: { event: TimelineEvent }) {
         </>
       );
     case "escalation_decision":
-      return <>{d.required ? `Escalated: ${show(d.reasons)}` : "Not escalated"}</>;
+      return d.required ? (
+        <>
+          Escalated: <ReasonList reasons={Array.isArray(d.reasons) ? d.reasons.map(String) : null} empty="Not recorded" />
+        </>
+      ) : (
+        <>Not escalated</>
+      );
     case "webhook_delivery":
       return (
         <>
@@ -84,7 +91,7 @@ function EventDetails({ event }: { event: TimelineEvent }) {
     case "staff_transition":
       return (
         <>
-          {show(d.actor_id)}: {show(d.from_status)} → {show(d.to_status)}
+          {show(d.actor_id)}: <StatusBadge status={show(d.from_status)} /> → <StatusBadge status={show(d.to_status)} />
         </>
       );
   }
@@ -122,17 +129,13 @@ export default function IntakeEvidence({
   }, [api, token, clinicId, intakeId, onAuthError]);
 
   if (state.status === "loading") {
-    return (
-      <p className="status-loading" role="status">
-        Loading evidence and timeline…
-      </p>
-    );
+    return <LoadingMessage>Loading evidence and timeline…</LoadingMessage>;
   }
   if (state.status === "error") {
     return (
-      <div className="alert alert-error" role="alert" data-testid="timeline-error">
+      <Alert variant="error" data-testid="timeline-error">
         Evidence and timeline could not be loaded. {state.message}
-      </div>
+      </Alert>
     );
   }
 
@@ -152,7 +155,7 @@ export default function IntakeEvidence({
           <ul data-testid="escalation-rules">
             {evidence.escalation_rules.map((r) => (
               <li key={r.reason}>
-                <strong>{r.rule}</strong> <code>{r.reason}</code>
+                <strong>{r.rule}</strong> <ReasonLabel code={r.reason} />
                 <div className="muted">Recorded evidence: {show(r.evidence)}</div>
               </li>
             ))}

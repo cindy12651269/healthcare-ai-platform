@@ -1,0 +1,150 @@
+/*
+ * Design tokens (#68). Plain CSS custom properties; see docs/decisions.md ADR-10.
+ * Every text/background pair below is checked for WCAG AA in both themes
+ * (Phase 8 journal §3). Breakpoints cannot be custom properties inside @media,
+ * so they are fixed values used consistently in globals.css:
+ *   mobile < 768px · tablet 768–1279px · desktop >= 1280px
+ */
+:root {
+  color-scheme: light;
+
+  /* Neutrals */
+  --color-bg: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #eef2f6;
+  --color-text: #17232f;
+  --color-text-muted: #4d5d6e;
+  --color-border: #d5dde6;
+  --color-border-strong: #7d8b99; /* form controls: >= 3:1 against surfaces */
+
+  /* Brand and interaction */
+  --color-primary: #0f6e78;
+  --color-primary-hover: #0b5a62;
+  --color-on-primary: #ffffff;
+  --color-link: #0c626b;
+  --color-focus: #1f5fcf;
+  --color-danger: #b42318;
+  --color-danger-hover: #93180f;
+  --color-on-danger: #ffffff;
+  --color-highlight: #fff1c7;
+  --color-highlight-border: #c78a00;
+
+  /* Semantic status colours: foreground / background / border */
+  --status-neutral-fg: #3d4b59;
+  --status-neutral-bg: #eef2f6;
+  --status-neutral-border: #c3ccd6;
+  --status-info-fg: #1b4f8f; /* submitted */
+  --status-info-bg: #e8f0fb;
+  --status-info-border: #a9c4ea;
+  --status-warning-fg: #7f4500; /* needs review */
+  --status-warning-bg: #fff4de;
+  --status-warning-border: #e8b65a;
+  --status-success-fg: #146236; /* reviewed */
+  --status-success-bg: #e6f5eb;
+  --status-success-border: #97cfaa;
+  --status-escalated-fg: #5e2a91; /* escalated */
+  --status-escalated-bg: #f2eafb;
+  --status-escalated-border: #c6abe6;
+  --status-blocked-fg: #96174f; /* blocked output */
+  --status-blocked-bg: #fcebf2;
+  --status-blocked-border: #e4a3c0;
+  --status-emergency-fg: #a3150c; /* emergency */
+  --status-emergency-bg: #fdecea;
+  --status-emergency-border: #d9534a;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  --leading-tight: 1.25;
+  --leading-normal: 1.55;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-1: 0 1px 2px rgba(16, 32, 48, 0.06), 0 1px 3px rgba(16, 32, 48, 0.08);
+  --shadow-2: 0 4px 12px rgba(16, 32, 48, 0.1), 0 2px 4px rgba(16, 32, 48, 0.06);
+
+  /* Layout */
+  --width-reading: 52rem; /* 832px: intake, system card */
+  --width-workspace: 78rem; /* 1248px: dashboard, staff */
+  --gutter: var(--space-4);
+  --header-height: 4rem;
+  --touch-target: 44px;
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-bg: #0e141a;
+    --color-surface: #17202a;
+    --color-surface-sunken: #111920;
+    --color-text: #e6ecf2;
+    --color-text-muted: #a7b4c1;
+    --color-border: #2c3845;
+    --color-border-strong: #6f7f8f;
+
+    --color-primary: #45b8c2;
+    --color-primary-hover: #6dcad2;
+    --color-on-primary: #0a1a1d;
+    --color-link: #6fd0d9;
+    --color-focus: #8ab8ff;
+    --color-danger: #ff8a80;
+    --color-danger-hover: #ffaba3;
+    --color-on-danger: #2a0a07;
+    --color-highlight: #4a3a0d;
+    --color-highlight-border: #d6a531;
+
+    --status-neutral-fg: #c3cdd7;
+    --status-neutral-bg: #1f2a35;
+    --status-neutral-border: #3d4b59;
+    --status-info-fg: #9ec5f7;
+    --status-info-bg: #142740;
+    --status-info-border: #2f5583;
+    --status-warning-fg: #f3c56a;
+    --status-warning-bg: #302410;
+    --status-warning-border: #7a5a1c;
+    --status-success-fg: #8fd8a8;
+    --status-success-bg: #112c1c;
+    --status-success-border: #2b6b42;
+    --status-escalated-fg: #d3b6f3;
+    --status-escalated-bg: #271b3a;
+    --status-escalated-border: #5d3f85;
+    --status-blocked-fg: #f5a6c9;
+    --status-blocked-bg: #351426;
+    --status-blocked-border: #7d2e55;
+    --status-emergency-fg: #ffa39b;
+    --status-emergency-bg: #391614;
+    --status-emergency-border: #c4483f;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.45);
+  }
+}
