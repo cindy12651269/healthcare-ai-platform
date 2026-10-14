@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { StaffApi } from "../services/staffApi";
+import { Alert, Button, LoadingMessage } from "./ui";
 
 // FHIR R4 export (#42): fetched on demand (each export is audited), previewed as JSON and
 // downloadable as a file. The Bundle contains the raw intake text; synthetic demo data only.
@@ -57,29 +58,25 @@ export default function FhirExport({
         Bundle (collection) with QuestionnaireResponse, Task, Provenance, Organization, Device and Questionnaire. It
         contains the original intake text; a downloaded file leaves the platform&apos;s access control.
       </p>
-      <button type="button" className="primary" onClick={load} disabled={state.status === "loading"}>
+      <Button variant="primary" onClick={load} disabled={state.status === "loading"}>
         {state.status === "ready" ? "Reload FHIR export" : "Load FHIR export"}
-      </button>
+      </Button>
 
       {state.status === "idle" && <p className="muted">No export loaded yet.</p>}
       {state.status === "loading" && (
-        <p className="status-loading" role="status">
-          Building FHIR export…
-        </p>
+        <LoadingMessage>Building FHIR export…</LoadingMessage>
       )}
       {state.status === "error" && (
-        <div className="alert alert-error" role="alert" data-testid="fhir-error">
+        <Alert variant="error" data-testid="fhir-error">
           FHIR export failed. {state.message}
-        </div>
+        </Alert>
       )}
       {state.status === "ready" &&
         (state.entries === 0 ? (
           <p className="muted">The export contains no resources.</p>
         ) : (
           <>
-            <button type="button" onClick={() => download(state.json)}>
-              Download JSON
-            </button>
+            <Button onClick={() => download(state.json)}>Download JSON</Button>
             <pre className="json-preview" data-testid="fhir-preview">
               {state.json}
             </pre>

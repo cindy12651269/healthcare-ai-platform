@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import FhirExport from "./FhirExport";
 import IntakeEvidence from "./IntakeEvidence";
+import { Alert, Button, Card, DataTable, EmptyState, LoadingMessage, ReasonList, StatusBadge } from "./ui";
 import {
   IntakeDetail,
   IntakeSummary,
@@ -23,13 +24,6 @@ const FILTERS: Array<[ReviewStatus | "", string]> = [
   ["submitted", "Submitted (not flagged)"],
   ["", "All"],
 ];
-
-const STATUS_LABELS: Record<string, string> = {
-  submitted: "Submitted",
-  needs_review: "Needs review",
-  reviewed: "Reviewed",
-  escalated: "Escalated",
-};
 
 const REPORT_SECTIONS: Array<[string, string]> = [
   ["overview", "Overview"],
@@ -127,9 +121,9 @@ function SignIn({
   }
 
   return (
-    <>
+    <div className="signin-grid">
       <StaffAccessPolicy />
-      <form className="card" onSubmit={handleSubmit} aria-labelledby="signin-heading">
+      <Card as="form" onSubmit={handleSubmit} aria-labelledby="signin-heading">
         <h2 id="signin-heading">Staff sign-in</h2>
         <p className="muted small">
           Paste the access token issued to you by your operator (<code>python -m api.auth issue-token</code>).
@@ -147,16 +141,12 @@ function SignIn({
           onChange={(e) => setToken(e.target.value)}
           disabled={pending}
         />
-        {error && (
-          <div className="alert alert-error" role="alert">
-            {error}
-          </div>
-        )}
-        <button type="submit" className="primary" disabled={pending}>
+        {error && <Alert variant="error">{error}</Alert>}
+        <Button type="submit" variant="primary" disabled={pending}>
           {pending ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-    </>
+        </Button>
+      </Card>
+    </div>
   );
 }
 
@@ -164,7 +154,7 @@ function SignIn({
 // there is deliberately no public token endpoint, guest login or shared password.
 function StaffAccessPolicy() {
   return (
-    <section className="card" aria-labelledby="staff-access-heading" data-testid="staff-access-policy">
+    <Card aria-labelledby="staff-access-heading" data-testid="staff-access-policy">
       <h2 id="staff-access-heading">Visiting the public demo?</h2>
       <p>
         Staff sign-in needs a short-lived access token for one of the seeded synthetic staff users. Tokens are issued
@@ -176,7 +166,7 @@ function StaffAccessPolicy() {
         <Link href="/system-card">System card</Link>. To see the staff queue, evidence timeline and FHIR export, ask the
         person who shared this demo for a token or a guided walkthrough.
       </p>
-    </section>
+    </Card>
   );
 }
 
@@ -229,7 +219,7 @@ function Workspace({
 
   return (
     <>
-      <section className="card" aria-label="Signed in">
+      <Card aria-label="Signed in" className="identity-bar">
         <p>
           Signed in as <strong>{me.email}</strong> · clinic <strong>{clinicId}</strong>
           {role ? ` (${role})` : ""}
@@ -252,12 +242,10 @@ function Workspace({
             </select>
           </label>
         )}
-        <button type="button" className="secondary" onClick={() => onSignOut(null)}>
-          Sign out
-        </button>
-      </section>
+        <Button onClick={() => onSignOut(null)}>Sign out</Button>
+      </Card>
 
-      <section className="card" aria-labelledby="queue-heading">
+      <Card aria-labelledby="queue-heading">
         <h2 id="queue-heading">Review queue</h2>
         <label className="field-label" htmlFor="status-filter">
           Status
@@ -279,51 +267,44 @@ function Workspace({
         </select>
 
         <div aria-live="polite">
-          {queue.status === "loading" && (
-            <p className="status-loading" role="status">
-              Loading intakes…
-            </p>
-          )}
+          {queue.status === "loading" && <LoadingMessage>Loading intakes…</LoadingMessage>}
           {queue.status === "error" && (
-            <div className="alert alert-error" role="alert">
+            <Alert variant="error">
               <p>{queue.message}</p>
-              <button type="button" className="secondary" onClick={() => setReloadKey((k) => k + 1)}>
-                Retry
-              </button>
-            </div>
+              <Button onClick={() => setReloadKey((k) => k + 1)}>Retry</Button>
+            </Alert>
           )}
-          {queue.status === "ready" && queue.data.length === 0 && (
-            <p className="muted">No intakes with this status.</p>
-          )}
+          {queue.status === "ready" && queue.data.length === 0 && <EmptyState title="No intakes with this status." />}
         </div>
 
         {queue.status === "ready" && queue.data.length > 0 && (
-          <table className="queue">
-            <thead>
-              <tr>
-                <th>Received</th>
-                <th>Status</th>
-                <th>Escalation reason</th>
-                <th>Intake</th>
-              </tr>
-            </thead>
-            <tbody>
-              {queue.data.map((row) => (
-                <tr key={row.id} aria-selected={row.id === selectedId}>
-                  <td>{row.created_at ? new Date(row.created_at).toLocaleString() : "—"}</td>
-                  <td>{STATUS_LABELS[row.review_status] ?? row.review_status}</td>
-                  <td>{row.escalation_reason ?? "—"}</td>
-                  <td>
-                    <button type="button" className="secondary" onClick={() => setSelectedId(row.id)}>
-                      Open {row.id.slice(0, 8)}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable
+            label="Review queue"
+            layout="stack"
+            rows={queue.data}
+            rowKey={(row) => row.id}
+            rowProps={(row) => ({ "aria-selected": row.id === selectedId })}
+            columns={[
+              {
+                key: "received",
+                header: "Received",
+                render: (row) => (row.created_at ? new Date(row.created_at).toLocaleString() : "—"),
+              },
+              { key: "status", header: "Status", render: (row) => <StatusBadge status={row.review_status} /> },
+              { key: "reason", header: "Escalation reason", render: (row) => <ReasonList reasons={row.escalation_reason} /> },
+              {
+                key: "open",
+                header: "Intake",
+                render: (row) => (
+                  <Button size="sm" onClick={() => setSelectedId(row.id)}>
+                    Open {row.id.slice(0, 8)}
+                  </Button>
+                ),
+              },
+            ]}
+          />
         )}
-      </section>
+      </Card>
 
       {selectedId && (
         <IntakeDetailView
@@ -403,20 +384,8 @@ function IntakeDetailView({
     }
   }
 
-  if (detail.status === "loading") {
-    return (
-      <p className="status-loading" role="status">
-        Loading intake…
-      </p>
-    );
-  }
-  if (detail.status === "error") {
-    return (
-      <div className="alert alert-error" role="alert">
-        {detail.message}
-      </div>
-    );
-  }
+  if (detail.status === "loading") return <LoadingMessage>Loading intake…</LoadingMessage>;
+  if (detail.status === "error") return <Alert variant="error">{detail.message}</Alert>;
 
   const intake = detail.data;
   const clinical = asObject(intake.structured.clinical_structuring);
@@ -427,13 +396,17 @@ function IntakeDetailView({
   const pending = transition.status === "pending";
 
   return (
-    <article className="card" aria-labelledby="detail-heading">
+    <Card as="article" aria-labelledby="detail-heading">
       <h2 id="detail-heading">Intake {intake.id.slice(0, 8)}</h2>
       <dl className="kv">
         <dt>Review status</dt>
-        <dd data-testid="detail-status">{STATUS_LABELS[intake.review_status] ?? intake.review_status}</dd>
+        <dd data-testid="detail-status">
+          <StatusBadge status={intake.review_status} />
+        </dd>
         <dt>Escalation reason</dt>
-        <dd>{intake.escalation_reason ?? "None"}</dd>
+        <dd>
+          <ReasonList reasons={intake.escalation_reason} empty="None" />
+        </dd>
         <dt>Received</dt>
         <dd>{intake.created_at ? new Date(intake.created_at).toLocaleString() : "—"}</dd>
       </dl>
@@ -491,35 +464,25 @@ function IntakeDetailView({
       />
 
       <div aria-live="polite">
-        {pending && (
-          <p className="status-loading" role="status">
-            Updating status…
-          </p>
-        )}
+        {pending && <LoadingMessage>Updating status…</LoadingMessage>}
         {transition.status === "done" && (
-          <div className="alert alert-warn" role="status">
-            Marked {transition.target === "reviewed" ? "reviewed" : "escalated"}.
-          </div>
+          <Alert variant="success">Marked {transition.target === "reviewed" ? "reviewed" : "escalated"}.</Alert>
         )}
-        {transition.status === "error" && (
-          <div className="alert alert-error" role="alert">
-            {transition.message}
-          </div>
-        )}
+        {transition.status === "error" && <Alert variant="error">{transition.message}</Alert>}
       </div>
 
       {canTransition ? (
-        <div>
-          <button type="button" className="primary" disabled={pending} onClick={() => handleTransition("reviewed")}>
+        <div className="button-row">
+          <Button variant="primary" disabled={pending} onClick={() => handleTransition("reviewed")}>
             Mark reviewed
-          </button>{" "}
-          <button type="button" className="primary" disabled={pending} onClick={() => handleTransition("escalated")}>
+          </Button>
+          <Button variant="danger" disabled={pending} onClick={() => handleTransition("escalated")}>
             Mark escalated
-          </button>
+          </Button>
         </div>
       ) : (
         <p className="muted">Only intakes that need review can be marked reviewed or escalated.</p>
       )}
-    </article>
+    </Card>
   );
 }

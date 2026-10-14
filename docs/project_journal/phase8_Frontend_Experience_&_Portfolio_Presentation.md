@@ -2,7 +2,7 @@
 
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
-Scope: Issue #67 (item 1 of 7) so far
+Scope: Issues #67 and #68 (items 1–2 of 7) so far
 Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c).
 
 ---
@@ -86,3 +86,83 @@ Network log of that session: `GET https://healthcare-ai-api-tovn.onrender.com/he
 * `/intake` makes a second `/health` call for the LLM-mode badge (pre-existing); not a functional issue.
 
 **Verdict for #67 on the hosted demo:** webhook isolation, the four presets, `hosted_check`, staff-access messaging, the correct API host and the waking → awake path are verified; the failure state is test-only.
+
+---
+
+## 3. Issue 68 — Design System, App Shell & Responsive Layout
+
+**Status:** implemented on branch `feat/issue-68-design-system-app-shell`; in review. No API, backend, auth, RBAC, clinic-isolation or workflow change; no new dependency (`app/package.json` unchanged).
+
+**Delivered:**
+
+* **Tokens** (`app/styles/tokens.css`): colour palette with semantic status colours (submitted, needs review, reviewed, escalated, blocked, emergency, neutral), type scale, spacing, radius, elevation, reading (832 px) and workspace (1248 px) widths; light and dark themes. Decision: plain CSS, [ADR-10](../decisions.md).
+* **AppShell** (`app/components/AppShell.tsx`): brand, primary navigation (`aria-current`), skip link, persistent *"Demo · synthetic data · mock mode"* indicator, footer, document title and viewport. All four pages render through it; the per-page header/footer markup and `SiteNav.tsx` are removed. The intake page's live *LLM Mode* badge is passed into the shell's indicator bar.
+* **Responsive navigation:** horizontal from 768 px; below that a *Menu* button (`aria-expanded`, `aria-controls`) collapses it; Escape closes it and returns focus to the button; following a link closes it.
+* **Components** (`app/components/ui/`): `Button` (primary/secondary/danger/ghost, sm/md), `Card`, `Alert`, `StatusBadge`, `ReasonLabel`/`ReasonList` (label + visible code; splits the stored comma-separated `escalation_reason`), `PageHeader`, `DataTable` (scrolls inside a labelled, focusable region, or stacks rows as labelled blocks below 768 px), `EmptyState`, `Spinner`/`Skeleton`/`LoadingMessage`.
+* **Where statuses and reasons now use the shared components:** staff queue (status + reason columns), intake detail (status, escalation reason), *Why flagged* rules, timeline *escalation decision* reasons, system-card escalation rules.
+* **Widths:** `/intake` and `/system-card` reading width; `/` and `/staff` workspace width, with two-column grids at ≥ 1280 px (landing workflow + scenarios; staff access policy + sign-in). The staff queue/detail side-by-side layout is left to #71.
+* **Accessibility basics:** visible `:focus-visible` ring (focus colour ≥ 3:1 in both themes), 44 px minimum height for buttons, nav links, inputs and selects (small buttons are 36 px on ≥ 768 px only), `prefers-reduced-motion` disables spinner/skeleton animation and transitions.
+
+**Deliberate exception:** timeline *staff action* lines still show the recorded `from_status → to_status` codes verbatim (an existing test pins this audit text, and #71 redesigns the timeline). Safety *guard action* codes (`add_emergency_guidance`, …) are not escalation reasons and are unchanged.
+
+**Tests:** `app/tests/ui.test.tsx` (30 new: variants, roles, accessible names, reason/status mapping, DataTable, AppShell nav/indicator/widths, keyboard menu toggle + Escape). All 76 existing tests pass unchanged → 106 total. `npm run lint`, `typecheck`, `test`, `build` pass locally.
+
+**Contrast** (token pairs, WCAG 2.x formula, computed from `tokens.css`; 47 pairs × 2 themes, 0 failures; text ≥ 4.5:1, focus ring / control borders / primary ≥ 3:1):
+
+| Pair | Min | Light | Dark |
+| --- | --- | --- | --- |
+| `--color-text` on `--color-bg` | 4.5:1 | 14.72 | 15.56 |
+| `--color-text` on `--color-surface` | 4.5:1 | 15.93 | 13.82 |
+| `--color-text` on `--color-surface-sunken` | 4.5:1 | 14.16 | 14.91 |
+| `--color-text-muted` on `--color-bg` | 4.5:1 | 6.24 | 8.77 |
+| `--color-text-muted` on `--color-surface` | 4.5:1 | 6.76 | 7.79 |
+| `--color-text-muted` on `--color-surface-sunken` | 4.5:1 | 6.01 | 8.40 |
+| `--color-link` on `--color-surface` | 4.5:1 | 7.06 | 9.17 |
+| `--color-link` on `--color-bg` | 4.5:1 | 6.52 | 10.32 |
+| `--color-on-primary` on `--color-primary` | 4.5:1 | 5.96 | 7.54 |
+| `--color-on-primary` on `--color-primary-hover` | 4.5:1 | 7.92 | 9.36 |
+| `--color-on-danger` on `--color-danger` | 4.5:1 | 6.57 | 8.03 |
+| `--color-on-danger` on `--color-danger-hover` | 4.5:1 | 8.83 | 10.14 |
+| `--color-danger` on `--color-surface` | 4.5:1 | 6.57 | 7.21 |
+| `--color-text` on `--color-highlight` | 4.5:1 | 14.16 | 9.28 |
+| `--color-focus` on `--color-surface` | 3:1 | 5.84 | 8.13 |
+| `--color-focus` on `--color-bg` | 3:1 | 5.39 | 9.16 |
+| `--color-border-strong` on `--color-surface` | 3:1 | 3.49 | 4.00 |
+| `--color-border-strong` on `--color-bg` | 3:1 | 3.22 | 4.51 |
+| `--color-primary` on `--color-surface` | 3:1 | 5.96 | 6.96 |
+| `--status-neutral-fg` on `--status-neutral-bg` | 4.5:1 | 7.95 | 9.05 |
+| `--status-neutral-fg` on `--color-surface` | 4.5:1 | 8.94 | 10.21 |
+| `--color-text` on `--status-neutral-bg` | 4.5:1 | 14.16 | 12.25 |
+| `--color-text-muted` on `--status-neutral-bg` | 4.5:1 | 6.01 | 6.90 |
+| `--status-info-fg` on `--status-info-bg` | 4.5:1 | 7.14 | 8.45 |
+| `--status-info-fg` on `--color-surface` | 4.5:1 | 8.20 | 9.23 |
+| `--color-text` on `--status-info-bg` | 4.5:1 | 13.88 | 12.66 |
+| `--color-text-muted` on `--status-info-bg` | 4.5:1 | 5.89 | 7.13 |
+| `--status-warning-fg` on `--status-warning-bg` | 4.5:1 | 6.99 | 9.39 |
+| `--status-warning-fg` on `--color-surface` | 4.5:1 | 7.63 | 10.19 |
+| `--color-text` on `--status-warning-bg` | 4.5:1 | 14.60 | 12.74 |
+| `--color-text-muted` on `--status-warning-bg` | 4.5:1 | 6.20 | 7.18 |
+| `--status-success-fg` on `--status-success-bg` | 4.5:1 | 6.58 | 8.96 |
+| `--status-success-fg` on `--color-surface` | 4.5:1 | 7.42 | 9.84 |
+| `--color-text` on `--status-success-bg` | 4.5:1 | 14.13 | 12.60 |
+| `--color-text-muted` on `--status-success-bg` | 4.5:1 | 6.00 | 7.10 |
+| `--status-escalated-fg` on `--status-escalated-bg` | 4.5:1 | 8.09 | 9.01 |
+| `--status-escalated-fg` on `--color-surface` | 4.5:1 | 9.48 | 9.21 |
+| `--color-text` on `--status-escalated-bg` | 4.5:1 | 13.61 | 13.53 |
+| `--color-text-muted` on `--status-escalated-bg` | 4.5:1 | 5.77 | 7.62 |
+| `--status-blocked-fg` on `--status-blocked-bg` | 4.5:1 | 7.23 | 8.74 |
+| `--status-blocked-fg` on `--color-surface` | 4.5:1 | 8.29 | 8.76 |
+| `--color-text` on `--status-blocked-bg` | 4.5:1 | 13.89 | 13.79 |
+| `--color-text-muted` on `--status-blocked-bg` | 4.5:1 | 5.89 | 7.77 |
+| `--status-emergency-fg` on `--status-emergency-bg` | 4.5:1 | 6.88 | 8.44 |
+| `--status-emergency-fg` on `--color-surface` | 4.5:1 | 7.87 | 8.59 |
+| `--color-text` on `--status-emergency-bg` | 4.5:1 | 13.93 | 13.59 |
+| `--color-text-muted` on `--status-emergency-bg` | 4.5:1 | 5.91 | 7.65 |
+
+47 pairs × 2 themes; failures: 0
+
+**Pending (not done in this change):**
+
+* Responsive visual check and screenshots at 390 / 768 / 1280 / 1440 px in light and dark, the measured horizontal-overflow check and touch-target measurement in a real browser: **pending**. Layout rules were written for these widths but have not been verified visually yet.
+* Hosted verification: **pending** — the new code is not deployed; no deploy or Render change was made.
+* The *mock mode* text in the indicator is static (the hosted demo and CI run mock mode only); a locally run real-mode API would still show the live *LLM Mode: Real* badge on `/intake`.

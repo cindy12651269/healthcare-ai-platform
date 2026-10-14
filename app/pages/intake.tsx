@@ -1,9 +1,9 @@
-import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import InputForm from "../components/InputForm";
 import ReportView from "../components/ReportView";
 import DeveloperTracePanel from "../components/DeveloperTracePanel";
-import SiteNav from "../components/SiteNav";
+import AppShell from "../components/AppShell";
+import { Alert, LoadingMessage, PageHeader } from "../components/ui";
 import ApiStatus from "../components/ApiStatus";
 import { SCENARIO_PRESETS } from "../services/demo";
 import {
@@ -84,66 +84,42 @@ export default function IntakePage({
   const isSubmitting = state.status === "loading";
 
   return (
-    <>
-      <Head>
-        <title>Pre-visit Intake | Healthcare AI Platform</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-
-      <header className="site-header">
-        <div className="container">
-          <span className="brand">Healthcare AI Platform</span>
-          <span className="badges">
-            {llmMode && (
-              <span className="badge" data-testid="llm-mode">
-                LLM Mode: {llmMode === "real" ? "Real" : "Mock"}
-              </span>
-            )}
-            <span className="badge">Demo · synthetic data only</span>
+    <AppShell
+      title="Pre-visit Intake"
+      current="/intake"
+      indicators={
+        llmMode && (
+          <span className="badge" data-testid="llm-mode">
+            LLM Mode: {llmMode === "real" ? "Real" : "Mock"}
           </span>
-        </div>
-        <div className="container">
-          <SiteNav current="/intake" />
-        </div>
-      </header>
-
-      <main className="container">
+        )
+      }
+    >
         <ApiStatus wait={checkApi} />
-        <section className="intro">
-          <h1>Pre-visit symptom intake</h1>
-          <p>
-            Share how you are feeling before your appointment. We will prepare a
-            short, safety-checked summary so your care team can get ready for
-            your visit.
-          </p>
+        <PageHeader
+          title="Pre-visit symptom intake"
+          description="Share how you are feeling before your appointment. We will prepare a short, safety-checked summary so your care team can get ready for your visit."
+        >
           <ol className="steps" aria-label="How it works">
             <li>Describe your symptoms</li>
             <li>We structure your intake</li>
             <li>You receive a safe summary</li>
           </ol>
-        </section>
+        </PageHeader>
 
         <InputForm onSubmit={handleSubmit} isSubmitting={isSubmitting} presets={SCENARIO_PRESETS} />
 
         <div aria-live="polite">
-          {isSubmitting && (
-            <p className="status-loading" role="status">
-              Processing your intake…
-            </p>
-          )}
+          {isSubmitting && <LoadingMessage>Processing your intake…</LoadingMessage>}
 
           {state.status === "error" && (
-            <div
-              className={`alert ${state.kind === "validation" ? "alert-warn" : "alert-error"}`}
+            <Alert
+              variant={state.kind === "validation" ? "warning" : "error"}
               role="alert"
+              title={state.kind === "validation" ? "Please check your intake" : "Something went wrong"}
             >
-              <strong>
-                {state.kind === "validation"
-                  ? "Please check your intake"
-                  : "Something went wrong"}
-              </strong>
               <p>{state.message}</p>
-            </div>
+            </Alert>
           )}
         </div>
 
@@ -161,11 +137,6 @@ export default function IntakePage({
         {showTrace && state.status === "error" && (
           <DeveloperTracePanel mode="failure" diagnostics={state.diagnostics} />
         )}
-      </main>
-
-      <footer className="site-footer container">
-        Portfolio demonstration. Not a medical device; not for real patient data.
-      </footer>
-    </>
+    </AppShell>
   );
 }

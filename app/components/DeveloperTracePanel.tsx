@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "./ui";
 import { FailureDiagnostics, PipelineResult } from "../services/api";
 
 type JsonObject = Record<string, unknown>;
@@ -62,9 +63,9 @@ export default function DeveloperTracePanel(props: DeveloperTracePanelProps) {
       <section className="dev-section">
         <div className="dev-section-header">
           <h4>{props.mode === "success" ? "Response JSON" : "Error JSON"}</h4>
-          <button type="button" className="secondary small" onClick={copyJson}>
+          <Button size="sm" onClick={copyJson}>
             {copied ? "Copied" : "Copy JSON"}
-          </button>
+          </Button>
         </div>
         <pre className="json" data-testid="raw-json">
           {json}
