@@ -2,8 +2,8 @@
 
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
-Scope: Issues #67–#69 (items 1–3 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c).
+Scope: Issues #67–#70 (items 1–4 of 7) so far
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 in review: implemented and validated locally (§5a); hosted validation pending deployment authorization (§5b).
 
 ---
 
@@ -335,3 +335,94 @@ About 43 s from the first check to *ready*. No environment or mode was shown bef
 **Not verified on the hosted demo:** the *unavailable* state and *Try again* (unit tests only); per-request `/health` timings during the wake; Safari/Firefox, physical devices and 200 % zoom (#72). The signed-in staff workspace is unchanged by #69 and remains pending hosted validation (§3c).
 
 **Verdict for #69 on the hosted demo:** the deployed build is `24d2a6b`; the dashboard and system card pass the responsive and accessibility checks at 390, 768 and 1280 px in both themes; live status reports the real `/health` values through a natural cold start; the system card's numbers, sample sizes and caveats match the committed snapshot exactly; the webhook is presented as conditional; the access policy and demo gating are intact; all evidence links resolve.
+
+---
+
+## 5. Issue 70 — Patient Intake Experience
+
+**Status:** implemented on branch `feat/issue-70-patient-intake-experience`; in review. Frontend only: no backend, `/api/ingest`, validation-rule, consent-semantics, safety-guard or escalation-rule change; no new dependency (`app/package.json` unchanged); no environment variable or Render change. **Not deployed; nothing here is hosted-verified** (§5b).
+
+**Delivered:**
+
+* **Scenario cards** (`app/components/InputForm.tsx`): the four `SCENARIO_PRESETS` as a fieldset of `aria-pressed` buttons, each showing the name, the synthetic text and *Expected outcome:* from `SCENARIO_PRESETS.expect`, with a *Selected* tag and a 2 px primary border. Choosing a card fills the text only. It never ticks consent, never submits, and a consent the patient already ticked is kept. Editing the text away from the scenario clears the selection. Cards are disabled while a submission is active.
+* **Form** (the page now owns the values, so a failure keeps them and a reset can clear them): explicit label *Your symptoms (required)*, instructions (*At least 10 characters…*) and a request not to enter name, contact details, date of birth or other identifiers. The field is described by the hint, the counter and, when present, the error (`aria-describedby`, `aria-invalid`). Live counter *n / 5000 characters* against `MAX_TEXT_LENGTH`; a separate polite live region announces only the last 500 characters and the limit, not every keystroke. Validation rules unchanged (`validateIntake`, `maxLength`). A client error moves focus to the field and is announced (`role="alert"`). A server consent error marks and focuses the consent checkbox. Consent stays exactly as before: not required on the client, enforced by the backend when it detects personal details.
+* **Staged submission** (`app/components/SubmissionProgress.tsx`): *Wake the demo server* (or *Demo server ready*) → *Process your intake* → *Submission completed*, as a step list with `aria-current="step"` and one `role="status"` line. No percentages. The page runs the #67 readiness check once (`useApiReadiness`, now shared with the notice through the new `ApiStatusView`). A submission made before `/health` answered waits in stage 1 and **sends nothing** until it does (*"Your intake has not been sent yet"*, attempt *n* of 6). *Processing* is shown only when the POST starts. After 15 s of processing a note says it is taking longer than usual and asks not to resubmit. If the wake check gives up, the POST is never sent (class *unavailable*), and one explicit re-check runs per submission, never in the background. The *LLM Mode* badge now comes from the same `/health` answer, which removes the page's second `/health` request. Submit, text, consent and cards stay disabled for the whole submission (button *Submitting…*, plus the existing `inFlight` guard).
+* **Outcome first** (`app/components/ReportView.tsx`, `app/services/intakeOutcome.ts`): *Your intake has been received* (focused when it appears), then emergency guidance (urgent `role="alert"`, first element, *"Do not wait for the clinic to review this intake"*) whenever the safety trace requests it or `emergency_signal` is a reason. Then an **Outcome** card: `StatusBadge` from `escalation.review_status` (`submitted` → *Submitted*, `needs_review` → *Flagged for staff review*, via a new optional `label` prop; staff views unchanged), the reasons as `ReasonList`/`ReasonLabel`, a blocked-report notice when the guard blocked the report, and what happens next. All values are read from the response; nothing is re-evaluated in the browser.
+* **What happens next depends on `persistence.status`** (`agents/pipeline.py::save_record`): `saved` + flagged → *"Authorized clinic staff can review this record in their queue before your visit"*; `saved` + not flagged → stored as submitted, no review flag; `duplicate` → *"An identical description was received earlier, so no new record was created"*; `disabled`/`skipped`/`failed` → not stored, will not appear in the queue; missing → says it is unknown. The queue is never claimed for a record that was not saved.
+* **Sections:** Intake summary (what you told us, summary) · Extracted information (symptoms, duration, onset, severity, warning signs, and the unchanged *"deterministic rule-based baseline, not LLM-generated"* note in mock mode) · Safety findings · Pre-visit report, or **Safe acknowledgement (report withheld)** for a blocked report, with *"No automated report was generated for you"* in the outcome card · Next steps (disclaimer, reference id, *Start a new intake*).
+* **Errors and recovery** (`app/services/api.ts`): each failed outcome now carries an `errorClass`. HTTP 502 and 503 have their own messages (previously the generic processing message). Backend detail stays in the developer trace.
+
+| Class | Trigger | Message (patient) | Recovery | Stored? |
+| --- | --- | --- | --- | --- |
+| `validation` | 400 (not consent), 422 with a list | *We couldn't accept this description…* | *Review your description* (focus field) | No |
+| `consent` | 400 consent detail | *…appears to include personal details. Please confirm consent…* | *Review consent* (focus checkbox) | No |
+| `provider` | 502 (`LLMError`) | *…did not respond properly, so nothing was saved…* | *Try again* | No (raised before persistence) |
+| `configuration` | 503 (`LLMConfigurationError`) | *…not available at the moment, so nothing was saved…* | *Try again* | No |
+| `server` | 500, 422 string, 200 without `success` | *We couldn't process your intake right now…* | *Try again* | No |
+| `network` | no readable response | *We couldn't reach the intake service…* + *may or may not have been received* | *Send again* | **Unknown** |
+| `timeout` | client abort at 60 s | *…took too long to respond…* + *may still have been received* | *Send again* | **Unknown** |
+| `unavailable` | #67 wake check gave up | *…did not respond, so your intake was not sent…* | *Try again* (re-checks `/health` first) | No (no POST) |
+
+  Text and consent are kept on every failure (*"Your description and your consent choice have been kept"*). **No automatic retry**, because a network failure or timeout is ambiguous. *Send again* is an explicit action, and the same in-flight guard and disabled controls apply, so a retry cannot overlap another submission. Duplicate handling relies on the existing backend behaviour: identical text hits the `input_hash` unique constraint, returns `persistence: duplicate`, creates no second record, and does not fire the webhook, which runs only for `saved`. The page then shows the *identical description* next step. An edited text is a new submission.
+* **Start a new intake:** clears text, scenario, consent (unchecked), field errors, result, error, progress and the trace toggle, then moves focus to the form heading. Nothing is sent and no record is deleted.
+* **Developer trace:** still behind the reviewer toggle (#43), collapsed. It is now a `Card` with a *Reviewer only* `Tag`, and its Run section adds escalation required, review status, reasons (`ReasonList`) and storage status.
+
+**Raw-text limitation (unchanged).** `/api/ingest` still returns the full trace, including `intake.raw_text`, `chief_complaint` and guard evidence (#32 finding, `docs/security_data_handling.md`). The result shows *What you told us* from `chief_complaint` as before. Fixing it is an API change, out of scope.
+
+**Tests.** `app/tests/IntakePage.test.tsx` rewritten (19 → 51), covering:
+* the four scenario cards (text, expected outcome, fills text only, consent untouched, no submit) and each preset's expected outcome (status and reasons on screen without the trace);
+* consent as a deliberate action and no identifier fields;
+* validation linked by `aria-describedby`, focus and announcement; the counter and its near-limit announcements;
+* already awake → processing → done; a slow `/health` (attempt 2 of 6) with no POST until ready and a single `/health` check; wake failure (no POST, kept input, retry); the slow-processing note;
+* submitted, flagged (queue wording), emergency first, blocked acknowledgement, and duplicate/disabled/failed storage wording;
+* every error class end to end through the real `submitIntake` against a mocked `fetch` (400, 400 consent, 422, 502, 503, network, timeout): message, kept text and consent, focus, a single announcement, and the recovery path (no automatic retry; explicit retry sends the same body). Also network/timeout followed by a `duplicate` answer, and a retry that cannot overlap;
+* double-submit prevention; *Start a new intake* after a result and after an error; developer-trace visibility and contents.
+
+`app/tests/api.test.ts` adds 7: `errorClass` for 502/503/500/422-string and the three validation cases, and the network/timeout classes. Fixtures gained `escalation`/`persistence` and four synthetic scenario outcomes shaped like the mock pipeline's. Total **179 passed** (140 before). `npm run lint`, `typecheck`, `test` and `build` pass locally.
+
+### 5a. Local browser validation (2026-10-15)
+
+**Setup.** Production build (`next build` + `next start`, `NEXT_PUBLIC_API_BASE_URL=http://localhost:8787`, `NEXT_PUBLIC_DEMO_MODE=true`) against a local synthetic fixture API (`fixtures-server.mjs`). Its `/api/ingest` answers with **real mock-pipeline responses** for the four preset texts: `gen-ingest-fixtures.py` runs `HealthcarePipeline` with `LLM_MODE=mock`, persistence and webhook off, with no database and no network (`ingest-fixtures.json`). The server sets `persistence` to `saved` because no local database ran. Error classes are produced by a synthetic marker in the text (`[fixture:502]` etc.; `network` drops the socket), and `/__control` delays `/health` or the ingest for the cold-start and slow shots. Headless Chrome over the DevTools Protocol (`capture-cdp.mjs`), `en-US`/UTC. No hosted service was called.
+
+**Matrix:** the form (a scenario selected) and the four outcomes × **390 / 768 / 1280 px × light / dark = 30 runs**.
+
+| Check | Result |
+| --- | --- |
+| Horizontal page overflow | **0 px in all 30 runs** |
+| Touch targets ≥ 44 × 44 (scenario cards, buttons, consent label, reviewer toggle) | **No smaller target** |
+| Clipped content (scenario cards, progress steps, badges, reasons, cards, alerts, tags) | **None** |
+| One `h1`; demo indicator; *LLM Mode: Mock* from the single `/health` | 30/30 |
+| Outcomes (all 6 viewports each) | routine *Submitted*, no reasons; emergency *Flagged for staff review* + `emergency_signal`, guidance first; prescription *Flagged…* + `blocked_prescription`, *Safe acknowledgement (report withheld)*; vague *Flagged…* + `low_confidence`; queue wording for every `saved` result; baseline note present |
+| Focus after a result | *Your intake has been received* heading, 24/24 |
+| Keyboard | Tab from the form heading reaches the first scenario card (3 px ring); Space selects it; text filled, consent still unchecked |
+| Client validation | focus on the field, `aria-invalid`, `aria-describedby` `symptoms-hint symptoms-counter symptoms-error`, `role="alert"` |
+| Server errors, submitted from the keyboard | 400 consent → consent checkbox focused; 422 → field focused; 502/503/network → the alert focused; 3 px focus ring in each; text and consent kept; recovery button enabled |
+| Cold start (`/health` delayed 6 s, submit at once) | *waking, attempt 1 of 6, "has not been sent yet"* (10:51:09.9) → *processing* (10:51:15.9, when `/health` answered) → *done* (10:51:17.5); submit disabled until done |
+| Slow processing (17 s) | note after 15 s, no `%`, submit disabled, then the result |
+| Reset | text empty, consent unchecked, no selection, result and trace gone, focus on the form heading |
+| Developer trace | hidden by default; shows escalation, review status `needs_review`, reasons and storage when opened |
+| Reduced motion | spinner animation 0.01 ms |
+
+**Defect found and fixed in this pass:** after a server error, focus fell back to `<body>`. The focus call ran on a timer that could fire before React committed, while the form was still disabled and the alert not mounted. jsdom did not show this. Focus now moves in a post-commit effect, once the target is mounted and enabled, and the browser re-run confirms it. Focus moved to a heading (result or reset) shows no ring when the action came from a pointer; that is the browser's `:focus-visible` behaviour.
+
+**Evidence:** [`evidence/phase8_issue70_intake_local_2026-10-15/`](evidence/phase8_issue70_intake_local_2026-10-15/) — `intake-form-{390,768,1280}-{light,dark}.jpg`, `result-emergency-{390,768,1280}-{light,dark}.jpg`, `result-{routine,prescription,vague}-{390-light,1280-dark}.jpg`, `stage-waking-1280-light.jpg`, `stage-processing-slow-1280-light.jpg`, `error-{client-validation,400-consent,422,502,503,network}-390-light.jpg`, `focus-scenario-card-390-light.jpg`, `developer-trace-1280-dark.jpg`, `measurements.json` (all 30 runs and every interaction check), `capture-cdp.mjs`, `fixtures-server.mjs`, `gen-ingest-fixtures.py`, `ingest-fixtures.json`. Screenshots of the other outcome/viewport combinations were measured but not committed, to keep the evidence size in line with earlier issues. Synthetic data only.
+
+### 5b. Hosted validation — pending
+
+The new frontend is **not deployed**, so none of the above is a hosted result, and the #67 API checks (§2a) do not validate this UI. Hosted validation needs, in order:
+
+1. **Owner authorization** for the frontend *Manual Deploy* (no API redeploy needed: no backend change).
+2. **Webhook pre-check before any flagged preset.** The owner confirms on Render that the API service still has `WEBHOOK_URL` unset, then sends one non-flagged synthetic probe and checks that the API log shows `Escalation webhook disabled: WEBHOOK_URL and WEBHOOK_SECRET (>= 32 chars) are both required`, as in §2a. No public endpoint exposes this setting, so it cannot be checked from outside. **If it cannot be confirmed, no flagged preset is sent.**
+3. The four presets in the browser at 390 and 1280 px (desktop and mobile screenshots for the PR), the cold start if the API is asleep, and the responsive matrix. Synthetic text only.
+
+**Expected hosted difference:** the four preset texts are already stored on the hosted database (§2a), so a hosted run returns `persistence: duplicate`. The outcome card then shows the status and reasons from the escalation decision as usual, but the next step reads *"An identical description was received earlier, so no new record was created"* rather than the queue wording. This is the correct wording for that response, not a defect. A `duplicate` result also triggers no webhook (it fires only for `saved`). That does not replace the pre-check in step 2.
+
+### 5c. Limitations
+
+* Hosted validation pending (§5b).
+* The browser outcomes come from real mock-pipeline responses, but `persistence: saved` is set by the fixture server; the storage-dependent wording for other statuses is covered by unit tests.
+* Timeout (60 s) and the full 6-attempt wake failure are covered by unit tests, not browser runs; `422` with a string detail and `500` are unit-tested only.
+* The counter announces only near the limit; screen-reader output itself was not tested with a real screen reader (VoiceOver/NVDA).
+* The API's raw-text-in-response finding (#32) is unchanged (above).
+* Chrome only; Safari/Firefox, physical devices and 200 % zoom are #72.
+

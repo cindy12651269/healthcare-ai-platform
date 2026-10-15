@@ -68,7 +68,11 @@ export function useApiReadiness(wait: Wait = waitForApi, slowAfterMs = 1500) {
 
 export default function ApiStatus({ wait = waitForApi, slowAfterMs = 1500 }: ApiStatusProps) {
   const { state, retry } = useApiReadiness(wait, slowAfterMs);
+  return <ApiStatusView state={state} retry={retry} />;
+}
 
+// The notice alone, for a page that already runs useApiReadiness (the intake, #70) so /health is polled once
+export function ApiStatusView({ state, retry }: { state: ApiState; retry: () => void }) {
   if (state.status === "checking" || (state.status === "ready" && !state.afterWake)) return null;
 
   if (state.status === "waking") {

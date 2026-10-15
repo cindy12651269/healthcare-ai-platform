@@ -1,0 +1,1685 @@
+{
+  "results": [
+    {
+      "view": "form",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-15T10:50:34.513Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": false,
+        "progress": null,
+        "status": null,
+        "statusCode": null,
+        "reasons": [],
+        "emergencyFirst": null,
+        "blockedNotice": null,
+        "reportHeading": null,
+        "nextStep": null,
+        "baselineNote": false,
+        "traceVisible": false,
+        "focus": "body"
+      }
+    },
+    {
+      "view": "result-routine",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-15T10:50:35.316Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Submitted",
+        "statusCode": "submitted",
+        "reasons": [],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-emergency",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-15T10:50:36.338Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "emergency_signal"
+        ],
+        "emergencyFirst": true,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-prescription",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-15T10:50:37.369Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "blocked_prescription"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing advice. You see a safe acknowledgement instead.",
+        "reportHeading": "Safe acknowledgement (report withheld)",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-vague",
+      "width": 390,
+      "theme": "light",
+      "at": "2026-10-15T10:50:38.391Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "true",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "low_confidence"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "form",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-15T10:50:39.134Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": false,
+        "progress": null,
+        "status": null,
+        "statusCode": null,
+        "reasons": [],
+        "emergencyFirst": null,
+        "blockedNotice": null,
+        "reportHeading": null,
+        "nextStep": null,
+        "baselineNote": false,
+        "traceVisible": false,
+        "focus": "body"
+      }
+    },
+    {
+      "view": "result-routine",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-15T10:50:40.030Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Submitted",
+        "statusCode": "submitted",
+        "reasons": [],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-emergency",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-15T10:50:41.067Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "emergency_signal"
+        ],
+        "emergencyFirst": true,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-prescription",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-15T10:50:42.109Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "blocked_prescription"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing advice. You see a safe acknowledgement instead.",
+        "reportHeading": "Safe acknowledgement (report withheld)",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-vague",
+      "width": 768,
+      "theme": "light",
+      "at": "2026-10-15T10:50:43.152Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "true",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "low_confidence"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "form",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-15T10:50:43.884Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": false,
+        "progress": null,
+        "status": null,
+        "statusCode": null,
+        "reasons": [],
+        "emergencyFirst": null,
+        "blockedNotice": null,
+        "reportHeading": null,
+        "nextStep": null,
+        "baselineNote": false,
+        "traceVisible": false,
+        "focus": "body"
+      }
+    },
+    {
+      "view": "result-routine",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-15T10:50:44.686Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Submitted",
+        "statusCode": "submitted",
+        "reasons": [],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-emergency",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-15T10:50:45.727Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "emergency_signal"
+        ],
+        "emergencyFirst": true,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-prescription",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-15T10:50:46.752Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "blocked_prescription"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing advice. You see a safe acknowledgement instead.",
+        "reportHeading": "Safe acknowledgement (report withheld)",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-vague",
+      "width": 1280,
+      "theme": "light",
+      "at": "2026-10-15T10:50:47.787Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "true",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "low_confidence"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "form",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:48.527Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": false,
+        "progress": null,
+        "status": null,
+        "statusCode": null,
+        "reasons": [],
+        "emergencyFirst": null,
+        "blockedNotice": null,
+        "reportHeading": null,
+        "nextStep": null,
+        "baselineNote": false,
+        "traceVisible": false,
+        "focus": "body"
+      }
+    },
+    {
+      "view": "result-routine",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:49.303Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Submitted",
+        "statusCode": "submitted",
+        "reasons": [],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-emergency",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:50.305Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "emergency_signal"
+        ],
+        "emergencyFirst": true,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-prescription",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:51.345Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "blocked_prescription"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing advice. You see a safe acknowledgement instead.",
+        "reportHeading": "Safe acknowledgement (report withheld)",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-vague",
+      "width": 390,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:52.382Z",
+      "vw": 390,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "true",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "low_confidence"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "form",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:53.109Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": false,
+        "progress": null,
+        "status": null,
+        "statusCode": null,
+        "reasons": [],
+        "emergencyFirst": null,
+        "blockedNotice": null,
+        "reportHeading": null,
+        "nextStep": null,
+        "baselineNote": false,
+        "traceVisible": false,
+        "focus": "body"
+      }
+    },
+    {
+      "view": "result-routine",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:53.918Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Submitted",
+        "statusCode": "submitted",
+        "reasons": [],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-emergency",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:54.945Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "emergency_signal"
+        ],
+        "emergencyFirst": true,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-prescription",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:55.992Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "blocked_prescription"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing advice. You see a safe acknowledgement instead.",
+        "reportHeading": "Safe acknowledgement (report withheld)",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-vague",
+      "width": 768,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:57.030Z",
+      "vw": 768,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "true",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "low_confidence"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "form",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:57.770Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": false,
+        "progress": null,
+        "status": null,
+        "statusCode": null,
+        "reasons": [],
+        "emergencyFirst": null,
+        "blockedNotice": null,
+        "reportHeading": null,
+        "nextStep": null,
+        "baselineNote": false,
+        "traceVisible": false,
+        "focus": "body"
+      }
+    },
+    {
+      "view": "result-routine",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:58.572Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Submitted",
+        "statusCode": "submitted",
+        "reasons": [],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-emergency",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-15T10:50:59.608Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "emergency_signal"
+        ],
+        "emergencyFirst": true,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-prescription",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-15T10:51:00.669Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "true",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "false",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "blocked_prescription"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing advice. You see a safe acknowledgement instead.",
+        "reportHeading": "Safe acknowledgement (report withheld)",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    },
+    {
+      "view": "result-vague",
+      "width": 1280,
+      "theme": "dark",
+      "at": "2026-10-15T10:51:01.710Z",
+      "vw": 1280,
+      "overflow": 0,
+      "offenders": [],
+      "small": [],
+      "clipped": [],
+      "facts": {
+        "h1": 1,
+        "indicator": "Demo · synthetic data · mock mode",
+        "llmMode": "LLM Mode: Mock",
+        "scenarios": [
+          {
+            "id": "scenario-routine",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-emergency",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-prescription",
+            "pressed": "false",
+            "h": 175
+          },
+          {
+            "id": "scenario-vague",
+            "pressed": "true",
+            "h": 175
+          }
+        ],
+        "consentChecked": true,
+        "progress": "done",
+        "status": "Flagged for staff review",
+        "statusCode": "needs_review",
+        "reasons": [
+          "low_confidence"
+        ],
+        "emergencyFirst": false,
+        "blockedNotice": null,
+        "reportHeading": "Pre-visit report",
+        "nextStep": "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit.",
+        "baselineNote": true,
+        "traceVisible": false,
+        "focus": "results-heading"
+      }
+    }
+  ],
+  "checks": {
+    "firstTabAfterHeading": {
+      "el": "button[scenario-routine] 'Routine symptoms“I have had a '",
+      "outline": "solid 3px rgb(31, 95, 207)"
+    },
+    "scenarioSelectedByKeyboard": {
+      "pressed": "true",
+      "text": "I have had a sore throat and a mild fever for two days.",
+      "consent": false
+    },
+    "clientValidation": {
+      "focused": true,
+      "invalid": "true",
+      "describedby": "symptoms-hint symptoms-counter symptoms-error",
+      "role": "alert",
+      "message": "Please describe your symptoms in at least 10 characters."
+    },
+    "clientValidationFocus": {
+      "el": "textarea#symptoms 'short'",
+      "outline": "solid 3px rgb(180, 35, 24)"
+    },
+    "errors": {
+      "422": {
+        "errorClass": "validation",
+        "role": "alert",
+        "title": "Please check your intake",
+        "text": "Please check your intakeWe couldn't accept this description. Please check what you entered and try again.Your description and your consent choice have been kept.Review your descriptionStart a new intake",
+        "recovery": "Review your description",
+        "recoveryEnabled": true,
+        "textKept": true,
+        "consentKept": true,
+        "focus": "symptoms",
+        "focusStyle": {
+          "el": "textarea#symptoms 'Headache and a stiff neck sinc'",
+          "outline": "solid 3px rgb(180, 35, 24)"
+        }
+      },
+      "502": {
+        "errorClass": "provider",
+        "role": "alert",
+        "title": "The summary service failed",
+        "text": "The summary service failedThe service that prepares your summary did not respond properly, so nothing was saved. Please try again in a few minutes.Your description and your consent choice have been kept.Try againStart a new intake",
+        "recovery": "Try again",
+        "recoveryEnabled": true,
+        "textKept": true,
+        "consentKept": true,
+        "focus": "intake-error",
+        "focusStyle": {
+          "el": "div[intake-error] 'The summary service failedThe '",
+          "outline": "solid 3px rgb(31, 95, 207)"
+        }
+      },
+      "503": {
+        "errorClass": "configuration",
+        "role": "alert",
+        "title": "The intake service is unavailable",
+        "text": "The intake service is unavailableThe intake service is not available at the moment, so nothing was saved. Please try again later.Your description and your consent choice have been kept.Try againStart a new intake",
+        "recovery": "Try again",
+        "recoveryEnabled": true,
+        "textKept": true,
+        "consentKept": true,
+        "focus": "intake-error",
+        "focusStyle": {
+          "el": "div[intake-error] 'The intake service is unavaila'",
+          "outline": "solid 3px rgb(31, 95, 207)"
+        }
+      },
+      "400-consent": {
+        "errorClass": "consent",
+        "role": "alert",
+        "title": "Please check your intake",
+        "text": "Please check your intakeYour description appears to include personal details. Please confirm consent below, or remove identifying details and try again.Your description and your consent choice have been kept.Review consentStart a new intake",
+        "recovery": "Review consent",
+        "recoveryEnabled": true,
+        "textKept": true,
+        "consentKept": true,
+        "focus": "INPUT",
+        "focusStyle": {
+          "el": "input ''",
+          "outline": "solid 3px rgb(180, 35, 24)"
+        }
+      },
+      "network": {
+        "errorClass": "network",
+        "role": "alert",
+        "title": "We couldn't confirm your submission",
+        "text": "We couldn't confirm your submissionWe couldn't reach the intake service. Please try again in a few minutes.Your intake may or may not have been received. Nothing is resent automatically. If you send the same description again and it was already received, no second record is created.Your description and your consent choice have been kept.Send againStart a new intake",
+        "recovery": "Send again",
+        "recoveryEnabled": true,
+        "textKept": true,
+        "consentKept": true,
+        "focus": "intake-error",
+        "focusStyle": {
+          "el": "div[intake-error] 'We couldn't confirm your submi'",
+          "outline": "solid 3px rgb(31, 95, 207)"
+        }
+      }
+    },
+    "resetAfterError": {
+      "text": "",
+      "consent": false,
+      "error": false,
+      "focus": "intake-form-heading"
+    },
+    "coldStartStages": [
+      {
+        "at": "2026-10-15T10:51:09.936Z",
+        "stage": "waking",
+        "status": "Waking the demo server (can take up to a minute)… attempt 1 of 6. Your intake has not been sent yet.",
+        "submitDisabled": true
+      },
+      {
+        "at": "2026-10-15T10:51:15.979Z",
+        "stage": "processing",
+        "status": "Processing your intake…",
+        "submitDisabled": true
+      },
+      {
+        "at": "2026-10-15T10:51:17.512Z",
+        "stage": "done",
+        "status": "Submission completed.",
+        "submitDisabled": false
+      }
+    ],
+    "slow": {
+      "status": "Processing your intake… This is taking longer than usual. Please keep this page open and do not submit again.",
+      "submitDisabled": true,
+      "percent": false
+    },
+    "traceHiddenByDefault": true,
+    "traceRun": "Run IDa0ab4c03-2497-46e8-8fab-8667465cb450HTTP status200Pipeline successyesEscalation requiredyesReview statusneeds_reviewReasonsBlocked: prescription or dosing blocked_prescriptionStoragesaved",
+    "resetAfterResult": {
+      "text": "",
+      "consent": false,
+      "results": false,
+      "trace": false,
+      "pressed": false,
+      "focus": "intake-form-heading"
+    },
+    "resetFocusStyle": {
+      "el": "h2#intake-form-heading 'Tell us what brings you in'",
+      "outline": "none 3px rgb(230, 236, 242)"
+    },
+    "reducedMotionSpinner": "1e-05s"
+  }
+}
