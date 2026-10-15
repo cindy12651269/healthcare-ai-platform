@@ -1,0 +1,355 @@
+{
+  "phase": "transitions",
+  "base": "https://healthcare-ai-frontend-1s23.onrender.com",
+  "browser": "headless Chrome, de-DE / Asia/Taipei",
+  "demo-admin-a": {
+    "signIn": {
+      "field": false,
+      "tokenFree": true
+    },
+    "queue": {
+      "vw": 1280,
+      "overflow": 0,
+      "small": [],
+      "clipped": 0,
+      "tableScroll": 0,
+      "h1": 1,
+      "identity": "Signed in as admin-a@demo.example.test · clinic default · clinic_admin",
+      "queueVisible": true,
+      "detailVisible": false,
+      "backVisible": false,
+      "tabLabels": [
+        "Needs review, 5 intakes",
+        "Reviewed, 2 intakes",
+        "Escalated, 1 intake",
+        "Submitted, 4 intakes",
+        "All, 12 intakes"
+      ],
+      "rowIds": [
+        "2f005d14d0fc4de1acc4879d586481a3",
+        "d0d89533841744278aa03f20592b04f3",
+        "f0508a5123be4fea93fa649a28e940d8",
+        "0edbaf66641b48bdb73046023b7559b0",
+        "77c8cd979bc840d28302f0d572858046"
+      ],
+      "scope": "Counts are from the 12 intakes returned for clinic default when the queue was loaded. Times are in UTC.",
+      "detailStatus": null,
+      "timeline": [],
+      "noWebhookNote": null,
+      "focus": "body"
+    },
+    "before": {
+      "vw": 1280,
+      "overflow": 0,
+      "small": [],
+      "clipped": 0,
+      "tableScroll": 0,
+      "h1": 1,
+      "identity": "Signed in as admin-a@demo.example.test · clinic default · clinic_admin",
+      "queueVisible": true,
+      "detailVisible": true,
+      "backVisible": false,
+      "tabLabels": [
+        "Needs review, 5 intakes",
+        "Reviewed, 2 intakes",
+        "Escalated, 1 intake",
+        "Submitted, 4 intakes",
+        "All, 12 intakes"
+      ],
+      "rowIds": [
+        "2f005d14d0fc4de1acc4879d586481a3",
+        "d0d89533841744278aa03f20592b04f3",
+        "f0508a5123be4fea93fa649a28e940d8",
+        "0edbaf66641b48bdb73046023b7559b0",
+        "77c8cd979bc840d28302f0d572858046"
+      ],
+      "scope": "Counts are from the 12 intakes returned for clinic default when the queue was loaded. Times are in UTC.",
+      "detailStatus": "Needs reviewEmergency signal emergency_signal",
+      "timeline": [
+        {
+          "kind": "submitted",
+          "text": "Submitted Oct 14, 2026, 08:30 UTC",
+          "datetime": "2026-10-14T08:30:18.125428+00:00"
+        },
+        {
+          "kind": "processed",
+          "text": "Processed Oct 14, 2026, 08:30 UTCMode mock · model mock · prompt deterministic_rule_based_baseline_v1 · pipeline v0.1.0 · run f7b26a16-42de-42ba-a5f1-4fc37c97a7",
+          "datetime": "2026-10-14T08:30:18.132771+00:00"
+        },
+        {
+          "kind": "safety_evaluated",
+          "text": "Safety evaluated Oct 14, 2026, 08:30 UTCActions add_emergency_guidance · reason types EMERGENCY, EMERGENCY · severity high",
+          "datetime": "2026-10-14T08:30:18.132771+00:00"
+        },
+        {
+          "kind": "escalation_decision",
+          "text": "Escalation decision Oct 14, 2026, 08:30 UTCEscalated: Emergency signal emergency_signal",
+          "datetime": "2026-10-14T08:30:18.132771+00:00"
+        }
+      ],
+      "noWebhookNote": "No webhook delivery is recorded for this intake.",
+      "focus": "detail-heading"
+    },
+    "confirm": {
+      "text": "Mark this intake reviewed?It leaves the needs-review queue. Reviewed and escalated are final in this workflow.Confirm: mark reviewedCancel",
+      "focus": "Confirm: mark reviewed"
+    },
+    "transitionStates": [
+      {
+        "ms": 0,
+        "s": {
+          "pending": true,
+          "done": false,
+          "disabled": [
+            true,
+            true
+          ]
+        }
+      },
+      {
+        "ms": 570,
+        "s": {
+          "pending": false,
+          "done": true,
+          "disabled": []
+        }
+      }
+    ],
+    "after": {
+      "vw": 1280,
+      "overflow": 0,
+      "small": [],
+      "clipped": 0,
+      "tableScroll": 0,
+      "h1": 1,
+      "identity": "Signed in as admin-a@demo.example.test · clinic default · clinic_admin",
+      "queueVisible": true,
+      "detailVisible": true,
+      "backVisible": false,
+      "tabLabels": [
+        "Needs review, 4 intakes",
+        "Reviewed, 3 intakes",
+        "Escalated, 1 intake",
+        "Submitted, 4 intakes",
+        "All, 12 intakes"
+      ],
+      "rowIds": [
+        "d0d89533841744278aa03f20592b04f3",
+        "f0508a5123be4fea93fa649a28e940d8",
+        "0edbaf66641b48bdb73046023b7559b0",
+        "77c8cd979bc840d28302f0d572858046"
+      ],
+      "scope": "Counts are from the 12 intakes returned for clinic default when the queue was loaded. Times are in UTC.",
+      "detailStatus": "ReviewedEmergency signal emergency_signal",
+      "timeline": [
+        {
+          "kind": "submitted",
+          "text": "Submitted Oct 14, 2026, 08:30 UTC",
+          "datetime": "2026-10-14T08:30:18.125428+00:00"
+        },
+        {
+          "kind": "processed",
+          "text": "Processed Oct 14, 2026, 08:30 UTCMode mock · model mock · prompt deterministic_rule_based_baseline_v1 · pipeline v0.1.0 · run f7b26a16-42de-42ba-a5f1-4fc37c97a7",
+          "datetime": "2026-10-14T08:30:18.132771+00:00"
+        },
+        {
+          "kind": "safety_evaluated",
+          "text": "Safety evaluated Oct 14, 2026, 08:30 UTCActions add_emergency_guidance · reason types EMERGENCY, EMERGENCY · severity high",
+          "datetime": "2026-10-14T08:30:18.132771+00:00"
+        },
+        {
+          "kind": "escalation_decision",
+          "text": "Escalation decision Oct 14, 2026, 08:30 UTCEscalated: Emergency signal emergency_signal",
+          "datetime": "2026-10-14T08:30:18.132771+00:00"
+        },
+        {
+          "kind": "staff_transition",
+          "text": "Staff action Oct 15, 2026, 12:29 UTCdemo-admin-a: Needs review → Reviewed",
+          "datetime": "2026-10-15T12:29:37.508070+00:00"
+        }
+      ],
+      "noWebhookNote": "No webhook delivery is recorded for this intake.",
+      "focus": "body"
+    },
+    "afterTokenFree": true,
+    "success": "Marked reviewed. The queue and timeline were refreshed.",
+    "fhir": {
+      "resources": [
+        "QuestionnaireResponse × 1",
+        "Questionnaire × 1",
+        "Task × 1",
+        "Organization × 1",
+        "Device × 1",
+        "Provenance × 2"
+      ],
+      "disclaimer": "Synthetic demo data, export only: a Bundle (collection) with QuestionnaireResponse, Questionnaire, Task, Organization, Device, Provenance. It is not a FHIR conformance or certification claim, and nothing is sent to a FHIR server. It contains the original intake text; a downloaded file leaves the platform's access control.",
+      "previewCollapsed": true,
+      "summary": "JSON preview (7 entries)",
+      "previewText": 6445,
+      "downloaded": [
+        "intake-2f005d14d0fc4de1acc4879d586481a3-fhir-r4.json"
+      ]
+    },
+    "signedOut": true
+  },
+  "demo-admin-b": {
+    "signIn": {
+      "field": false,
+      "tokenFree": true
+    },
+    "queue": {
+      "vw": 1280,
+      "overflow": 0,
+      "small": [],
+      "clipped": 0,
+      "tableScroll": 0,
+      "h1": 1,
+      "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+      "queueVisible": true,
+      "detailVisible": false,
+      "backVisible": false,
+      "tabLabels": [
+        "Needs review, 1 intake",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 4 intakes"
+      ],
+      "rowIds": [
+        "demo-intake-b2"
+      ],
+      "scope": "Counts are from the 4 intakes returned for clinic demo-clinic-b when the queue was loaded. Times are in UTC.",
+      "detailStatus": null,
+      "timeline": [],
+      "noWebhookNote": null,
+      "focus": "body"
+    },
+    "before": {
+      "vw": 1280,
+      "overflow": 0,
+      "small": [],
+      "clipped": 0,
+      "tableScroll": 0,
+      "h1": 1,
+      "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+      "queueVisible": true,
+      "detailVisible": true,
+      "backVisible": false,
+      "tabLabels": [
+        "Needs review, 1 intake",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 4 intakes"
+      ],
+      "rowIds": [
+        "demo-intake-b2"
+      ],
+      "scope": "Counts are from the 4 intakes returned for clinic demo-clinic-b when the queue was loaded. Times are in UTC.",
+      "detailStatus": "Needs reviewLow structuring confidence low_confidence",
+      "timeline": [
+        {
+          "kind": "processed",
+          "text": "Processed Oct 12, 2026, 17:35 UTCMode mock · model mock · prompt deterministic_rule_based_baseline_v1 · pipeline v0.1.0 · run demo-seed:demo-intake-b2",
+          "datetime": "2026-10-12T17:35:40.903007+00:00"
+        },
+        {
+          "kind": "safety_evaluated",
+          "text": "Safety evaluated Oct 12, 2026, 17:35 UTCActions None · reason types None · severity low",
+          "datetime": "2026-10-12T17:35:40.903007+00:00"
+        },
+        {
+          "kind": "escalation_decision",
+          "text": "Escalation decision Oct 12, 2026, 17:35 UTCEscalated: Low structuring confidence low_confidence",
+          "datetime": "2026-10-12T17:35:40.903007+00:00"
+        },
+        {
+          "kind": "submitted",
+          "text": "Submitted Oct 12, 2026, 17:35 UTC",
+          "datetime": "2026-10-12T17:35:42.387459+00:00"
+        }
+      ],
+      "noWebhookNote": "No webhook delivery is recorded for this intake.",
+      "focus": "detail-heading"
+    },
+    "confirm": {
+      "text": "Mark this intake escalated?It is recorded as escalated for clinical follow-up. Reviewed and escalated are final in this workflow.Confirm: mark escalatedCancel",
+      "focus": "Confirm: mark escalated"
+    },
+    "transitionStates": [
+      {
+        "ms": 0,
+        "s": {
+          "pending": true,
+          "done": false,
+          "disabled": [
+            true,
+            true
+          ]
+        }
+      },
+      {
+        "ms": 413,
+        "s": {
+          "pending": false,
+          "done": true,
+          "disabled": []
+        }
+      }
+    ],
+    "after": {
+      "vw": 1280,
+      "overflow": 0,
+      "small": [],
+      "clipped": 0,
+      "tableScroll": 0,
+      "h1": 1,
+      "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+      "queueVisible": true,
+      "detailVisible": true,
+      "backVisible": false,
+      "tabLabels": [
+        "Needs review, 0 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 2 intakes",
+        "Submitted, 1 intake",
+        "All, 4 intakes"
+      ],
+      "rowIds": [],
+      "scope": "Counts are from the 4 intakes returned for clinic demo-clinic-b when the queue was loaded. Times are in UTC.",
+      "detailStatus": "EscalatedLow structuring confidence low_confidence",
+      "timeline": [
+        {
+          "kind": "processed",
+          "text": "Processed Oct 12, 2026, 17:35 UTCMode mock · model mock · prompt deterministic_rule_based_baseline_v1 · pipeline v0.1.0 · run demo-seed:demo-intake-b2",
+          "datetime": "2026-10-12T17:35:40.903007+00:00"
+        },
+        {
+          "kind": "safety_evaluated",
+          "text": "Safety evaluated Oct 12, 2026, 17:35 UTCActions None · reason types None · severity low",
+          "datetime": "2026-10-12T17:35:40.903007+00:00"
+        },
+        {
+          "kind": "escalation_decision",
+          "text": "Escalation decision Oct 12, 2026, 17:35 UTCEscalated: Low structuring confidence low_confidence",
+          "datetime": "2026-10-12T17:35:40.903007+00:00"
+        },
+        {
+          "kind": "submitted",
+          "text": "Submitted Oct 12, 2026, 17:35 UTC",
+          "datetime": "2026-10-12T17:35:42.387459+00:00"
+        },
+        {
+          "kind": "staff_transition",
+          "text": "Staff action Oct 15, 2026, 12:29 UTCdemo-admin-b: Needs review → Escalated",
+          "datetime": "2026-10-15T12:29:44.191715+00:00"
+        }
+      ],
+      "noWebhookNote": "No webhook delivery is recorded for this intake.",
+      "focus": "body"
+    },
+    "afterTokenFree": true,
+    "success": "Marked escalated. The queue and timeline were refreshed.",
+    "signedOut": true
+  }
+}

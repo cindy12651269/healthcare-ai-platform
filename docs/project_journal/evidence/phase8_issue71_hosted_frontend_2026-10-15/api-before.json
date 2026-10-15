@@ -1,0 +1,138 @@
+{
+ "ADMIN_A own default list": {
+  "http": 200,
+  "count": 12,
+  "by_status": {
+   "submitted": 4,
+   "needs_review": 5,
+   "reviewed": 2,
+   "escalated": 1
+  },
+  "ids_prefix": [
+   "0edbaf66",
+   "2f005d14",
+   "77c8cd97",
+   "ce204004",
+   "d0d89533",
+   "d7cdb418",
+   "demo-int",
+   "demo-int",
+   "demo-int",
+   "demo-int",
+   "f0508a51",
+   "fd3cc39b"
+  ]
+ },
+ "ADMIN_A -> demo-clinic-b list": {
+  "http": 403
+ },
+ "ADMIN_B own demo-clinic-b list": {
+  "http": 200,
+  "count": 4,
+  "by_status": {
+   "submitted": 1,
+   "needs_review": 1,
+   "reviewed": 1,
+   "escalated": 1
+  },
+  "ids_prefix": [
+   "demo-int",
+   "demo-int",
+   "demo-int",
+   "demo-int"
+  ]
+ },
+ "ADMIN_B -> default list": {
+  "http": 403
+ },
+ "2f005d14d0fc4de1acc4879d586481a3": {
+  "detail_http": 200,
+  "clinic_id": "default",
+  "review_status": "needs_review",
+  "escalation_reason": "emergency_signal",
+  "created_at": "2026-10-14T08:30:18.132771Z",
+  "timeline_http": 200,
+  "original_input": "Synthetic demo intake eebac05f: crushing chest pain and trouble breathing since breakfast.",
+  "events": [
+   [
+    "submitted",
+    "2026-10-14T08:30:18.125428+00:00",
+    {}
+   ],
+   [
+    "processed",
+    "2026-10-14T08:30:18.132771+00:00",
+    {}
+   ],
+   [
+    "safety_evaluated",
+    "2026-10-14T08:30:18.132771+00:00",
+    {}
+   ],
+   [
+    "escalation_decision",
+    "2026-10-14T08:30:18.132771+00:00",
+    {
+     "required": true,
+     "reasons": [
+      "emergency_signal"
+     ]
+    }
+   ]
+  ],
+  "provenance": {
+   "execution_mode": "mock",
+   "model_version": "mock",
+   "prompt_version": "deterministic_rule_based_baseline_v1",
+   "pipeline_version": "v0.1.0",
+   "run_id": "f7b26a16-42de-42ba-a5f1-4fc37c97a7f6"
+  },
+  "other_clinic_admin_detail_http": 403,
+  "other_admin_via_own_clinic_path_http": 404
+ },
+ "demo-intake-b2": {
+  "detail_http": 200,
+  "clinic_id": "demo-clinic-b",
+  "review_status": "needs_review",
+  "escalation_reason": "low_confidence",
+  "created_at": "2026-10-12T17:35:40.903007Z",
+  "timeline_http": 200,
+  "original_input": "Something feels off and I wanted to check in.",
+  "events": [
+   [
+    "processed",
+    "2026-10-12T17:35:40.903007+00:00",
+    {}
+   ],
+   [
+    "safety_evaluated",
+    "2026-10-12T17:35:40.903007+00:00",
+    {}
+   ],
+   [
+    "escalation_decision",
+    "2026-10-12T17:35:40.903007+00:00",
+    {
+     "required": true,
+     "reasons": [
+      "low_confidence"
+     ]
+    }
+   ],
+   [
+    "submitted",
+    "2026-10-12T17:35:42.387459+00:00",
+    {}
+   ]
+  ],
+  "provenance": {
+   "execution_mode": "mock",
+   "model_version": "mock",
+   "prompt_version": "deterministic_rule_based_baseline_v1",
+   "pipeline_version": "v0.1.0",
+   "run_id": "demo-seed:demo-intake-b2"
+  },
+  "other_clinic_admin_detail_http": 403,
+  "other_admin_via_own_clinic_path_http": 404
+ }
+}

@@ -1,0 +1,5 @@
+file: intake-2f005d14d0fc4de1acc4879d586481a3-fhir-r4.json
+sha256: 6de74bb0fa1a055c5056384ba18bf7d9e64907256180442d674b1c7cecf64104
+FHIR version: 4.0.1 | Bundle.type: collection | entries: 7
+resource types: QuestionnaireResponse, Questionnaire, Task, Organization, Device, Provenance, Provenance
+interoperability.fhir_validation.validate_bundle errors: 0
