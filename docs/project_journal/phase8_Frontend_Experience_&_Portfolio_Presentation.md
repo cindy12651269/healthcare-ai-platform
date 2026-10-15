@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
 Scope: Issues #67–#71 (items 1–5 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 closed (2026-10-15): PR #82 merged (`7585f84`); hosted staff workspace verified with short-lived tokens (§6d), one open defect (seeded-record references, §6d).
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 closed (2026-10-15): PR #82 merged (`7585f84`); hosted staff workspace verified with short-lived tokens (§6d); the seeded-reference defect was fixed in #84 (PR #85, `1ed0b4a`) and verified on the hosted demo (§6f).
 
 ---
 
@@ -652,9 +652,9 @@ No token, database URL or secret is included.
 * **Open defect:** readable references are ambiguous for seeded ids (above). It does not affect access control or data, but it does affect the *readable intake references* criterion and needs a frontend follow-up.
 
 
-### 6e. Follow-up #84 — distinct intake references (in review)
+### 6e. Follow-up #84 — distinct intake references
 
-The §6d defect is tracked as #84 (branch `fix/issue-84-intake-references`). `intakeRef()` (`app/services/format.ts`) now shortens only hash-like ids (32-hex or a hyphenated UUID) to their first 8 characters (`#2f005d14`), and shows any other id in full (`#demo-intake-b2`). The change is display only: API calls, `data-intake-id`, transitions, FHIR and audit data keep using the full id. No backend, database, seed, auth or FHIR change.
+The §6d defect is tracked as #84 and was fixed in PR #85 (merged `1ed0b4a`, reviewed head `8b398d4`; `main` CI run 38737504706 — success). `intakeRef()` (`app/services/format.ts`) now shortens only hash-like ids (32-hex or a hyphenated UUID) to their first 8 characters (`#2f005d14`), and shows any other id in full (`#demo-intake-b2`). The change is display only: API calls, `data-intake-id`, transitions, FHIR and audit data keep using the full id. No backend, database, seed, auth or FHIR change.
 
 **Tests.** New `app/tests/format.test.ts` (8):
 * seeded ids, 32-hex ids and UUIDs (both cases);
@@ -664,4 +664,38 @@ The §6d defect is tracked as #84 (branch `fix/issue-84-intake-references`). `in
 
 `StaffReview.test.tsx` gains 2: four seeded clinic-B rows with distinct visible and accessible names (*"Open intake #demo-intake-b1"* …), the detail heading, and the API still receiving the full id; and the short form kept for hash ids. Four existing assertions now expect full non-hash references (`#flagged-0001`, `#clinic-a-01`, `#clinic-b-01`). Total **203 passed** (193 before). Lint, typecheck and build pass.
 
-**Not yet verified:** no browser screenshots were taken for this change (the local fixture API uses hex ids only), and the hosted queue needs a re-check after a future frontend deploy.
+No local browser screenshots were taken for this change (the local fixture API uses hex ids only); it was verified on the hosted demo instead (§6f).
+
+### 6f. Hosted verification of #84 (2026-10-15)
+
+**Deploy.** Frontend *Manual Deploy* by the account owner: `healthcare-ai-frontend`, source commit `1ed0b4a`, *Live* at 20:50:55 Taiwan time (12:50:55 UTC). The live bundle contains the new `intakeRef` hash-id pattern. No API redeploy and no Render setting change.
+
+**Read-only.** One-hour tokens were issued by the owner with the §6d script and verified with `GET /api/staff/me` (`demo-admin-b` → `demo-clinic-b`, `clinic_admin`). Only `demo-admin-b` was used.
+* No action button was clicked. The request log (method, path and status only; no headers) contains **no non-GET request** apart from CORS preflights.
+* All 7 checked signed-in views (the 1280 queue and the 6 responsive runs) were token-free (HTML, storage, cookies); the four per-row detail views opened at 1280 px were not checked individually.
+* `~/.hc-demo-71` was deleted at 13:04:26 UTC. No token, URL or secret is in the evidence.
+
+**Results** (`capture-cdp-hosted.mjs`, 12:58–13:04 UTC; `measurements.json`):
+
+| Check | Result |
+| --- | --- |
+| Visible queue references (*All*, 4 intakes) | `#demo-intake-b1`, `#demo-intake-b2`, `#demo-intake-b3`, `#demo-intake-b4`: **distinct**, previously all `#demo-int` |
+| Accessible row names | *"Open intake #demo-intake-b1"* … *"#demo-intake-b4"*: distinct |
+| Detail headings (each row opened at 1280 px) | *Intake #demo-intake-b1* … *b4*, each with the matching full id in the detail and focus on the heading |
+| Full ids preserved | `data-intake-id` = `demo-intake-b1` … `b4`; API requests `GET /api/clinics/demo-clinic-b/intakes/demo-intake-bN` and `…/timeline` use the full id |
+| Layout: queue and detail at 390 / 768 / 1280 × light / dark (12 views) | **0 px overflow, 0 table scroll, no target under 44 × 44, nothing clipped**; row buttons 44 px high; 1280 side by side, 390/768 separate views |
+
+Hash-id references keep the 8-character form: they were shown as #2f005d14 on the pre-fix build (§6d), and the new code's behaviour is covered by unit tests (format.test.ts). They were not re-captured on the hosted demo after #84.
+
+During the run, two harness issues were fixed in the capture script (not the app):
+* The first attempt clicked *Sign in* before React hydrated, which reloaded the page. The token input has no `name`, so nothing was submitted or exposed; the script now waits for hydration.
+* A selector matched the reason-code chip instead of the id field.
+
+**Evidence:** [`evidence/phase8_issue84_hosted_2026-10-15/`](evidence/phase8_issue84_hosted_2026-10-15/):
+* screenshots: `queue-all-1280-light.jpg`, `detail-demo-intake-b2-1280-light.jpg`, `queue-all-{390,768,1280}-{light,dark}.jpg`, `detail-{390,768,1280}-{light,dark}.jpg`;
+* `measurements.json` and `capture-cdp-hosted.mjs`.
+
+Synthetic data only.
+
+**Verdict for #84 on the hosted demo: PASS.** Clinic B's four seeded intakes now have distinct visible and accessible references and headings. Full ids are unchanged for data attributes and API calls, and the layout passes at 390, 768 and 1280 px in both themes.
+

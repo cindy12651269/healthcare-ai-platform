@@ -1,0 +1,699 @@
+{
+  "base": "https://healthcare-ai-frontend-1s23.onrender.com",
+  "account": "demo-admin-b",
+  "runs": [
+    {
+      "width": 390,
+      "theme": "light",
+      "queue": {
+        "vw": 390,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 186,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 186,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 186,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 186,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": null,
+        "fullId": null,
+        "queueVisible": true,
+        "detailVisible": false,
+        "focus": "body"
+      },
+      "detail": {
+        "vw": 390,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": "Intake #demo-intake-b3",
+        "fullId": "demo-intake-b3",
+        "queueVisible": false,
+        "detailVisible": true,
+        "focus": "detail-heading"
+      },
+      "tokenFree": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "queue": {
+        "vw": 768,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 116,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 116,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 116,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 116,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": null,
+        "fullId": null,
+        "queueVisible": true,
+        "detailVisible": false,
+        "focus": "body"
+      },
+      "detail": {
+        "vw": 768,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": "Intake #demo-intake-b3",
+        "fullId": "demo-intake-b3",
+        "queueVisible": false,
+        "detailVisible": true,
+        "focus": "detail-heading"
+      },
+      "tokenFree": true
+    },
+    {
+      "width": 1280,
+      "theme": "light",
+      "queue": {
+        "vw": 1280,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 263,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": null,
+        "fullId": null,
+        "queueVisible": true,
+        "detailVisible": false,
+        "focus": "body"
+      },
+      "detail": {
+        "vw": 1280,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 263,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": "Intake #demo-intake-b3",
+        "fullId": "demo-intake-b3",
+        "queueVisible": true,
+        "detailVisible": true,
+        "focus": "detail-heading"
+      },
+      "tokenFree": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "queue": {
+        "vw": 390,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 186,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 186,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 186,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 186,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": null,
+        "fullId": null,
+        "queueVisible": true,
+        "detailVisible": false,
+        "focus": "body"
+      },
+      "detail": {
+        "vw": 390,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": "Intake #demo-intake-b3",
+        "fullId": "demo-intake-b3",
+        "queueVisible": false,
+        "detailVisible": true,
+        "focus": "detail-heading"
+      },
+      "tokenFree": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "queue": {
+        "vw": 768,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 116,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 116,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 116,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 116,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": null,
+        "fullId": null,
+        "queueVisible": true,
+        "detailVisible": false,
+        "focus": "body"
+      },
+      "detail": {
+        "vw": 768,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": "Intake #demo-intake-b3",
+        "fullId": "demo-intake-b3",
+        "queueVisible": false,
+        "detailVisible": true,
+        "focus": "detail-heading"
+      },
+      "tokenFree": true
+    },
+    {
+      "width": 1280,
+      "theme": "dark",
+      "queue": {
+        "vw": 1280,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 263,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": null,
+        "fullId": null,
+        "queueVisible": true,
+        "detailVisible": false,
+        "focus": "body"
+      },
+      "detail": {
+        "vw": 1280,
+        "overflow": 0,
+        "small": [],
+        "clipped": 0,
+        "tableScroll": 0,
+        "rows": [
+          {
+            "dataIntakeId": "demo-intake-b1",
+            "visible": "#demo-intake-b1",
+            "ariaLabel": "Open intake #demo-intake-b1",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b2",
+            "visible": "#demo-intake-b2",
+            "ariaLabel": "Open intake #demo-intake-b2",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b3",
+            "visible": "#demo-intake-b3",
+            "ariaLabel": "Open intake #demo-intake-b3",
+            "w": 263,
+            "h": 44
+          },
+          {
+            "dataIntakeId": "demo-intake-b4",
+            "visible": "#demo-intake-b4",
+            "ariaLabel": "Open intake #demo-intake-b4",
+            "w": 263,
+            "h": 44
+          }
+        ],
+        "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+        "heading": "Intake #demo-intake-b3",
+        "fullId": "demo-intake-b3",
+        "queueVisible": true,
+        "detailVisible": true,
+        "focus": "detail-heading"
+      },
+      "tokenFree": true
+    }
+  ],
+  "details": [
+    {
+      "row": "demo-intake-b1",
+      "heading": "Intake #demo-intake-b1",
+      "fullId": "demo-intake-b1",
+      "focus": "detail-heading"
+    },
+    {
+      "row": "demo-intake-b2",
+      "heading": "Intake #demo-intake-b2",
+      "fullId": "demo-intake-b2",
+      "focus": "detail-heading"
+    },
+    {
+      "row": "demo-intake-b3",
+      "heading": "Intake #demo-intake-b3",
+      "fullId": "demo-intake-b3",
+      "focus": "detail-heading"
+    },
+    {
+      "row": "demo-intake-b4",
+      "heading": "Intake #demo-intake-b4",
+      "fullId": "demo-intake-b4",
+      "focus": "detail-heading"
+    }
+  ],
+  "queue1280": {
+    "vw": 1280,
+    "overflow": 0,
+    "small": [],
+    "clipped": 0,
+    "tableScroll": 0,
+    "rows": [
+      {
+        "dataIntakeId": "demo-intake-b1",
+        "visible": "#demo-intake-b1",
+        "ariaLabel": "Open intake #demo-intake-b1",
+        "w": 263,
+        "h": 44
+      },
+      {
+        "dataIntakeId": "demo-intake-b2",
+        "visible": "#demo-intake-b2",
+        "ariaLabel": "Open intake #demo-intake-b2",
+        "w": 263,
+        "h": 44
+      },
+      {
+        "dataIntakeId": "demo-intake-b3",
+        "visible": "#demo-intake-b3",
+        "ariaLabel": "Open intake #demo-intake-b3",
+        "w": 263,
+        "h": 44
+      },
+      {
+        "dataIntakeId": "demo-intake-b4",
+        "visible": "#demo-intake-b4",
+        "ariaLabel": "Open intake #demo-intake-b4",
+        "w": 263,
+        "h": 44
+      }
+    ],
+    "identity": "Signed in as admin-b@demo.example.test · clinic demo-clinic-b · clinic_admin",
+    "heading": null,
+    "fullId": null,
+    "queueVisible": true,
+    "detailVisible": false,
+    "focus": "body"
+  },
+  "tokenFreeQueue": true,
+  "network": [
+    {
+      "method": "GET",
+      "url": "/api/staff/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b1",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b1/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b2",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b2/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "OPTIONS",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "OPTIONS",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b4",
+      "status": 200
+    },
+    {
+      "method": "OPTIONS",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b4",
+      "status": 200
+    },
+    {
+      "method": "OPTIONS",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b4/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b4/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/staff/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/staff/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/staff/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/staff/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/staff/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/staff/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/clinics/demo-clinic-b/intakes/demo-intake-b3/timeline",
+      "status": 200
+    }
+  ],
+  "nonGetRequests": []
+}
