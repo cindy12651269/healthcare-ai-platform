@@ -90,10 +90,31 @@ describe("submitIntake", () => {
     });
   });
 
+  it.each([
+    [502, { detail: "LLM provider error: upstream timeout" }, "provider", MESSAGES.provider],
+    [503, { detail: "LLM configuration error: missing key" }, "configuration", MESSAGES.configuration],
+    [500, { detail: "Internal server error" }, "server", MESSAGES.processing],
+    [422, { detail: "LLM report error: x" }, "server", MESSAGES.processing],
+  ] as const)("classifies HTTP %i as %s without leaking detail (#70)", async (status, body, errorClass, message) => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(status, body));
+    const outcome = await submitIntake(req, { fetchImpl });
+    expect(outcome).toMatchObject({ kind: "failure", errorClass, message, diagnostics: { status, body } });
+    expect(message).not.toMatch(/LLM|upstream|key/);
+  });
+
+  it.each([
+    [400, { detail: "PHI detected but patient consent has not been granted." }, "consent"],
+    [400, { detail: "raw_text is too short to be meaningful." }, "validation"],
+    [422, { detail: [{ loc: ["body", "text"], msg: "Field required" }] }, "validation"],
+  ] as const)("classifies HTTP %i validation errors (%#) as %s (#70)", async (status, body, errorClass) => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(status, body));
+    expect(await submitIntake(req, { fetchImpl })).toMatchObject({ kind: "validation", errorClass });
+  });
+
   it("maps a network/CORS failure to an unreachable message", async () => {
     const fetchImpl = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
     const outcome = await submitIntake(req, { fetchImpl });
-    expect(outcome).toMatchObject({ kind: "failure", message: MESSAGES.unreachable });
+    expect(outcome).toMatchObject({ kind: "failure", errorClass: "network", message: MESSAGES.unreachable });
   });
 
   it("times out slow requests", async () => {
@@ -109,7 +130,7 @@ describe("submitIntake", () => {
       fetchImpl: fetchImpl as unknown as typeof fetch,
       timeoutMs: 10,
     });
-    expect(outcome).toMatchObject({ kind: "failure", message: MESSAGES.timeout });
+    expect(outcome).toMatchObject({ kind: "failure", errorClass: "timeout", message: MESSAGES.timeout });
   });
 
   it("treats HTTP 200 without success=true as a failure", async () => {

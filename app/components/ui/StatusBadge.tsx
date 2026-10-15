@@ -19,12 +19,14 @@ const STATUS_TONES: Record<string, StatusTone> = {
 
 export const statusLabel = (status: string) => STATUS_LABELS[status] ?? status;
 
-export default function StatusBadge({ status }: { status: string }) {
+// `label` lets a view word a status for its audience (e.g. the patient intake, #70); tone and
+// data-status still follow the stored status.
+export default function StatusBadge({ status, label }: { status: string; label?: string }) {
   const tone = STATUS_TONES[status] ?? "neutral";
   return (
     <span className={`status-badge tone-${tone}`} data-status={status}>
       <span className="status-dot" aria-hidden="true" />
-      {statusLabel(status)}
+      {label ?? statusLabel(status)}
     </span>
   );
 }

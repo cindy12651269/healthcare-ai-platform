@@ -26,6 +26,8 @@ export interface PipelineResult {
   rag?: JsonObject | null;
   report?: JsonObject | null;
   safety?: JsonObject | null;
+  escalation?: JsonObject | null; // #29: required, review_status, reasons (codes only)
+  persistence?: JsonObject | null; // status: saved | duplicate | disabled | skipped | failed
   errors?: unknown[];
   telemetry?: JsonObject | null;
   metrics?: Record<string, number> | null;
@@ -38,10 +40,21 @@ export interface FailureDiagnostics {
   note?: string;
 }
 
+// Why a submission failed (#70), so the page can offer the right recovery. "network" and "timeout" are
+// ambiguous: the request may have reached the API, so they are never retried automatically.
+export type IngestErrorClass =
+  | "validation" // 400 / 422 list: the input was rejected
+  | "consent" // 400: personal details found without consent
+  | "provider" // 502: the model provider failed
+  | "configuration" // 503: the service is not configured or unavailable
+  | "server" // 500, 422 string, or 200 without success
+  | "network" // no readable HTTP response
+  | "timeout"; // aborted after the client timeout
+
 export type IngestOutcome =
   | { kind: "success"; status: number; data: PipelineResult }
-  | { kind: "validation"; message: string; diagnostics: FailureDiagnostics }
-  | { kind: "failure"; message: string; diagnostics: FailureDiagnostics };
+  | { kind: "validation"; errorClass: IngestErrorClass; message: string; diagnostics: FailureDiagnostics }
+  | { kind: "failure"; errorClass: IngestErrorClass; message: string; diagnostics: FailureDiagnostics };
 
 export const MESSAGES = {
   invalidInput:
@@ -50,6 +63,10 @@ export const MESSAGES = {
     "Your description appears to include personal details. Please confirm consent below, or remove identifying details and try again.",
   processing:
     "We couldn't process your intake right now. Please try again in a few minutes.",
+  provider:
+    "The service that prepares your summary did not respond properly, so nothing was saved. Please try again in a few minutes.",
+  configuration:
+    "The intake service is not available at the moment, so nothing was saved. Please try again later.",
   unreachable:
     "We couldn't reach the intake service. Please try again in a few minutes.",
   timeout:
@@ -80,6 +97,7 @@ function classifyError(status: number, body: unknown): IngestOutcome {
       typeof detail === "string" && detail.toLowerCase().includes("consent");
     return {
       kind: "validation",
+      errorClass: consent ? "consent" : "validation",
       message: consent ? MESSAGES.consentRequired : MESSAGES.invalidInput,
       diagnostics,
     };
@@ -87,10 +105,16 @@ function classifyError(status: number, body: unknown): IngestOutcome {
 
   // 422 with a list: FastAPI request validation. 422 with a string: StructuringError (pipeline failure).
   if (status === 422 && Array.isArray(detail)) {
-    return { kind: "validation", message: MESSAGES.invalidInput, diagnostics };
+    return { kind: "validation", errorClass: "validation", message: MESSAGES.invalidInput, diagnostics };
   }
 
-  return { kind: "failure", message: MESSAGES.processing, diagnostics };
+  // 502: LLMError, 503: LLMConfigurationError (api/routers/ingest.py). Both are raised before anything is stored.
+  if (status === 502) return { kind: "failure", errorClass: "provider", message: MESSAGES.provider, diagnostics };
+  if (status === 503) {
+    return { kind: "failure", errorClass: "configuration", message: MESSAGES.configuration, diagnostics };
+  }
+
+  return { kind: "failure", errorClass: "server", message: MESSAGES.processing, diagnostics };
 }
 
 async function readBody(response: Response): Promise<unknown> {
@@ -139,6 +163,7 @@ export async function submitIntake(
     const aborted = err instanceof DOMException && err.name === "AbortError";
     return {
       kind: "failure",
+      errorClass: aborted ? "timeout" : "network",
       message: aborted ? MESSAGES.timeout : MESSAGES.unreachable,
       diagnostics: {
         note: aborted
@@ -159,6 +184,7 @@ export async function submitIntake(
   if (!body || typeof body !== "object" || (body as PipelineResult).success !== true) {
     return {
       kind: "failure",
+      errorClass: "server",
       message: MESSAGES.processing,
       diagnostics: {
         status: response.status,

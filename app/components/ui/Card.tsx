@@ -1,6 +1,6 @@
 import { ComponentPropsWithoutRef, ElementType } from "react";
 
-type CardTag = "section" | "article" | "div" | "form" | "aside";
+type CardTag = "section" | "article" | "div" | "form" | "aside" | "details";
 
 export type CardProps<T extends CardTag = "section"> = { as?: T } & ComponentPropsWithoutRef<T>;
 

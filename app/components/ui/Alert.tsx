@@ -1,10 +1,11 @@
-import { HTMLAttributes, ReactNode } from "react";
+import { HTMLAttributes, ReactNode, Ref } from "react";
 
 export type AlertVariant = "info" | "success" | "warning" | "error" | "urgent";
 
 export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   variant?: AlertVariant;
   title?: ReactNode;
+  ref?: Ref<HTMLDivElement>; // e.g. to move focus to an error (#70)
 }
 
 // Errors and urgent notices are announced (role="alert"); others are polite status messages.

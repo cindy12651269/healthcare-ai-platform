@@ -1,0 +1,511 @@
+{
+ "routine": {
+  "run_id": "1da2bdfd-4dab-4a83-928d-6e3b299664c0",
+  "success": true,
+  "llm_mode": "mock",
+  "intake": {
+   "input_id": "886b3da2-bec9-41d1-ba88-7433be665e15",
+   "user_id": "7174953b-00ec-4b1f-b989-beeb68271380",
+   "raw_text": "I have had a sore throat and a mild fever for two days.",
+   "source": "web",
+   "input_type": "intake",
+   "timestamp": "2026-10-15T10:45:35.482253",
+   "contains_phi": false,
+   "consent_granted": true
+  },
+  "structured": {
+   "trace": {
+    "input_id": "886b3da2-bec9-41d1-ba88-7433be665e15",
+    "user_id": "7174953b-00ec-4b1f-b989-beeb68271380",
+    "timestamp": "2026-10-15T10:45:35.482253",
+    "source": "web",
+    "input_type": "intake"
+   },
+   "compliance": {
+    "contains_phi": false,
+    "consent_granted": true,
+    "data_zone": "public_zone",
+    "audit_required": false
+   },
+   "clinical_structuring": {
+    "chief_complaint": "I have had a sore throat and a mild fever for two days.",
+    "symptoms": [
+     "sore throat",
+     "fever"
+    ],
+    "red_flags": [],
+    "clinical_summary": "Rule-based baseline (not LLM-generated). Reported symptoms: sore throat, fever; severity: mild; duration: two days; red flags: none stated.",
+    "confidence_level": 1.0,
+    "severity": "mild",
+    "duration": "two days"
+   },
+   "agent_decisioning": {},
+   "ehr_interoperability": {},
+   "output_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "mock",
+    "prompt_version": "deterministic_rule_based_baseline_v1"
+   },
+   "safety_violation_count": 0
+  },
+  "rag": {
+   "enabled": false,
+   "used": false,
+   "query": null,
+   "top_k": 3,
+   "chunks": [],
+   "error": null
+  },
+  "report": {
+   "source_struct_id": "886b3da2-bec9-41d1-ba88-7433be665e15",
+   "report_sections": {
+    "overview": "Pre-visit intake received. Reported concern: I have had a sore throat and a mild fever for two days.",
+    "symptom_analysis": "Symptoms noted: sore throat, fever.",
+    "clinical_insights": "This summary was generated in deterministic demo mode from your structured intake. It is not a medical assessment; your care team will review it with you.",
+    "risk_summary": "No risk scoring is performed in demo mode. If your symptoms are severe or getting worse quickly, seek urgent care.",
+    "recommendations": "Keep a note of when your symptoms occur and how they change, and share it with your care team at your visit."
+   },
+   "input_context": "InputType.intake entry",
+   "report_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "mock",
+    "prompt_version": "v1"
+   },
+   "safety_checks": {
+    "diagnostic_check_passed": true,
+    "phi_safe": true,
+    "compliance_notes": "Safety guard applied at output stage.",
+    "guard_passed": true,
+    "events": []
+   }
+  },
+  "safety": {
+   "allowed": true,
+   "masked_text": "Pre-visit intake received. Reported concern: I have had a sore throat and a mild fever for two days.\n\nSymptoms noted: sore throat, fever.\n\nThis summary was generated in deterministic demo mode from your structured intake. It is not a medical assessment; your care team will review it with you.\n\nNo risk scoring is performed in demo mode. If your symptoms are severe or getting worse quickly, seek urgent care.\n\nKeep a note of when your symptoms occur and how they change, and share it with your care team at your visit.",
+   "actions": [],
+   "reasons": [],
+   "severity": "low"
+  },
+  "escalation": {
+   "required": false,
+   "review_status": "submitted",
+   "reasons": [],
+   "confidence_level": 1.0,
+   "low_confidence_threshold": 0.5
+  },
+  "errors": [],
+  "telemetry": {
+   "latency_ms": 3,
+   "retrieval_hits": 0,
+   "safety_violations": 0
+  },
+  "persistence": {
+   "status": "disabled",
+   "record_id": null
+  },
+  "metrics": {
+   "intake_ms": 0.07108399995559012,
+   "structuring_ms": 2.0695000000614527,
+   "retrieval_ms": 0.0,
+   "output_ms": 1.4734579999640118,
+   "safety_ms": 0.0008329998308909126,
+   "persistence_ms": 0.000833000058264588,
+   "latency_ms": 3,
+   "safety_violation_count": 0,
+   "retrieval_hit_count": 0
+  }
+ },
+ "emergency": {
+  "run_id": "0edebe09-704a-42f0-9194-ef0665ca5f48",
+  "success": true,
+  "llm_mode": "mock",
+  "intake": {
+   "input_id": "cc1b3ca2-2a3a-45c2-b2e6-27aa9ac8cd24",
+   "user_id": "f1993a04-6b3a-45f0-84cc-9239a8c03024",
+   "raw_text": "I have chest pain and shortness of breath since this morning.",
+   "source": "web",
+   "input_type": "intake",
+   "timestamp": "2026-10-15T10:45:35.486111",
+   "contains_phi": false,
+   "consent_granted": true
+  },
+  "structured": {
+   "trace": {
+    "input_id": "cc1b3ca2-2a3a-45c2-b2e6-27aa9ac8cd24",
+    "user_id": "f1993a04-6b3a-45f0-84cc-9239a8c03024",
+    "timestamp": "2026-10-15T10:45:35.486111",
+    "source": "web",
+    "input_type": "intake"
+   },
+   "compliance": {
+    "contains_phi": false,
+    "consent_granted": true,
+    "data_zone": "public_zone",
+    "audit_required": false
+   },
+   "clinical_structuring": {
+    "chief_complaint": "I have chest pain and shortness of breath since this morning.",
+    "symptoms": [
+     "chest pain",
+     "shortness of breath"
+    ],
+    "red_flags": [
+     "chest pain",
+     "shortness of breath"
+    ],
+    "clinical_summary": "Rule-based baseline (not LLM-generated). Reported symptoms: chest pain, shortness of breath; onset: since this morning; red flags: chest pain, shortness of breath.",
+    "confidence_level": 0.85,
+    "onset": "since this morning"
+   },
+   "agent_decisioning": {},
+   "ehr_interoperability": {},
+   "output_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "mock",
+    "prompt_version": "deterministic_rule_based_baseline_v1"
+   },
+   "safety_violation_count": 0
+  },
+  "rag": {
+   "enabled": false,
+   "used": false,
+   "query": null,
+   "top_k": 3,
+   "chunks": [],
+   "error": null
+  },
+  "report": {
+   "source_struct_id": "cc1b3ca2-2a3a-45c2-b2e6-27aa9ac8cd24",
+   "report_sections": {
+    "overview": "Pre-visit intake received. Reported concern: I have chest pain and shortness of breath since this morning.\n\nIf you are experiencing severe or rapidly worsening symptoms, or you might be in danger, please seek urgent medical care immediately. If you are in the U.S., call 911. If you are outside the U.S., contact your local emergency number or a trusted local crisis service.",
+    "symptom_analysis": "Symptoms noted: chest pain, shortness of breath.\n\nIf you are experiencing severe or rapidly worsening symptoms, or you might be in danger, please seek urgent medical care immediately. If you are in the U.S., call 911. If you are outside the U.S., contact your local emergency number or a trusted local crisis service.",
+    "clinical_insights": "This summary was generated in deterministic demo mode from your structured intake. It is not a medical assessment; your care team will review it with you.",
+    "risk_summary": "No risk scoring is performed in demo mode. If your symptoms are severe or getting worse quickly, seek urgent care.",
+    "recommendations": "Keep a note of when your symptoms occur and how they change, and share it with your care team at your visit."
+   },
+   "input_context": "InputType.intake entry",
+   "report_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "mock",
+    "prompt_version": "v1"
+   },
+   "safety_checks": {
+    "diagnostic_check_passed": true,
+    "phi_safe": true,
+    "compliance_notes": "Safety guard applied at output stage.",
+    "guard_passed": true,
+    "events": [
+     {
+      "severity": "high",
+      "actions": [
+       "add_emergency_guidance"
+      ],
+      "reasons": [
+       {
+        "type": "EMERGENCY",
+        "detail": "Emergency or crisis signal detected",
+        "match": "\\bchest pain\\b"
+       }
+      ]
+     },
+     {
+      "severity": "high",
+      "actions": [
+       "add_emergency_guidance"
+      ],
+      "reasons": [
+       {
+        "type": "EMERGENCY",
+        "detail": "Emergency or crisis signal detected",
+        "match": "\\bchest pain\\b"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "safety": {
+   "allowed": true,
+   "masked_text": "Pre-visit intake received. Reported concern: I have chest pain and shortness of breath since this morning.\n\nIf you are experiencing severe or rapidly worsening symptoms, or you might be in danger, please seek urgent medical care immediately. If you are in the U.S., call 911. If you are outside the U.S., contact your local emergency number or a trusted local crisis service.\n\nSymptoms noted: chest pain, shortness of breath.\n\nIf you are experiencing severe or rapidly worsening symptoms, or you might be in danger, please seek urgent medical care immediately. If you are in the U.S., call 911. If you are outside the U.S., contact your local emergency number or a trusted local crisis service.\n\nThis summary was generated in deterministic demo mode from your structured intake. It is not a medical assessment; your care team will review it with you.\n\nNo risk scoring is performed in demo mode. If your symptoms are severe or getting worse quickly, seek urgent care.\n\nKeep a note of when your symptoms occur and how they change, and share it with your care team at your visit.",
+   "actions": [
+    "add_emergency_guidance"
+   ],
+   "reasons": [
+    {
+     "type": "EMERGENCY",
+     "detail": "Emergency or crisis signal detected",
+     "match": "\\bchest pain\\b"
+    },
+    {
+     "type": "EMERGENCY",
+     "detail": "Emergency or crisis signal detected",
+     "match": "\\bchest pain\\b"
+    }
+   ],
+   "severity": "high"
+  },
+  "escalation": {
+   "required": true,
+   "review_status": "needs_review",
+   "reasons": [
+    "emergency_signal"
+   ],
+   "confidence_level": 0.85,
+   "low_confidence_threshold": 0.5
+  },
+  "errors": [],
+  "telemetry": {
+   "latency_ms": 2,
+   "retrieval_hits": 0,
+   "safety_violations": 0
+  },
+  "persistence": {
+   "status": "disabled",
+   "record_id": null
+  },
+  "metrics": {
+   "intake_ms": 0.028833999976995983,
+   "structuring_ms": 1.2977090000276803,
+   "retrieval_ms": 0.0,
+   "output_ms": 0.6807090001075267,
+   "safety_ms": 0.000624999984211172,
+   "persistence_ms": 0.0005420001798484009,
+   "latency_ms": 2,
+   "safety_violation_count": 0,
+   "retrieval_hit_count": 0
+  }
+ },
+ "prescription": {
+  "run_id": "a0ab4c03-2497-46e8-8fab-8667465cb450",
+  "success": true,
+  "llm_mode": "mock",
+  "intake": {
+   "input_id": "ee5e80bb-e19d-4dc3-9b6e-5f6e1b2b25f4",
+   "user_id": "7da40c1f-85ab-410d-9a09-dfb99c3d64fb",
+   "raw_text": "Should I take 500 mg of amoxicillin for this cough?",
+   "source": "web",
+   "input_type": "intake",
+   "timestamp": "2026-10-15T10:45:35.488200",
+   "contains_phi": false,
+   "consent_granted": true
+  },
+  "structured": {
+   "trace": {
+    "input_id": "ee5e80bb-e19d-4dc3-9b6e-5f6e1b2b25f4",
+    "user_id": "7da40c1f-85ab-410d-9a09-dfb99c3d64fb",
+    "timestamp": "2026-10-15T10:45:35.488200",
+    "source": "web",
+    "input_type": "intake"
+   },
+   "compliance": {
+    "contains_phi": false,
+    "consent_granted": true,
+    "data_zone": "public_zone",
+    "audit_required": false
+   },
+   "clinical_structuring": {
+    "chief_complaint": "Should I take 500 mg of amoxicillin for this cough?",
+    "symptoms": [
+     "cough"
+    ],
+    "red_flags": [],
+    "clinical_summary": "Rule-based baseline (not LLM-generated). Reported symptoms: cough; red flags: none stated.",
+    "confidence_level": 0.5
+   },
+   "agent_decisioning": {},
+   "ehr_interoperability": {},
+   "output_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "mock",
+    "prompt_version": "deterministic_rule_based_baseline_v1"
+   },
+   "safety_violation_count": 0
+  },
+  "rag": {
+   "enabled": false,
+   "used": false,
+   "query": null,
+   "top_k": 3,
+   "chunks": [],
+   "error": null
+  },
+  "report": {
+   "source_struct_id": "ee5e80bb-e19d-4dc3-9b6e-5f6e1b2b25f4",
+   "report_sections": {
+    "overview": "Thank you, your pre-visit intake has been received. A member of your care team will review it before your visit.",
+    "symptom_analysis": "An automated summary is not available for this intake.",
+    "clinical_insights": "Your intake has been sent to your care team for review.",
+    "risk_summary": "If your symptoms are severe or getting worse quickly, seek urgent care.",
+    "recommendations": "Please bring any questions about your symptoms to your care team."
+   },
+   "input_context": "InputType.intake entry",
+   "safety_checks": {
+    "diagnostic_check_passed": false,
+    "phi_safe": true,
+    "compliance_notes": "Generated report blocked by the safety guard; intake recorded for review."
+   },
+   "report_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "safety_acknowledgement",
+    "prompt_version": "v1"
+   }
+  },
+  "safety": {
+   "allowed": false,
+   "masked_text": "",
+   "actions": [
+    "block_prescription"
+   ],
+   "reasons": [
+    {
+     "type": "MEDICAL_PRESCRIPTION",
+     "detail": "Prescription or dosing detected"
+    }
+   ],
+   "severity": "high"
+  },
+  "escalation": {
+   "required": true,
+   "review_status": "needs_review",
+   "reasons": [
+    "blocked_prescription"
+   ],
+   "confidence_level": 0.5,
+   "low_confidence_threshold": 0.5
+  },
+  "errors": [],
+  "telemetry": {
+   "latency_ms": 1,
+   "retrieval_hits": 0,
+   "safety_violations": 0
+  },
+  "persistence": {
+   "status": "disabled",
+   "record_id": null
+  },
+  "metrics": {
+   "intake_ms": 0.02466699993419752,
+   "structuring_ms": 1.2704579999081034,
+   "retrieval_ms": 0.0,
+   "output_ms": 0.054917000170462416,
+   "safety_ms": 0.0010840001323231263,
+   "persistence_ms": 0.00045799993131367955,
+   "latency_ms": 1,
+   "safety_violation_count": 0,
+   "retrieval_hit_count": 0
+  }
+ },
+ "vague": {
+  "run_id": "987bd874-16c7-44da-bd80-6b7c282c2464",
+  "success": true,
+  "llm_mode": "mock",
+  "intake": {
+   "input_id": "a61323d0-07f2-45c6-b769-3c1a199ac7d6",
+   "user_id": "0a2292e3-3e1e-4c7f-89b8-dc1246ae4e6c",
+   "raw_text": "I just don't feel right and wanted to check in.",
+   "source": "web",
+   "input_type": "intake",
+   "timestamp": "2026-10-15T10:45:35.489653",
+   "contains_phi": false,
+   "consent_granted": true
+  },
+  "structured": {
+   "trace": {
+    "input_id": "a61323d0-07f2-45c6-b769-3c1a199ac7d6",
+    "user_id": "0a2292e3-3e1e-4c7f-89b8-dc1246ae4e6c",
+    "timestamp": "2026-10-15T10:45:35.489653",
+    "source": "web",
+    "input_type": "intake"
+   },
+   "compliance": {
+    "contains_phi": false,
+    "consent_granted": true,
+    "data_zone": "public_zone",
+    "audit_required": false
+   },
+   "clinical_structuring": {
+    "chief_complaint": "I just don't feel right and wanted to check in.",
+    "symptoms": [],
+    "red_flags": [],
+    "clinical_summary": "Rule-based baseline (not LLM-generated): no symptoms from the baseline lexicon were found in the intake. Staff review recommended.",
+    "confidence_level": 0.1
+   },
+   "agent_decisioning": {},
+   "ehr_interoperability": {},
+   "output_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "mock",
+    "prompt_version": "deterministic_rule_based_baseline_v1"
+   },
+   "safety_violation_count": 0
+  },
+  "rag": {
+   "enabled": false,
+   "used": false,
+   "query": null,
+   "top_k": 3,
+   "chunks": [],
+   "error": null
+  },
+  "report": {
+   "source_struct_id": "a61323d0-07f2-45c6-b769-3c1a199ac7d6",
+   "report_sections": {
+    "overview": "Pre-visit intake received. Reported concern: I just don't feel right and wanted to check in.",
+    "symptom_analysis": "No discrete symptoms were extracted; the reported concern is summarised above.",
+    "clinical_insights": "This summary was generated in deterministic demo mode from your structured intake. It is not a medical assessment; your care team will review it with you.",
+    "risk_summary": "No risk scoring is performed in demo mode. If your symptoms are severe or getting worse quickly, seek urgent care.",
+    "recommendations": "Keep a note of when your symptoms occur and how they change, and share it with your care team at your visit."
+   },
+   "input_context": "InputType.intake entry",
+   "report_metadata": {
+    "generated_at": "2025-01-01T00:00:00Z",
+    "model_version": "mock",
+    "prompt_version": "v1"
+   },
+   "safety_checks": {
+    "diagnostic_check_passed": true,
+    "phi_safe": true,
+    "compliance_notes": "Safety guard applied at output stage.",
+    "guard_passed": true,
+    "events": []
+   }
+  },
+  "safety": {
+   "allowed": true,
+   "masked_text": "Pre-visit intake received. Reported concern: I just don't feel right and wanted to check in.\n\nNo discrete symptoms were extracted; the reported concern is summarised above.\n\nThis summary was generated in deterministic demo mode from your structured intake. It is not a medical assessment; your care team will review it with you.\n\nNo risk scoring is performed in demo mode. If your symptoms are severe or getting worse quickly, seek urgent care.\n\nKeep a note of when your symptoms occur and how they change, and share it with your care team at your visit.",
+   "actions": [],
+   "reasons": [],
+   "severity": "low"
+  },
+  "escalation": {
+   "required": true,
+   "review_status": "needs_review",
+   "reasons": [
+    "low_confidence"
+   ],
+   "confidence_level": 0.1,
+   "low_confidence_threshold": 0.5
+  },
+  "errors": [],
+  "telemetry": {
+   "latency_ms": 2,
+   "retrieval_hits": 0,
+   "safety_violations": 0
+  },
+  "persistence": {
+   "status": "disabled",
+   "record_id": null
+  },
+  "metrics": {
+   "intake_ms": 0.023957999928825302,
+   "structuring_ms": 1.2620420000075683,
+   "retrieval_ms": 0.0,
+   "output_ms": 0.6829159999597323,
+   "safety_ms": 0.0007920000371086644,
+   "persistence_ms": 0.0006660000053670956,
+   "latency_ms": 2,
+   "safety_violation_count": 0,
+   "retrieval_hit_count": 0
+  }
+ }
+}

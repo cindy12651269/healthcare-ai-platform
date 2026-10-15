@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "./ui";
+import { Button, Card, ReasonList, Tag } from "./ui";
 import { FailureDiagnostics, PipelineResult } from "../services/api";
 
 type JsonObject = Record<string, unknown>;
@@ -46,8 +46,10 @@ export default function DeveloperTracePanel(props: DeveloperTracePanelProps) {
   }
 
   return (
-    <details className="dev-panel">
-      <summary>Developer trace</summary>
+    <Card as="details" className="dev-panel">
+      <summary>
+        <span>Developer trace</span> <Tag tone="neutral">Reviewer only</Tag>
+      </summary>
       <p className="muted small">
         Read-only diagnostics from the backend response, for reviewers and
         developers. Pipeline settings (RAG, persistence, LLM mode) are server
@@ -71,7 +73,7 @@ export default function DeveloperTracePanel(props: DeveloperTracePanelProps) {
           {json}
         </pre>
       </section>
-    </details>
+    </Card>
   );
 }
 
@@ -99,6 +101,8 @@ function SuccessSections({ status, data }: { status: number; data: PipelineResul
   const safety = asObject(data.safety);
   const safetyChecks = asObject(asObject(data.report)?.safety_checks);
   const chunks = Array.isArray(rag?.chunks) ? (rag!.chunks as unknown[]) : [];
+  const escalation = asObject(data.escalation);
+  const persistence = asObject(data.persistence);
 
   return (
     <>
@@ -111,6 +115,16 @@ function SuccessSections({ status, data }: { status: number; data: PipelineResul
           <dd>{status}</dd>
           <dt>Pipeline success</dt>
           <dd>{yesNo(data.success)}</dd>
+          <dt>Escalation required</dt>
+          <dd>{yesNo(escalation?.required)}</dd>
+          <dt>Review status</dt>
+          <dd>{typeof escalation?.review_status === "string" ? <code>{escalation.review_status}</code> : "—"}</dd>
+          <dt>Reasons</dt>
+          <dd>
+            <ReasonList reasons={Array.isArray(escalation?.reasons) ? (escalation!.reasons as string[]) : []} empty="none" />
+          </dd>
+          <dt>Storage</dt>
+          <dd>{typeof persistence?.status === "string" ? <code>{persistence.status}</code> : "—"}</dd>
         </dl>
       </section>
 
