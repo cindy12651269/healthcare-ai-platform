@@ -702,7 +702,7 @@ Synthetic data only.
 
 ## 7. Issue 72 — Accessibility, Frontend Quality & Browser E2E Validation (2026-10-15)
 
-This was a 10-minute timeboxed pass, so the PR is **partial**. This section lists only what was actually run. It makes no WCAG conformance claim.
+This section lists only what was actually run. It makes no WCAG conformance claim.
 
 ### 7a. Implemented
 
@@ -747,6 +747,8 @@ The stack is a throwaway `postgres:15` container, the API in mock mode via `scri
 ### 7e. CI result for the Playwright job
 
 Run https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38745649052 on head `7767fb8`: all four jobs passed. Backend 48s, benchmark 18s, frontend 1m6s, and Browser E2E 3m7s (`27 passed (1.7m)` on Chromium).
+
+Final reviewed head `892cec9`: run https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38747468313 passed all four jobs. Backend tests 35s, deterministic benchmark 20s, frontend 1m5s, and Browser E2E 2m54s (`35 passed (1.8m)`, 35/35 Chromium browser tests).
 
 ### 7f. Lighthouse on the hosted frontend (2026-10-15)
 
