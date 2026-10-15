@@ -308,6 +308,8 @@ function Workspace({
                 key={label}
                 size="sm"
                 aria-pressed={filter === value}
+                // Spoken as "Needs review, 3 intakes" rather than the run-together visible text
+                aria-label={queue.status === "ready" ? `${label}, ${count(value)} intake${count(value) === 1 ? "" : "s"}` : label}
                 data-filter={value || "all"}
                 onClick={() => {
                   setSelectedId(null);
@@ -406,6 +408,7 @@ function IntakeDetailView({
   const [transition, setTransition] = useState<TransitionState>({ status: "idle" });
   const [confirming, setConfirming] = useState<TransitionTarget | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const backRef = useRef<HTMLButtonElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const focusedOnce = useRef(false);
 
@@ -436,10 +439,16 @@ function IntakeDetailView({
   }, [api, token, clinicId, intakeId, onAuthError]);
 
   // Move focus to the opened intake once (so keyboard and screen-reader users land on it)
+  // On a narrow screen the queue (and the button that opened this) is hidden, so focus must land here:
+  // the heading once loaded, or the Back control if the intake cannot be loaded
   useEffect(() => {
-    if (detail.status === "ready" && !focusedOnce.current) {
+    if (focusedOnce.current) return;
+    if (detail.status === "ready") {
       focusedOnce.current = true;
       headingRef.current?.focus();
+    } else if (detail.status === "error") {
+      focusedOnce.current = true;
+      backRef.current?.focus();
     }
   }, [detail.status]);
   useEffect(() => {
@@ -467,7 +476,7 @@ function IntakeDetailView({
   }
 
   const back = (
-    <Button variant="ghost" className="back-to-queue" onClick={onBack}>
+    <Button ref={backRef} variant="ghost" className="back-to-queue" onClick={onBack}>
       ← Back to queue
     </Button>
   );

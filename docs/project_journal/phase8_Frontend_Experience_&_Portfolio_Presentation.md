@@ -514,7 +514,7 @@ No sign-in, no token, synthetic text only.
   * The disclaimer: synthetic demo data, export only, not a FHIR conformance or certification claim, nothing sent to a FHIR server, and the bundle contains the original intake text.
   * On demand load; a resource summary (type × count from the returned Bundle); the existing download; the JSON preview in a collapsed `<details>`.
 
-**Tests.** `app/tests/StaffReview.test.tsx`: 27 → **40**. Updated tests: the unfiltered list call, tab counts and client filtering with no refetch, the confirmation step before a transition, and the new sign-in message.
+**Tests.** `app/tests/StaffReview.test.tsx`: 27 → **41**. Updated tests: the unfiltered list call, tab counts and client filtering with no refetch, the confirmation step before a transition, and the new sign-in message.
 
 New tests:
 * no CLI text;
@@ -529,7 +529,7 @@ New tests:
 * clinic A/B: only the signed-in clinic is requested, with an explicit switch for a two-clinic admin, and a clinic-B account that never requests clinic A and sees no rows on 403;
 * the FHIR resource summary, collapsed preview and disclaimer.
 
-Existing 401/403/404, 409, pending, failure, evidence and FHIR download tests still pass. Total **192 passed** (179 before). `npm run lint`, `typecheck`, `test` and `build` pass.
+Existing 401/403/404, 409, pending, failure, evidence and FHIR download tests still pass. Total **193 passed** (179 before). `npm run lint`, `typecheck`, `test` and `build` pass.
 
 ### 6a. Local browser validation (2026-10-15)
 
@@ -545,7 +545,8 @@ Production build against the #68 synthetic fixture API (`fixtures-server.mjs`, c
 | Clipped content (cards, tabs, badges, reasons, timeline, detail values) | **None** |
 | Layout | 1280: queue and detail visible together, no back control. 390/768: queue only, or detail only with *Back to queue* |
 | Dates | *Oct 14, 2026, 01:00 UTC* under a `de-DE`/`Asia/Taipei` browser |
-| Focus | detail heading on open; the opened row's button after *Back to queue* (390 px) |
+| Focus | detail heading on open (18/18 detail runs); after *Back to queue* (390 px) the opened row's button (`row:a1f3c2d4e5f60718`, the row that was opened) |
+| Tab names (accessible) | *"Needs review, 3 intakes"*, *"Reviewed, 1 intake"* … (`aria-label`), not the run-together visible text |
 | Confirmation | *Mark escalated* → *"Mark this intake escalated?"*, focus on *Confirm: mark escalated* (nothing sent; the fixture API has no transition endpoint) |
 | FHIR | resource summary shown, preview collapsed (the fixture Bundle has one `Task`) |
 | Token storage | `localStorage` 0, `sessionStorage` 0, no cookie |
@@ -571,4 +572,10 @@ Not deployed. Required after an authorized frontend deploy, with **securely issu
 * Expired and invalid tokens share one message, because the API does not distinguish them.
 * Counts reflect the list as loaded; they refresh after a transition or *Retry*, not live.
 * Chrome only; Safari/Firefox, physical devices, 200 % zoom and a real screen reader are #72.
+
+**Review Gate (2026-10-15).** The first candidate (`0532c3b`) had two accessibility defects, fixed in the frontend only:
+* Status tabs were announced as *"Needs review3"* (label and count run together). Each tab now has the accessible name *"Needs review, 3 intakes"*; a test asserts it.
+* Below 1280 px, opening an intake hides the queue and the button that opened it. If the intake then failed to load (403/404/network), focus was left on `<body>`. Focus now moves to *Back to queue* on a load error (heading on success); a test covers the 404 case.
+
+The capture now records which row receives focus after *Back to queue*, and §6a states what was measured. Lint, typecheck, **193** tests and build pass. The 18-run matrix was re-run (0 overflow, 0 table scroll, no target < 44 × 44, nothing clipped), with screenshots and `measurements.json` refreshed. Token handling, clinic scoping, counts, UTC dates, timeline, transitions and FHIR were reviewed with no change needed. Hosted criteria remain **PENDING** (§6b).
 

@@ -29,7 +29,8 @@ const MEASURE = `
   return { vw, overflow, small, clipped, tableScroll, h1: document.querySelectorAll("h1").length,
     queueVisible: shown(".workspace-queue"), detailVisible: shown(".intake-detail"), backVisible: shown(".back-to-queue"),
     tabs: [...document.querySelectorAll(".status-tabs .btn")].map(b => b.textContent), firstTime: q(".data-table tbody tr td:last-child")?.textContent || null,
-    focus: document.activeElement.id || document.activeElement.tagName.toLowerCase() };`;
+    tabLabels: [...document.querySelectorAll(".status-tabs .btn")].map(b => b.getAttribute("aria-label")),
+    focus: document.activeElement.id || (document.activeElement.dataset.intakeId ? "row:" + document.activeElement.dataset.intakeId : document.activeElement.tagName.toLowerCase()) };`;
 async function setView(width, theme) { await send("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: width < 768 }); await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: theme }] }); }
 async function shot(name) { const { cssContentSize } = await send("Page.getLayoutMetrics"); const r = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true, clip: { x: 0, y: 0, width: cssContentSize.width, height: Math.min(cssContentSize.height, 16000), scale: 1 } }); writeFileSync(`${OUT}/${name}.png`, Buffer.from(r.data, "base64")); }
 async function signIn() {
@@ -61,6 +62,7 @@ await waitFor(`document.querySelector("[data-testid=fhir-resources]")`); await s
 checks.fhir = await ev(`return { resources: document.querySelector("[data-testid=fhir-resources]").textContent, previewOpen: document.querySelector(".fhir-json").open }`);
 await shot("detail-confirm-fhir-1280-light");
 await setView(390, "light"); await signIn();
+checks.mobileOpenedRow = await ev(`return document.querySelector("[data-intake-id]").dataset.intakeId`);
 await ev(`document.querySelector("[data-intake-id]").focus(); document.querySelector("[data-intake-id]").click(); return 1`); await waitFor(`document.querySelector("[data-testid=timeline]")`); await sleep(300);
 checks.mobileDetail = await ev(MEASURE);
 await ev(`document.querySelector(".back-to-queue").click(); return 1`); await sleep(300);

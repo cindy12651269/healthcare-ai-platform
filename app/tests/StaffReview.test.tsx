@@ -226,6 +226,9 @@ describe("StaffReview queue", () => {
     expect(tab(/^Escalated/)).toHaveTextContent("Escalated0");
     expect(tab(/^Submitted/)).toHaveTextContent("Submitted1");
     expect(tab(/^All/)).toHaveTextContent("All4");
+    // Accessible names keep the label and count apart
+    expect(screen.getByRole("button", { name: "Needs review, 2 intakes" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reviewed, 1 intake" })).toBeInTheDocument();
     expect(screen.getByTestId("queue-scope")).toHaveTextContent("Counts are from the 4 intakes returned for clinic default");
     expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(3);
 
@@ -608,6 +611,13 @@ describe("Staff review workspace (#71)", () => {
     expect(workspace).toHaveAttribute("data-view", "queue");
     expect(screen.queryByRole("heading", { name: /^Intake #/ })).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole("button", { name: "Open intake #flagged-" })).toHaveFocus());
+  });
+
+  it("moves focus to Back to queue when the opened intake cannot be loaded", async () => {
+    const user = await signIn(makeApi({ getIntake: vi.fn().mockResolvedValue(fail("not_found", 404)) }));
+    await user.click(await screen.findByRole("button", { name: /^Open intake / }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(STAFF_MESSAGES.not_found);
+    await waitFor(() => expect(screen.getByRole("button", { name: "← Back to queue" })).toHaveFocus());
   });
 
   it("cancelling the confirmation sends nothing", async () => {

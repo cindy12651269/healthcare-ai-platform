@@ -17,6 +17,7 @@
       "backVisible": false,
       "tabs": [],
       "firstTime": null,
+      "tabLabels": [],
       "focus": "body"
     },
     {
@@ -40,6 +41,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "body"
     },
     {
@@ -63,6 +71,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "detail-heading"
     },
     {
@@ -80,6 +95,7 @@
       "backVisible": false,
       "tabs": [],
       "firstTime": null,
+      "tabLabels": [],
       "focus": "body"
     },
     {
@@ -103,6 +119,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "body"
     },
     {
@@ -126,6 +149,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "detail-heading"
     },
     {
@@ -143,6 +173,7 @@
       "backVisible": false,
       "tabs": [],
       "firstTime": null,
+      "tabLabels": [],
       "focus": "body"
     },
     {
@@ -166,6 +197,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "body"
     },
     {
@@ -189,6 +227,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "detail-heading"
     },
     {
@@ -206,6 +251,7 @@
       "backVisible": false,
       "tabs": [],
       "firstTime": null,
+      "tabLabels": [],
       "focus": "body"
     },
     {
@@ -229,6 +275,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "body"
     },
     {
@@ -252,6 +305,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "detail-heading"
     },
     {
@@ -269,6 +329,7 @@
       "backVisible": false,
       "tabs": [],
       "firstTime": null,
+      "tabLabels": [],
       "focus": "body"
     },
     {
@@ -292,6 +353,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "body"
     },
     {
@@ -315,6 +383,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "detail-heading"
     },
     {
@@ -332,6 +407,7 @@
       "backVisible": false,
       "tabs": [],
       "firstTime": null,
+      "tabLabels": [],
       "focus": "body"
     },
     {
@@ -355,6 +431,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "body"
     },
     {
@@ -378,6 +461,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "detail-heading"
     }
   ],
@@ -390,6 +480,7 @@
       "resources": "Task × 1",
       "previewOpen": false
     },
+    "mobileOpenedRow": "a1f3c2d4e5f60718",
     "mobileDetail": {
       "vw": 390,
       "overflow": 0,
@@ -408,6 +499,13 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
       "focus": "detail-heading"
     },
     "mobileBack": {
@@ -428,7 +526,14 @@
         "All6"
       ],
       "firstTime": "Oct 14, 2026, 01:00 UTC",
-      "focus": "button"
+      "tabLabels": [
+        "Needs review, 3 intakes",
+        "Reviewed, 1 intake",
+        "Escalated, 1 intake",
+        "Submitted, 1 intake",
+        "All, 6 intakes"
+      ],
+      "focus": "row:a1f3c2d4e5f60718"
     },
     "tokenStorage": {
       "local": 0,
