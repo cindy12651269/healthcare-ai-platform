@@ -401,7 +401,7 @@ describe("Outcome-first results", () => {
     await fillAndSubmit();
     await resultsHeading();
     expect(screen.getByTestId("blocked-notice")).toHaveTextContent(
-      "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing advice.",
+      "No automated report was generated for you. The safety check withheld it because it would have included prescription or dosing content.",
     );
     expect(screen.getByRole("heading", { name: "Safe acknowledgement (report withheld)" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Pre-visit report" })).not.toBeInTheDocument();
@@ -410,16 +410,22 @@ describe("Outcome-first results", () => {
   });
 
   it.each([
-    ["duplicate", "An identical description was received earlier, so no new record was created."],
+    ["duplicate", "so no new record was created and nothing new was added to the clinic staff queue"],
     ["disabled", "This intake was not stored (storage is turned off on this server)"],
     ["failed", "This intake was not stored (the record could not be saved)"],
-  ])("does not claim a queue entry when storage is %s", async (status, text) => {
+  ])("does not claim a new record or queue entry when storage is %s", async (status, text) => {
     const data = { ...scenarioResults.vague, persistence: { status, record_id: null } };
     render(<IntakePage checkApi={apiReady} submit={vi.fn().mockResolvedValue(success(data))} />);
     await fillAndSubmit();
     await resultsHeading();
     expect(screen.getByTestId("next-step")).toHaveTextContent(text);
     expect(screen.getByTestId("next-step")).not.toHaveTextContent("can review this record in their queue");
+    const summary = screen.getByTestId("outcome-summary");
+    // The badge reports the storage result, never "Flagged for staff review" for a record not newly saved
+    expect(within(summary).queryByText("Flagged for staff review")).not.toBeInTheDocument();
+    expect(within(summary).getByText(status === "duplicate" ? "Already received · no new record" : "Not stored")).toBeInTheDocument();
+    expect(within(summary).getByText("Escalation rules this description matched")).toBeInTheDocument();
+    expect(within(summary).getByText("low_confidence")).toBeInTheDocument();
   });
 });
 
@@ -542,6 +548,9 @@ describe("Error handling and recovery", () => {
       const alert = await screen.findByRole("alert");
       expect(alert).toHaveTextContent("We couldn't confirm your submission");
       expect(alert).toHaveTextContent("Nothing is resent automatically");
+      // No universal idempotency claim
+      expect(alert).toHaveTextContent("cannot be guaranteed");
+      expect(alert).not.toHaveTextContent("no second record is created");
       await user.click(within(alert).getByRole("button", { name: "Send again" }));
       await resultsHeading();
       expect(screen.getByTestId("next-step")).toHaveTextContent("no new record was created");

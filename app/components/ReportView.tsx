@@ -22,7 +22,16 @@ const PATIENT_STATUS: Record<string, string> = {
 
 const BLOCK_LABELS: Record<string, string> = {
   block_diagnosis: "diagnostic language",
-  block_prescription: "prescription or dosing advice",
+  block_prescription: "prescription or dosing content",
+};
+
+// Only a newly saved record is in the queue with this decision. For any other storage result the badge
+// says what happened to the record instead, so it never implies a new queue item.
+const STORAGE_BADGE: Partial<Record<StorageStatus, string>> = {
+  duplicate: "Already received · no new record",
+  disabled: "Not stored",
+  skipped: "Not stored",
+  failed: "Not stored",
 };
 
 const NOT_STORED: Partial<Record<StorageStatus, string>> = {
@@ -35,11 +44,11 @@ function whatHappensNext(outcome: IntakeOutcome): string {
   const { flagged, storage } = outcome;
   if (storage === "saved") {
     return flagged
-      ? "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue before your visit."
+      ? "Your intake has been flagged for staff review. Authorized clinic staff can review this record in their queue."
       : "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.";
   }
   if (storage === "duplicate") {
-    return "An identical description was received earlier, so no new record was created. Clinic staff see the earlier record in their queue.";
+    return "An identical description was received earlier, so no new record was created and nothing new was added to the clinic staff queue.";
   }
   if (storage === "unknown") {
     return "The service did not report whether this intake was stored, so we cannot say whether it is in the clinic staff queue.";
@@ -97,7 +106,9 @@ export default function ReportView({ data, headingRef, actions }: ReportViewProp
       <Card as="article" className="outcome-card" data-testid="outcome-summary" aria-labelledby="outcome-heading">
         <h3 id="outcome-heading">Outcome</h3>
         <p className="outcome-status">
-          {outcome.reviewStatus ? (
+          {STORAGE_BADGE[outcome.storage] ? (
+            <StatusBadge status={outcome.storage} label={STORAGE_BADGE[outcome.storage]} />
+          ) : outcome.reviewStatus ? (
             <StatusBadge status={outcome.reviewStatus} label={PATIENT_STATUS[outcome.reviewStatus]} />
           ) : (
             <span className="muted">The service did not return a review status.</span>
@@ -105,7 +116,11 @@ export default function ReportView({ data, headingRef, actions }: ReportViewProp
         </p>
         {outcome.reasons.length > 0 && (
           <div className="outcome-reasons" data-testid="outcome-reasons">
-            <span className="field-label">Why it was flagged</span>
+            <span className="field-label">
+              {outcome.storage === "saved" || outcome.storage === "unknown"
+                ? "Why it was flagged"
+                : "Escalation rules this description matched"}
+            </span>
             <ReasonList reasons={outcome.reasons} />
           </div>
         )}

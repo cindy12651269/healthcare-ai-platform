@@ -42,13 +42,13 @@ const ERROR_COPY: Record<ErrorClass, { title: string; variant: "warning" | "erro
     title: "We couldn't confirm your submission",
     variant: "error",
     retry: "Send again",
-    note: "Your intake may or may not have been received. Nothing is resent automatically. If you send the same description again and it was already received, no second record is created.",
+    note: "Your intake may or may not have been received. Nothing is resent automatically. If you send it again unchanged and it had already been stored, this demo normally recognises the identical text and does not store it twice, but that cannot be guaranteed.",
   },
   timeout: {
     title: "We couldn't confirm your submission",
     variant: "error",
     retry: "Send again",
-    note: "Your intake may still have been received. Nothing is resent automatically. If you send the same description again and it was already received, no second record is created.",
+    note: "Your intake may still have been received. Nothing is resent automatically. If you send it again unchanged and it had already been stored, this demo normally recognises the identical text and does not store it twice, but that cannot be guaranteed.",
   },
 };
 
