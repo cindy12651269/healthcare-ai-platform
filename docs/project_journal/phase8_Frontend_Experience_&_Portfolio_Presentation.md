@@ -699,3 +699,112 @@ Synthetic data only.
 
 **Verdict for #84 on the hosted demo: PASS.** Clinic B's four seeded intakes now have distinct visible and accessible references and headings. Full ids are unchanged for data attributes and API calls, and the layout passes at 390, 768 and 1280 px in both themes.
 
+
+## 7. Issue 72 — Accessibility, Frontend Quality & Browser E2E Validation (2026-10-15)
+
+This section lists only what was actually run. It makes no WCAG conformance claim.
+
+### 7a. Implemented
+
+* Route-level error boundary (`components/ErrorBoundary.tsx`, wired in `pages/_app.tsx` and keyed by route). It shows a styled fallback, never renders error details and only logs to the browser console.
+* Styled `pages/404.tsx` and `pages/500.tsx`, rendered inside the app shell through a shared `components/ErrorPage.tsx`.
+* `tests/ErrorHandling.test.tsx`: 404, 500 and boundary fallback, with no leaked error message.
+* `tests/contrast.test.ts`: computes WCAG contrast ratios from `styles/tokens.css` for 16 foreground/background token pairs in both the light and dark themes.
+
+### 7b. Accessibility findings (2026-10-15, initial pass; superseded by §7g)
+
+| Criterion | Page | Finding | Status | Evidence |
+|---|---|---|---|---|
+| 1.4.3 Contrast (Minimum) | All (tokens) | Text, muted text, link, on-primary, on-danger, danger and highlight pairs are ≥ 4.5:1 in light and dark | PASS (token level only) | `tests/contrast.test.ts` |
+| 1.4.11 Non-text Contrast | All (tokens) | Focus ring and strong control border are ≥ 3:1 against bg/surface in both themes | PASS (token level only) | `tests/contrast.test.ts` |
+| 2.4.1 Bypass Blocks | All | A skip link targets `main#main` | Present in code | `components/AppShell.tsx` |
+| 2.4.7 / 2.4.11 Focus Visible / Not Obscured | All | Global 3px `:focus-visible` outline exists. Obscuring was not tested in a browser | NOT VERIFIED | `styles/globals.css` |
+| 1.3.1 / 2.4.6 Landmarks, headings | All + error pages | header/nav/main/footer landmarks; error pages have an h1 | Partially verified (unit tests) | `tests/ErrorHandling.test.tsx`, existing `ui.test.tsx` |
+| 2.1.1 Keyboard | All | Full keyboard-only walkthrough not performed | NOT VERIFIED | — |
+| 3.3.1 / 4.1.3 Errors, live regions | Intake, Staff | Not re-audited in this pass | NOT VERIFIED | — |
+| 1.4.4 / 1.4.10 Resize 200% / Reflow | All | Not tested | NOT VERIFIED | — |
+| 2.3.3 Reduced motion | All | A `prefers-reduced-motion` rule exists. Not tested in a browser | NOT VERIFIED | `styles/globals.css` |
+
+No critical keyboard or contrast **defect** was found in what was tested. Because keyboard behaviour was not verified in a browser, the "no open critical keyboard failures" criterion is still **pending**.
+
+### 7c. Frontend quality (run locally, 2026-10-15)
+
+* `npm run lint`: pass. `npm run typecheck`: pass. `npm test`: 10 files, 238 tests passed. `npm run build`: compiled successfully. Routes `/`, `/404`, `/500`, `/intake`, `/staff` and `/system-card` were all prerendered as static. Page sizes were not printed by this Next.js version and are not recorded.
+* Bundle scan of `.next/static`: the only `NEXT_PUBLIC_*` names are `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEMO_MODE`. A grep for API-key, token, database-URL and private-key patterns found no secrets. The only hits were the UI constant name `WEBHOOK_BRANCH` (system-card copy).
+
+### 7d. Browser E2E, accessibility and resilience (Playwright, local, 2026-10-15)
+
+Command (from `app/`, Docker running):
+`E2E_DATABASE_URL=$(../scripts/e2e_local_db.sh start) npm run e2e` (add `E2E_ALL_BROWSERS=1` for Firefox and WebKit), then `../scripts/e2e_local_db.sh stop`.
+The stack is a throwaway `postgres:15` container, the API in mock mode via `scripts/e2e_api.sh` (test-only user, a one-hour token signed with a per-run random secret, webhook URL and secret empty, non-local DB refused), and a production build pointed at it. The hosted demo is never contacted.
+
+* `app/e2e/smoke.spec.ts`: landing → routine intake → outcome (`submitted`); staff sign-in with the test token → queue (All) → detail → FHIR preview (`"resourceType": "Bundle"`); unknown route → styled 404 (HTTP 404).
+* `app/e2e/a11y.spec.ts` (automated): on all four pages in light and dark themes, one banner/main/contentinfo, the nav landmark, exactly one h1, skip link as the first Tab stop (visible, moves focus to `main`), a visible focus indicator on the next 15 Tab stops, and no horizontal overflow at 320 CSS px (1.4.10). Also no animation or transition over 10 ms with `prefers-reduced-motion: reduce`, keyboard-only intake completion and submission, `aria-invalid` on empty staff sign-in, and Escape closing the mobile menu with focus returned to the toggle.
+* `app/e2e/resilience.spec.ts`: requests to the API blocked in the browser. Dashboard: waking notice, then "Unreachable" plus "Try again". System card: load error alert. Intake (network lost after load): unreachable alert, with the text kept. Staff sign-in: unreachable alert. No code change was needed; existing handling behaved as designed.
+* **Results:** 27 tests × Chromium 153.0.8010.12, Firefox 155.0 and WebKit 26.6 (Playwright builds) = **81 passed**, run twice consecutively with no failures (about 4.2 min each). WebKit stands in for Safari; native Safari was not tested. In WebKit, keyboard tests use Option+Tab, because by macOS default Tab skips links and buttons. This is platform behaviour, not an app defect.
+* CI: the new `e2e` job runs the suite on Chromium against a PostgreSQL service with a test token generated in the job.
+
+### 7e. CI result for the Playwright job
+
+Run https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38745649052 on head `7767fb8`: all four jobs passed. Backend 48s, benchmark 18s, frontend 1m6s, and Browser E2E 3m7s (`27 passed (1.7m)` on Chromium).
+
+Final reviewed head `892cec9`: run https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38747468313 passed all four jobs. Backend tests 35s, deterministic benchmark 20s, frontend 1m5s, and Browser E2E 2m54s (`35 passed (1.8m)`, 35/35 Chromium browser tests).
+
+### 7f. Lighthouse on the hosted frontend (2026-10-15)
+
+* URL: https://healthcare-ai-frontend-1s23.onrender.com/ (dashboard only, read-only: no forms submitted, no sign-in).
+* Tooling: Lighthouse 13.5.0 CLI (`npx lighthouse@13.5.0`), headless Google Chrome 155.0.8059.40 on macOS, one run per preset.
+* Conditions: the frontend was asleep beforehand (a warm-up `GET /` took 12.6 s), so these are runs on a warmed instance. Lighthouse loads the page once and does not wait out a backend cold start. Single runs vary; these are not averages.
+
+| Run (fetch time UTC) | Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|---|
+| Mobile (default), 13:50:18 | 96 | 96 | 96 | 90 |
+| Desktop (`--preset=desktop`), 13:50:44 | 100 | 96 | 96 | 90 |
+
+Mobile: FCP 1.4 s, LCP 1.9 s, TBT 0 ms, CLS 0.004. Desktop: FCP 0.4 s, LCP 0.5 s, TBT 0 ms, CLS 0.003.
+
+Findings below 0.9:
+* `html-has-lang` (WCAG 3.1.1). **Fixed** in this PR with `pages/_document.tsx` (`<html lang="en">`) and an E2E assertion on all four pages.
+* `meta-description`. **Fixed**: a site description was added in `_document.tsx`.
+* `errors-in-console`. The only error was a 404 for `/favicon.ico`. **Fixed** with an inline SVG icon link.
+* `unused-javascript`, `legacy-javascript-insight`, `render-blocking-insight`, and mobile `speed-index` (0.67). Recorded, not changed: these are framework bundle and CSS delivery and out of scope.
+
+The fixes are not yet deployed, so the hosted scores above are from **before** them. No score target is claimed.
+
+### 7g. Accessibility findings, final for this PR (2026-10-15)
+
+Evidence types:
+* **Automated** means asserted by a committed Playwright or Vitest test.
+* **Agent-observed** means I reviewed screenshots or tab-order listings produced by the browser; this is not a human tester.
+* No human manual test or screen-reader test was performed. This is not a WCAG 2.2 AA conformance claim.
+
+Pages: `/`, `/intake`, `/staff` (signed-out view, plus the signed-in queue, detail and FHIR flow in the smoke test) and `/system-card`. Browsers: Chromium 153, Firefox 155 and WebKit 26.6 (Playwright builds).
+
+| Criterion | Pages | Result | Status | Evidence |
+|---|---|---|---|---|
+| 1.3.1 Info and relationships (landmarks, headings) | all 4, light and dark | One banner, main and contentinfo; labelled nav; exactly one h1 | PASS (automated) | `e2e/a11y.spec.ts` |
+| 1.3.2 / 2.4.3 Meaningful sequence / Focus order | all 4 | Full Tab walk recorded: 31 stops on `/`, 13 on `/intake`, 10 on `/staff` (signed out), 13 on `/system-card`. Order is header → nav → main content in reading order. On `/staff`, the access-policy links come before the token field, matching the visual layout (policy card above the sign-in form) | PASS (automated walk + agent-observed order) | `e2e/a11y.spec.ts` (tab-order attachment), screenshot review |
+| 1.4.3 / 1.4.11 Contrast | all (tokens) | Token pairs ≥ 4.5:1 for text and ≥ 3:1 for focus and borders, light and dark. Lighthouse colour-contrast audit passed on the hosted `/` (light) | PASS (token level + Lighthouse on `/`) | `tests/contrast.test.ts`, §7f |
+| 1.4.4 Resize text | all 4 | Root font size 200% at 1280 px: no horizontal scrolling. Type is rem-based | PASS (automated proxy) | `e2e/a11y.spec.ts` |
+| 1.4.10 Reflow / 200% zoom | all 4, light and dark | 320 CSS px and a 640 CSS px viewport at 2× scale (equivalent to 200% zoom of 1280 px): no horizontal scrolling. At 200% in dark theme the layout collapses to the mobile menu and focus rings remain visible | PASS (automated + agent-observed screenshot) | `e2e/a11y.spec.ts` |
+| 2.1.1 Keyboard | intake, staff, nav | Intake completed and submitted with keyboard only; staff token field and Sign in reachable; menu opens with Enter and Escape closes it, returning focus | PASS (automated) | `e2e/a11y.spec.ts` |
+| 2.3.3 / reduced motion | all 4 | No animation or transition over 10 ms with `prefers-reduced-motion: reduce` | PASS (automated) | `e2e/a11y.spec.ts` |
+| 2.4.1 Bypass blocks | all 4 | Skip link is the first stop, visible, and focuses `main` | PASS (automated) | `e2e/a11y.spec.ts` |
+| 2.4.7 Focus visible | all 4, every Tab stop | Outline ≥ 2 px or a box-shadow on every stop | PASS (automated) | `e2e/a11y.spec.ts` |
+| 2.4.11 Focus not obscured (minimum) | all 4, every Tab stop | The site has no sticky or fixed UI. The point under the centre of each focused element's first line box is the element itself | PASS (automated) | `e2e/a11y.spec.ts` |
+| 3.1.1 Language of page | all 4 | `lang` was missing (Lighthouse). Fixed with `<html lang="en">` | FIXED, PASS (automated) | `pages/_document.tsx`, `e2e/a11y.spec.ts` |
+| 3.3.1 / 3.3.2 Errors, labels | intake, staff | `aria-invalid` on an empty token; errors use `role=alert`; unreachable-API errors render on every page | PASS (automated) | `e2e/*.spec.ts`, `tests/*` |
+| 4.1.3 Status messages | intake, dashboard | Progress and system status use `role=status` | PASS (unit level) | `tests/IntakePage.test.tsx`, `tests/Dashboard.test.tsx` |
+| Screen-reader output | all | VoiceOver is installed but was not run; it can't be driven and heard reliably from this environment | NOT VERIFIED (deferred) | — |
+| Native Safari | all | Safari 18.1 is present, but WebDriver needs "Allow remote automation" turned on in Safari settings, which the session could not enable. WebKit 26.6 was used as a substitute | NOT VERIFIED (deferred) | — |
+
+Defects found and fixed: missing page language (3.1.1). No critical keyboard or contrast failure was found.
+
+### 7h. Remaining limitations
+
+* There is no human screen-reader pass (VoiceOver or NVDA) and no native Safari run. Both need a person at the machine.
+* Rendered-pixel contrast on every state (for example hover or disabled) was not measured beyond tokens and Lighthouse on `/`. Lighthouse was run on the hosted `/` only, not on `/intake`, `/staff` or `/system-card`.
+* The hosted scores in §7f predate the `_document.tsx` fixes. Re-running after deployment is a post-merge check.
+* CI runs Chromium only; Firefox and WebKit run locally with `E2E_ALL_BROWSERS=1`.
+* Bundle re-scan after the final changes (2026-10-15): `NEXT_PUBLIC_*` is only `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEMO_MODE`. A grep of `.next/static` and the prerendered HTML for key, secret, database-URL, private-key and staff-token patterns found no matches.
+* Final local run: 35 Playwright tests × 3 browsers = **105 passed** (4.3 min). 238 Vitest tests passed; lint, typecheck and build passed.

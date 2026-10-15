@@ -2,3 +2,8 @@ node_modules/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+# Playwright (#72): test token and generated artifacts; browsers live in the user cache, not the repo
+e2e/.auth/
+test-results/
+playwright-report/
+blob-report/
