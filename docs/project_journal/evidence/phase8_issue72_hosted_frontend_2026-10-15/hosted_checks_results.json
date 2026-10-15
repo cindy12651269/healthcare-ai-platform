@@ -1,0 +1,362 @@
+{
+  "startTime": "2026-10-15T14:32:25.505Z",
+  "stats": {
+    "startTime": "2026-10-15T14:32:25.505Z",
+    "duration": 336741.404,
+    "expected": 45,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "baseURL": "https://healthcare-ai-frontend-1s23.onrender.com",
+  "browsers": {
+    "chromium": "153.0.8010.12",
+    "firefox": "155.0",
+    "webkit": "26.6 (Playwright build; not native Safari)"
+  },
+  "playwright": "1.63.0",
+  "tests": [
+    {
+      "project": "chromium",
+      "suite": "hosted.spec.ts",
+      "test": "/ 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "chromium",
+      "suite": "hosted.spec.ts",
+      "test": "/intake 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "chromium",
+      "suite": "hosted.spec.ts",
+      "test": "/staff 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "chromium",
+      "suite": "hosted.spec.ts",
+      "test": "/system-card 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "chromium",
+      "suite": "hosted.spec.ts",
+      "test": "reduced motion: no animation or transition over 10 ms",
+      "status": "passed"
+    },
+    {
+      "project": "chromium",
+      "suite": "hosted.spec.ts",
+      "test": "styled 404 for an unknown URL",
+      "status": "passed"
+    },
+    {
+      "project": "chromium",
+      "suite": "hosted.spec.ts",
+      "test": "API blocked in this browser only: dashboard and system card show error states",
+      "status": "passed"
+    },
+    {
+      "project": "firefox",
+      "suite": "hosted.spec.ts",
+      "test": "/ 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "firefox",
+      "suite": "hosted.spec.ts",
+      "test": "/intake 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "firefox",
+      "suite": "hosted.spec.ts",
+      "test": "/staff 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "firefox",
+      "suite": "hosted.spec.ts",
+      "test": "/system-card 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "firefox",
+      "suite": "hosted.spec.ts",
+      "test": "reduced motion: no animation or transition over 10 ms",
+      "status": "passed"
+    },
+    {
+      "project": "firefox",
+      "suite": "hosted.spec.ts",
+      "test": "styled 404 for an unknown URL",
+      "status": "passed"
+    },
+    {
+      "project": "firefox",
+      "suite": "hosted.spec.ts",
+      "test": "API blocked in this browser only: dashboard and system card show error states",
+      "status": "passed"
+    },
+    {
+      "project": "webkit",
+      "suite": "hosted.spec.ts",
+      "test": "/ 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "webkit",
+      "suite": "hosted.spec.ts",
+      "test": "/intake 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "webkit",
+      "suite": "hosted.spec.ts",
+      "test": "/staff 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "webkit",
+      "suite": "hosted.spec.ts",
+      "test": "/system-card 200% zoom, 390 px mobile, 200% text: no horizontal scroll",
+      "status": "passed"
+    },
+    {
+      "project": "webkit",
+      "suite": "hosted.spec.ts",
+      "test": "reduced motion: no animation or transition over 10 ms",
+      "status": "passed"
+    },
+    {
+      "project": "webkit",
+      "suite": "hosted.spec.ts",
+      "test": "styled 404 for an unknown URL",
+      "status": "passed"
+    },
+    {
+      "project": "webkit",
+      "suite": "hosted.spec.ts",
+      "test": "API blocked in this browser only: dashboard and system card show error states",
+      "status": "passed"
+    },
+    {
+      "project": "chromium",
+      "suite": "light",
+      "test": "/ landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "31",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "chromium",
+      "suite": "light",
+      "test": "/intake landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "chromium",
+      "suite": "light",
+      "test": "/staff landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "9",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "chromium",
+      "suite": "light",
+      "test": "/system-card landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "light",
+      "test": "/ landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "31",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "light",
+      "test": "/intake landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "light",
+      "test": "/staff landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "9",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "light",
+      "test": "/system-card landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "light",
+      "test": "/ landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "31",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "light",
+      "test": "/intake landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "light",
+      "test": "/staff landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "9",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "light",
+      "test": "/system-card landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "chromium",
+      "suite": "dark",
+      "test": "/ landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "31",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "chromium",
+      "suite": "dark",
+      "test": "/intake landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "chromium",
+      "suite": "dark",
+      "test": "/staff landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "9",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "chromium",
+      "suite": "dark",
+      "test": "/system-card landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "dark",
+      "test": "/ landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "31",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "dark",
+      "test": "/intake landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "dark",
+      "test": "/staff landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "9",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "firefox",
+      "suite": "dark",
+      "test": "/system-card landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "dark",
+      "test": "/ landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "31",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "dark",
+      "test": "/intake landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "dark",
+      "test": "/staff landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "9",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    },
+    {
+      "project": "webkit",
+      "suite": "dark",
+      "test": "/system-card landmarks, lang, skip link, focus on every Tab stop",
+      "status": "passed",
+      "tab-stops": "12",
+      "console-errors": "[]",
+      "favicon-requests": "0"
+    }
+  ]
+}
