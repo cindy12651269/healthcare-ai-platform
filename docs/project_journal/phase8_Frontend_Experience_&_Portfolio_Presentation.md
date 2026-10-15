@@ -672,7 +672,7 @@ No local browser screenshots were taken for this change (the local fixture API u
 
 **Read-only.** One-hour tokens were issued by the owner with the §6d script and verified with `GET /api/staff/me` (`demo-admin-b` → `demo-clinic-b`, `clinic_admin`). Only `demo-admin-b` was used.
 * No action button was clicked. The request log (method, path and status only; no headers) contains **no non-GET request** apart from CORS preflights.
-* Every signed-in view was token-free (HTML, storage, cookies).
+* All 7 checked signed-in views (the 1280 queue and the 6 responsive runs) were token-free (HTML, storage, cookies); the four per-row detail views opened at 1280 px were not checked individually.
 * `~/.hc-demo-71` was deleted at 13:04:26 UTC. No token, URL or secret is in the evidence.
 
 **Results** (`capture-cdp-hosted.mjs`, 12:58–13:04 UTC; `measurements.json`):
@@ -685,7 +685,7 @@ No local browser screenshots were taken for this change (the local fixture API u
 | Full ids preserved | `data-intake-id` = `demo-intake-b1` … `b4`; API requests `GET /api/clinics/demo-clinic-b/intakes/demo-intake-bN` and `…/timeline` use the full id |
 | Layout: queue and detail at 390 / 768 / 1280 × light / dark (12 views) | **0 px overflow, 0 table scroll, no target under 44 × 44, nothing clipped**; row buttons 44 px high; 1280 side by side, 390/768 separate views |
 
-Hash-id references (`#2f005d14`) were verified unchanged in §6d and by unit tests; they were not re-captured here.
+Hash-id references keep the 8-character form: they were shown as #2f005d14 on the pre-fix build (§6d), and the new code's behaviour is covered by unit tests (format.test.ts). They were not re-captured on the hosted demo after #84.
 
 During the run, two harness issues were fixed in the capture script (not the app):
 * The first attempt clicked *Sign in* before React hydrated, which reloaded the page. The token input has no `name`, so nothing was submitted or exposed; the script now waits for hydration.
