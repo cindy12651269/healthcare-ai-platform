@@ -593,8 +593,8 @@ describe("Staff review workspace (#71)", () => {
 
   it("shows readable intake references and opens the detail with focus on its heading", async () => {
     const user = await signIn(makeApi());
-    await user.click(await screen.findByRole("button", { name: "Open intake #flagged-" }));
-    const heading = await screen.findByRole("heading", { name: "Intake #flagged-" });
+    await user.click(await screen.findByRole("button", { name: "Open intake #flagged-0001" }));
+    const heading = await screen.findByRole("heading", { name: "Intake #flagged-0001" });
     await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.getByText("flagged-0001")).toBeInTheDocument(); // full id in the detail
   });
@@ -610,7 +610,7 @@ describe("Staff review workspace (#71)", () => {
     await user.click(screen.getByRole("button", { name: "← Back to queue" }));
     expect(workspace).toHaveAttribute("data-view", "queue");
     expect(screen.queryByRole("heading", { name: /^Intake #/ })).not.toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Open intake #flagged-" })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Open intake #flagged-0001" })).toHaveFocus());
   });
 
   it("moves focus to Back to queue when the opened intake cannot be loaded", async () => {
@@ -678,13 +678,13 @@ describe("Staff review workspace (#71)", () => {
       ),
     });
     const user = await signIn(api);
-    expect(await screen.findByRole("button", { name: "Open intake #clinic-a" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Open intake #clinic-b" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open intake #clinic-a-01" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open intake #clinic-b-01" })).not.toBeInTheDocument();
     expect(api.listIntakes.mock.calls.map((c) => c[1])).toEqual(["default"]);
 
     await user.selectOptions(screen.getByRole("combobox"), "demo-clinic-b");
-    expect(await screen.findByRole("button", { name: "Open intake #clinic-b" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Open intake #clinic-a" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open intake #clinic-b-01" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open intake #clinic-a-01" })).not.toBeInTheDocument();
     expect(api.listIntakes.mock.calls.map((c) => c[1])).toEqual(["default", "demo-clinic-b"]);
   });
 
@@ -717,5 +717,45 @@ describe("Staff review workspace (#71)", () => {
     const details = screen.getByTestId("fhir-preview").closest("details")!;
     expect(details).not.toHaveAttribute("open");
     expect(within(details).getByText("JSON preview (6 entries)")).toBeInTheDocument();
+  });
+});
+
+describe("Seeded intake references (#84)", () => {
+  it("gives seeded queue rows distinct visible and accessible references, and keeps the full id for the API", async () => {
+    const meB = { ...ME, user_id: "demo-admin-b", memberships: [{ clinic_id: "demo-clinic-b", role: "clinic_admin" }] };
+    const rows = [
+      summary("demo-intake-b1", "submitted", null),
+      summary("demo-intake-b2", "needs_review", "low_confidence"),
+      summary("demo-intake-b3", "escalated", "emergency_signal"),
+      summary("demo-intake-b4", "reviewed", "low_confidence"),
+    ];
+    const api = makeApi({
+      fetchStaffMe: vi.fn().mockResolvedValue(ok(meB)),
+      listIntakes: vi.fn().mockResolvedValue(ok(rows)),
+      getIntake: vi.fn().mockResolvedValue(ok(detail({ id: "demo-intake-b2", clinic_id: "demo-clinic-b" }))),
+    });
+    const user = await signIn(api);
+    await screen.findByRole("table");
+    await user.click(screen.getByRole("button", { name: /^All/ }));
+
+    const names = rows.map((r) => `Open intake #${r.id}`);
+    for (const name of names) expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    expect(new Set(names).size).toBe(4);
+    expect(screen.queryByText("#demo-int")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Open intake #demo-intake-b2" }));
+    expect(await screen.findByRole("heading", { name: "Intake #demo-intake-b2" })).toBeInTheDocument();
+    // Display only: the API still receives the full id
+    expect(api.getIntake).toHaveBeenCalledWith(TOKEN, "demo-clinic-b", "demo-intake-b2");
+    expect(screen.getByRole("button", { name: "Open intake #demo-intake-b2" })).toHaveAttribute("data-intake-id", "demo-intake-b2");
+  });
+
+  it("keeps the short form for hash ids", async () => {
+    const api = makeApi({ listIntakes: vi.fn().mockResolvedValue(ok([summary("2f005d14d0fc4de1acc4879d586481a3", "needs_review", "emergency_signal")])) });
+    await signIn(api);
+    expect(await screen.findByRole("button", { name: "Open intake #2f005d14" })).toHaveAttribute(
+      "data-intake-id",
+      "2f005d14d0fc4de1acc4879d586481a3",
+    );
   });
 });

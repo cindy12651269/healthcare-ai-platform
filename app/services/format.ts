@@ -16,5 +16,10 @@ export function formatStaffDateTime(iso: string | null | undefined, missing = "â
   return Number.isNaN(d.getTime()) ? iso : `${STAFF_DATE_TIME.format(d)} UTC`;
 }
 
-// Readable short reference for an intake id (full id stays available in the detail view)
-export const intakeRef = (id: string) => `#${id.slice(0, 8)}`;
+// Readable reference for an intake id (#84). Hash-like ids (32-hex or UUID) are shortened to their
+// first 8 characters (#2f005d14); any other id, such as the seeded "demo-intake-b2", is shown in full,
+// because a prefix of it is shared by every seeded record. Display only: API calls, data attributes and
+// the detail view always use the full id.
+const HASH_LIKE_ID = /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+
+export const intakeRef = (id: string) => `#${HASH_LIKE_ID.test(id) ? id.slice(0, 8) : id}`;
