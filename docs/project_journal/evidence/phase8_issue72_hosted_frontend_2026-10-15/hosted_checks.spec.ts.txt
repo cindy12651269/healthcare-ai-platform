@@ -1,0 +1,110 @@
+// Evidence copy (#72 post-deployment, 2026-10-15): the read-only hosted spot-check spec that produced this directory.
+// Run once with a scratch Playwright config (baseURL https://healthcare-ai-frontend-1s23.onrender.com, Chromium/Firefox/WebKit).
+// Kept as .txt on purpose: the committed suite in app/e2e never targets the hosted demo.
+import { expect, Page, test } from "@playwright/test";
+// Page loads, keyboard focus and screenshots only. No form is submitted and no sign-in is attempted.
+const SHOTS = "./shots"; // converted to JPEG for this directory
+const API = "https://healthcare-ai-api-tovn.onrender.com/**";
+const PAGES = ["/", "/intake", "/staff", "/system-card"];
+const slug = (p: string) => (p === "/" ? "dashboard" : p.slice(1));
+let TAB = "Tab";
+test.beforeEach(({ browserName }) => { TAB = browserName === "webkit" ? "Alt+Tab" : "Tab"; });
+const overflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+
+for (const scheme of ["light", "dark"] as const) {
+  test.describe(scheme, () => {
+    test.use({ colorScheme: scheme });
+    for (const path of PAGES) {
+      test(`${path} landmarks, lang, skip link, focus on every Tab stop`, async ({ page, browserName }, info) => {
+        const consoleErrors: string[] = [];
+        const faviconRequests: string[] = [];
+        page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
+        page.on("request", (r) => r.url().endsWith("/favicon.ico") && faviconRequests.push(r.url()));
+        await page.goto(path);
+        await page.waitForLoadState("networkidle"); // API-loaded content (system card) is present before the walk
+        await expect(page.locator("h1")).toHaveCount(1);
+        await expect(page.locator("html")).toHaveAttribute("lang", "en");
+        await expect(page.getByRole("main")).toHaveCount(1);
+        await page.keyboard.press(TAB);
+        const skip = page.getByRole("link", { name: "Skip to main content" });
+        await expect(skip).toBeFocused();
+        await expect(skip).toBeInViewport();
+        if (browserName === "chromium") await page.screenshot({ path: `${SHOTS}/${slug(path)}-skiplink-1280-${scheme}.png` });
+        let stops = 0;
+        for (let i = 0; i < 120; i++) {
+          await page.keyboard.press(TAB);
+          const s = await page.evaluate(() => {
+            const el = document.activeElement as HTMLElement | null;
+            if (!el || el === document.body) return null;
+            if (el.dataset.hv) return { wrapped: true } as const;
+            el.dataset.hv = "1";
+            el.scrollIntoView({ block: "center" });
+            const r = el.getClientRects()[0] ?? el.getBoundingClientRect();
+            const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            const cs = getComputedStyle(el);
+            return { wrapped: false, tag: el.tagName, indicator: (cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) >= 2) || cs.boxShadow !== "none", unobscured: !!hit && (hit === el || el.contains(hit)) };
+          });
+          if (!s || s.wrapped) break;
+          stops++;
+          expect(s.indicator, `stop ${stops} ${s.tag} indicator`).toBe(true);
+          expect(s.unobscured, `stop ${stops} ${s.tag} unobscured`).toBe(true);
+        }
+        info.annotations.push({ type: "tab-stops", description: String(stops) });
+        info.annotations.push({ type: "console-errors", description: JSON.stringify(consoleErrors) });
+        info.annotations.push({ type: "favicon-requests", description: String(faviconRequests.length) });
+        expect(faviconRequests).toHaveLength(0);
+      });
+    }
+  });
+}
+
+for (const path of PAGES) {
+  test(`${path} 200% zoom, 390 px mobile, 200% text: no horizontal scroll`, async ({ browser, browserName }) => {
+    for (const scheme of ["light", "dark"] as const) {
+      const ctx = await browser.newContext({ viewport: { width: 640, height: 900 }, deviceScaleFactor: 2, colorScheme: scheme });
+      const page = await ctx.newPage();
+      await page.goto(path);
+      await expect(page.locator("h1")).toBeVisible();
+      expect(await overflow(page), "200% zoom").toBeLessThanOrEqual(0);
+      if (browserName === "chromium") await page.screenshot({ path: `${SHOTS}/${slug(path)}-zoom200-${scheme}.png` });
+      await page.setViewportSize({ width: 390, height: 844 });
+      expect(await overflow(page), "390 px").toBeLessThanOrEqual(0);
+      if (browserName === "chromium" && scheme === "light") await page.screenshot({ path: `${SHOTS}/${slug(path)}-390-light.png` });
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.addStyleTag({ content: "html { font-size: 200% !important; }" });
+      expect(await overflow(page), "200% text").toBeLessThanOrEqual(0);
+      await ctx.close();
+    }
+  });
+}
+
+test("reduced motion: no animation or transition over 10 ms", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const path of PAGES) {
+    await page.goto(path);
+    await expect(page.locator("h1")).toBeVisible();
+    const slow = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("*")].map((el) => getComputedStyle(el))
+      .filter((s) => [s.animationDuration, s.transitionDuration].some((d) => d.split(",").some((v) => parseFloat(v) * (v.trim().endsWith("ms") ? 1 : 1000) > 10))).length);
+    expect(slow, path).toBe(0);
+  }
+});
+
+test("styled 404 for an unknown URL", async ({ page, browserName }) => {
+  const res = await page.goto("/does-not-exist-issue-72");
+  expect(res?.status()).toBe(404);
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Return to the dashboard" })).toHaveAttribute("href", "/");
+  await expect(page.getByRole("navigation", { name: "Demo sections" })).toBeVisible();
+  if (browserName === "chromium") await page.screenshot({ path: `${SHOTS}/404-1280-light.png`, fullPage: true });
+});
+
+test("API blocked in this browser only: dashboard and system card show error states", async ({ page, browserName }) => {
+  await page.route(API, (r) => r.abort("connectionrefused"));
+  await page.goto("/");
+  await expect(page.getByText("Waking the demo server").first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId("status-api")).toHaveText("Unreachable", { timeout: 120_000 });
+  await expect(page.getByRole("complementary", { name: "Live system status" }).getByRole("button", { name: "Try again" })).toBeVisible();
+  if (browserName === "chromium") await page.screenshot({ path: `${SHOTS}/dashboard-api-blocked-1280-light.png` });
+  await page.goto("/system-card");
+  await expect(page.getByText("The system card could not be loaded from the API.")).toBeVisible({ timeout: 30_000 });
+});

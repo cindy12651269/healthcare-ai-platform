@@ -808,3 +808,37 @@ Defects found and fixed: missing page language (3.1.1). No critical keyboard or 
 * CI runs Chromium only; Firefox and WebKit run locally with `E2E_ALL_BROWSERS=1`.
 * Bundle re-scan after the final changes (2026-10-15): `NEXT_PUBLIC_*` is only `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEMO_MODE`. A grep of `.next/static` and the prerendered HTML for key, secret, database-URL, private-key and staff-token patterns found no matches.
 * Final local run: 35 Playwright tests × 3 browsers = **105 passed** (4.3 min). 238 Vitest tests passed; lint, typecheck and build passed.
+
+### 7i. Post-deployment hosted validation (2026-10-15)
+
+Evidence: [`evidence/phase8_issue72_hosted_frontend_2026-10-15/`](evidence/phase8_issue72_hosted_frontend_2026-10-15/README.md). All checks were read-only: no intake submitted, no sign-in, no staff transition, no webhook.
+
+* **Deployment confirmed.** At 14:24 UTC the hosted `/` served `<html lang="en">`, the new meta description and the inline SVG icon. `/does-not-exist-e72` returned HTTP 404 with the styled "Page not found" page. All of these come only from PR #87 (merge `68db16a`).
+* **Lighthouse** (13.5.0 CLI, headless Chrome 155.0.8059.40, https://healthcare-ai-frontend-1s23.onrender.com/, single runs; scores are Performance / Accessibility / Best practices / SEO):
+
+| Run | Before (§7f) | After deployment | Fetch time (UTC) |
+|---|---|---|---|
+| Mobile | 96 / 96 / 96 / 90 | **99 / 100 / 100 / 100** | 14:24:52 |
+| Desktop | 100 / 96 / 96 / 90 | **100 / 100 / 100 / 100** | 14:25:19 |
+
+  After deployment, `html-has-lang`, `meta-description` and `errors-in-console` pass; the favicon 404 is gone.
+  * Still below 0.9: `unused-javascript` (about 40 KiB), `legacy-javascript-insight` (about 13 KiB) and `render-blocking-insight`. These are unchanged and out of scope.
+  * Mobile metrics: FCP 1.0 s, LCP 1.7 s, TBT 0 ms, CLS 0.004, SI 2.6 s.
+  * Single runs vary, so this is not a score claim.
+* **Browser spot checks.** 45/45 passed across Chromium 153, Firefox 155 and WebKit 26.6, run 14:32–14:38 UTC. On each of the four pages, in light and dark:
+  * `lang="en"`, one h1 and one main.
+  * The skip link is the first stop and visible.
+  * Every Tab stop has a visible, unobscured focus indicator. Stops after the skip link: `/` 31, `/intake` 12, `/staff` 9, `/system-card` 12. The walk starts after network idle, because system-card content loads from the API.
+  * No console errors and no `/favicon.ico` request.
+
+  Also checked:
+  * No horizontal scrolling at 200% zoom (640 px at 2×), at 390 px, or with 200% text.
+  * No animation or transition over 10 ms with reduced motion.
+  * The styled 404 page.
+  * With the API blocked in the browser, the dashboard shows Unreachable and "Try again", and the system card shows its load error.
+
+  Not tested on the hosted site, to avoid submissions: intake and staff network loss. Both are covered locally (§7d).
+* **Agent-observed screenshots:** the 404 page, the dark-theme skip-link focus ring, the API-blocked dashboard and the 200% dark intake layout render as expected.
+* **Still NOT VERIFIED:** native Safari (WebDriver needs "Allow remote automation") and a VoiceOver or other screen-reader pass. This is not a WCAG 2.2 AA conformance claim.
+
+**Verdict:** hosted validation PASS for the checks above. Native Safari and screen-reader checks remain deferred.
