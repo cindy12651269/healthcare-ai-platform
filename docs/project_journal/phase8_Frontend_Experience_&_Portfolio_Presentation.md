@@ -651,3 +651,17 @@ No token, database URL or secret is included.
 * **PASS:** clinic isolation (UI and API), both transitions with confirmation, pending state, success and timeline/actor updates, FHIR summary, preview, download and validation, responsive layout and focus in both themes, UTC dates and token hygiene.
 * **Open defect:** readable references are ambiguous for seeded ids (above). It does not affect access control or data, but it does affect the *readable intake references* criterion and needs a frontend follow-up.
 
+
+### 6e. Follow-up #84 — distinct intake references (in review)
+
+The §6d defect is tracked as #84 (branch `fix/issue-84-intake-references`). `intakeRef()` (`app/services/format.ts`) now shortens only hash-like ids (32-hex or a hyphenated UUID) to their first 8 characters (`#2f005d14`), and shows any other id in full (`#demo-intake-b2`). The change is display only: API calls, `data-intake-id`, transitions, FHIR and audit data keep using the full id. No backend, database, seed, auth or FHIR change.
+
+**Tests.** New `app/tests/format.test.ts` (8):
+* seeded ids, 32-hex ids and UUIDs (both cases);
+* all eight seeded ids give distinct references;
+* near-hash ids are not shortened;
+* explicit UTC formatting.
+
+`StaffReview.test.tsx` gains 2: four seeded clinic-B rows with distinct visible and accessible names (*"Open intake #demo-intake-b1"* …), the detail heading, and the API still receiving the full id; and the short form kept for hash ids. Four existing assertions now expect full non-hash references (`#flagged-0001`, `#clinic-a-01`, `#clinic-b-01`). Total **203 passed** (193 before). Lint, typecheck and build pass.
+
+**Not yet verified:** no browser screenshots were taken for this change (the local fixture API uses hex ids only), and the hosted queue needs a re-check after a future frontend deploy.
