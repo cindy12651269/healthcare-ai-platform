@@ -699,3 +699,48 @@ Synthetic data only.
 
 **Verdict for #84 on the hosted demo: PASS.** Clinic B's four seeded intakes now have distinct visible and accessible references and headings. Full ids are unchanged for data attributes and API calls, and the layout passes at 390, 768 and 1280 px in both themes.
 
+
+## 7. Issue 72 — Accessibility, Frontend Quality & Browser E2E Validation (PARTIAL, 2026-10-15)
+
+This was a 10-minute timeboxed pass, so the PR is **partial**. This section lists only what was actually run. It makes no WCAG conformance claim.
+
+### 7a. Implemented
+
+* Route-level error boundary (`components/ErrorBoundary.tsx`, wired in `pages/_app.tsx` and keyed by route). It shows a styled fallback, never renders error details and only logs to the browser console.
+* Styled `pages/404.tsx` and `pages/500.tsx`, rendered inside the app shell through a shared `components/ErrorPage.tsx`.
+* `tests/ErrorHandling.test.tsx`: 404, 500 and boundary fallback, with no leaked error message.
+* `tests/contrast.test.ts`: computes WCAG contrast ratios from `styles/tokens.css` for 16 foreground/background token pairs in both the light and dark themes.
+
+### 7b. Accessibility findings (2026-10-15)
+
+| Criterion | Page | Finding | Status | Evidence |
+|---|---|---|---|---|
+| 1.4.3 Contrast (Minimum) | All (tokens) | Text, muted text, link, on-primary, on-danger, danger and highlight pairs are ≥ 4.5:1 in light and dark | PASS (token level only) | `tests/contrast.test.ts` |
+| 1.4.11 Non-text Contrast | All (tokens) | Focus ring and strong control border are ≥ 3:1 against bg/surface in both themes | PASS (token level only) | `tests/contrast.test.ts` |
+| 2.4.1 Bypass Blocks | All | A skip link targets `main#main` | Present in code | `components/AppShell.tsx` |
+| 2.4.7 / 2.4.11 Focus Visible / Not Obscured | All | Global 3px `:focus-visible` outline exists. Obscuring was not tested in a browser | NOT VERIFIED | `styles/globals.css` |
+| 1.3.1 / 2.4.6 Landmarks, headings | All + error pages | header/nav/main/footer landmarks; error pages have an h1 | Partially verified (unit tests) | `tests/ErrorHandling.test.tsx`, existing `ui.test.tsx` |
+| 2.1.1 Keyboard | All | Full keyboard-only walkthrough not performed | NOT VERIFIED | — |
+| 3.3.1 / 4.1.3 Errors, live regions | Intake, Staff | Not re-audited in this pass | NOT VERIFIED | — |
+| 1.4.4 / 1.4.10 Resize 200% / Reflow | All | Not tested | NOT VERIFIED | — |
+| 2.3.3 Reduced motion | All | A `prefers-reduced-motion` rule exists. Not tested in a browser | NOT VERIFIED | `styles/globals.css` |
+
+No critical keyboard or contrast **defect** was found in what was tested. Because keyboard behaviour was not verified in a browser, the "no open critical keyboard failures" criterion is still **pending**.
+
+### 7c. Frontend quality (run locally, 2026-10-15)
+
+* `npm run lint`: pass. `npm run typecheck`: pass. `npm test`: 10 files, 238 tests passed. `npm run build`: compiled successfully. Routes `/`, `/404`, `/500`, `/intake`, `/staff` and `/system-card` were all prerendered as static. Page sizes were not printed by this Next.js version and are not recorded.
+* Bundle scan of `.next/static`: the only `NEXT_PUBLIC_*` names are `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEMO_MODE`. A grep for API-key, token, database-URL and private-key patterns found no secrets. The only hits were the UI constant name `WEBHOOK_BRANCH` (system-card copy).
+
+### 7d. Pending (not done in this PR)
+
+* **Browser E2E**: Playwright was **not** introduced and no automated E2E ran, so `docs/decisions.md` is unchanged. Scripted manual checklist, not yet executed:
+  1. Start the local mock stack (`docker compose up`, `LLM_MODE=mock`, no `ESCALATION_WEBHOOK_URL`).
+  2. Landing → Patient intake → submit a routine synthetic sample → confirm the outcome renders.
+  3. Staff review → sign in with a locally generated test-only token → queue → open detail → FHIR preview.
+  4. Visit `/does-not-exist` → styled 404.
+  Record the date and results here when executed.
+* Lighthouse on the hosted frontend: not run.
+* Cross-browser spot check (Chrome, WebKit/Safari, Firefox): not run.
+* Keyboard-only walkthrough, 200% zoom, reduced motion, live-region and error-message audit: not run.
+* API-unreachable/network-loss states: existing page-level handling was not re-reviewed in this pass.
