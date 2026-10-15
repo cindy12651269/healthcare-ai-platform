@@ -700,7 +700,7 @@ Synthetic data only.
 **Verdict for #84 on the hosted demo: PASS.** Clinic B's four seeded intakes now have distinct visible and accessible references and headings. Full ids are unchanged for data attributes and API calls, and the layout passes at 390, 768 and 1280 px in both themes.
 
 
-## 7. Issue 72 — Accessibility, Frontend Quality & Browser E2E Validation (PARTIAL, 2026-10-15)
+## 7. Issue 72 — Accessibility, Frontend Quality & Browser E2E Validation (2026-10-15)
 
 This was a 10-minute timeboxed pass, so the PR is **partial**. This section lists only what was actually run. It makes no WCAG conformance claim.
 
@@ -732,15 +732,41 @@ No critical keyboard or contrast **defect** was found in what was tested. Becaus
 * `npm run lint`: pass. `npm run typecheck`: pass. `npm test`: 10 files, 238 tests passed. `npm run build`: compiled successfully. Routes `/`, `/404`, `/500`, `/intake`, `/staff` and `/system-card` were all prerendered as static. Page sizes were not printed by this Next.js version and are not recorded.
 * Bundle scan of `.next/static`: the only `NEXT_PUBLIC_*` names are `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEMO_MODE`. A grep for API-key, token, database-URL and private-key patterns found no secrets. The only hits were the UI constant name `WEBHOOK_BRANCH` (system-card copy).
 
-### 7d. Pending (not done in this PR)
+### 7d. Browser E2E, accessibility and resilience (Playwright, local, 2026-10-15)
 
-* **Browser E2E**: Playwright was **not** introduced and no automated E2E ran, so `docs/decisions.md` is unchanged. Scripted manual checklist, not yet executed:
-  1. Start the local mock stack (`docker compose up`, `LLM_MODE=mock`, no `ESCALATION_WEBHOOK_URL`).
-  2. Landing → Patient intake → submit a routine synthetic sample → confirm the outcome renders.
-  3. Staff review → sign in with a locally generated test-only token → queue → open detail → FHIR preview.
-  4. Visit `/does-not-exist` → styled 404.
-  Record the date and results here when executed.
-* Lighthouse on the hosted frontend: not run.
-* Cross-browser spot check (Chrome, WebKit/Safari, Firefox): not run.
-* Keyboard-only walkthrough, 200% zoom, reduced motion, live-region and error-message audit: not run.
-* API-unreachable/network-loss states: existing page-level handling was not re-reviewed in this pass.
+Command (from `app/`, Docker running):
+`E2E_DATABASE_URL=$(../scripts/e2e_local_db.sh start) npm run e2e` (add `E2E_ALL_BROWSERS=1` for Firefox and WebKit), then `../scripts/e2e_local_db.sh stop`.
+The stack is a throwaway `postgres:15` container, the API in mock mode via `scripts/e2e_api.sh` (test-only user, a one-hour token signed with a per-run random secret, webhook URL and secret empty, non-local DB refused), and a production build pointed at it. The hosted demo is never contacted.
+
+* `app/e2e/smoke.spec.ts`: landing → routine intake → outcome (`submitted`); staff sign-in with the test token → queue (All) → detail → FHIR preview (`"resourceType": "Bundle"`); unknown route → styled 404 (HTTP 404).
+* `app/e2e/a11y.spec.ts` (automated): on all four pages in light and dark themes, one banner/main/contentinfo, the nav landmark, exactly one h1, skip link as the first Tab stop (visible, moves focus to `main`), a visible focus indicator on the next 15 Tab stops, and no horizontal overflow at 320 CSS px (1.4.10). Also no animation or transition over 10 ms with `prefers-reduced-motion: reduce`, keyboard-only intake completion and submission, `aria-invalid` on empty staff sign-in, and Escape closing the mobile menu with focus returned to the toggle.
+* `app/e2e/resilience.spec.ts`: requests to the API blocked in the browser. Dashboard: waking notice, then "Unreachable" plus "Try again". System card: load error alert. Intake (network lost after load): unreachable alert, with the text kept. Staff sign-in: unreachable alert. No code change was needed; existing handling behaved as designed.
+* **Results:** 27 tests × Chromium 153.0.8010.12, Firefox 155.0 and WebKit 26.6 (Playwright builds) = **81 passed**, run twice consecutively with no failures (about 4.2 min each). WebKit stands in for Safari; native Safari was not tested. In WebKit, keyboard tests use Option+Tab, because by macOS default Tab skips links and buttons. This is platform behaviour, not an app defect.
+* CI: the new `e2e` job runs the suite on Chromium against a PostgreSQL service with a test token generated in the job.
+
+### 7e. Accessibility findings, updated (2026-10-15)
+
+"Automated" means asserted by a committed test. "Manual" would mean a human observation, and none were made in this pass. This is not a conformance claim.
+
+| Criterion | Pages | Finding | Status | Evidence |
+|---|---|---|---|---|
+| 1.3.1 Info and relationships / landmarks, headings | all 4, both themes | One banner, main and contentinfo, labelled nav, single h1 | PASS (automated) | `e2e/a11y.spec.ts` |
+| 1.4.3 / 1.4.11 Contrast | all (tokens) | Token pairs ≥ 4.5:1 for text and ≥ 3:1 for focus and borders, light and dark. Rendered-pixel contrast not measured | PASS (token level, automated) | `tests/contrast.test.ts` |
+| 1.4.4 / 1.4.10 Resize / Reflow | all 4, both themes | No horizontal scroll at 320 CSS px. Browser 200% text zoom not tested separately | PASS (automated, viewport emulation) | `e2e/a11y.spec.ts` |
+| 2.1.1 Keyboard | intake, staff, nav | Intake completed and submitted with keyboard only; staff field reachable; menu Escape works | PASS (automated, partial flows) | `e2e/a11y.spec.ts` |
+| 2.4.1 Bypass blocks | all 4 | Skip link is the first Tab stop and focuses main | PASS (automated) | `e2e/a11y.spec.ts` |
+| 2.4.3 Focus order | all 4 | Only the start of the order was checked; the full order was not reviewed by a person | NOT VERIFIED | — |
+| 2.4.7 Focus visible | all 4, both themes | First 15 Tab stops show an outline ≥ 2px or a box-shadow | PASS (automated, sampled) | `e2e/a11y.spec.ts` |
+| 2.4.11 Focus not obscured | all 4 | Not tested | NOT VERIFIED | — |
+| 2.3.3 Animation from interactions / reduced motion | all 4 | No animation or transition over 10 ms when reduce is set | PASS (automated) | `e2e/a11y.spec.ts` |
+| 3.3.1 / 3.3.2 Error identification, labels | intake, staff | `aria-invalid` on empty token; errors are `role=alert` (unit tests plus resilience E2E) | PASS (automated) | `e2e/*.spec.ts`, `tests/*` |
+| 4.1.3 Status messages | intake, dashboard | Submission progress and system status use `role=status` (unit tests) | PASS (unit level) | `tests/IntakePage.test.tsx`, `Dashboard.test.tsx` |
+| Screen-reader announcement quality | all | No screen reader used | NOT VERIFIED | — |
+
+No critical keyboard or contrast defect was found by these checks, so no fix was required.
+
+### 7f. Pending
+
+* Lighthouse on the hosted frontend: **not run** (time limit). No scores are recorded.
+* Native Safari (WebKit was used instead), a screen-reader pass, and a manual focus-order and focus-obscured review.
+* Bundle re-scan after this change: `NEXT_PUBLIC_*` is still only `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_DEMO_MODE`. The grep for keys, tokens (including the `v1.` staff-token shape), `AUTH_TOKEN_SECRET`, database URLs and private keys found nothing.
