@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Alert, LoadingMessage, ReasonLabel, ReasonList, StatusBadge } from "./ui";
 import { IntakeTimeline, RecordedMatch, StaffApi, TimelineEvent } from "../services/staffApi";
+import { formatStaffDateTime } from "../services/format";
 
 // "Why flagged" evidence and review timeline for one intake (#41). Shows persisted data only:
 // recorded guard matches are highlighted where they literally occur in the original input;
@@ -25,7 +26,7 @@ const show = (v: unknown): string => {
   return String(v);
 };
 
-const when = (at: string | null) => (at ? new Date(at).toLocaleString() : "Time not recorded");
+const when = (at: string | null) => formatStaffDateTime(at, "Time not recorded");
 
 // Splits the input into plain and highlighted parts for each recorded match found in it (case-insensitive)
 export function highlightMatches(text: string, matches: RecordedMatch[]): ReactNode[] {
@@ -217,16 +218,28 @@ export default function IntakeEvidence({
         {events.length === 0 ? (
           <p className="muted">No events have been recorded for this intake.</p>
         ) : (
-          <ol className="timeline" data-testid="timeline">
+          <ol className="timeline timeline-vertical" data-testid="timeline">
             {events.map((e, i) => (
               <li key={`${e.kind}-${i}`} data-kind={e.kind}>
-                <strong>{EVENT_LABELS[e.kind]}</strong> <span className="muted">{when(e.at)}</span>
-                <div>
-                  <EventDetails event={e} />
+                <span className="timeline-marker" aria-hidden="true" />
+                <div className="timeline-body">
+                  <strong>{EVENT_LABELS[e.kind]}</strong>{" "}
+                  <time className="muted" dateTime={e.at ?? undefined}>
+                    {when(e.at)}
+                  </time>
+                  <div>
+                    <EventDetails event={e} />
+                  </div>
                 </div>
               </li>
             ))}
           </ol>
+        )}
+        {/* Only recorded deliveries are shown; their absence is stated, never read as "sent" or "disabled" */}
+        {events.length > 0 && !events.some((e) => e.kind === "webhook_delivery") && (
+          <p className="muted small" data-testid="no-webhook-delivery">
+            No webhook delivery is recorded for this intake.
+          </p>
         )}
         {notes.map((n) => (
           <p key={n} className="muted" data-testid="timeline-note">

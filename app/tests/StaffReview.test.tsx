@@ -163,13 +163,15 @@ describe("StaffReview sign-in", () => {
     expect(screen.queryByTestId("staff-access-policy")).not.toBeInTheDocument();
   });
 
-  it("signs in with the staff token and loads the own-clinic needs_review queue", async () => {
+  it("signs in with the staff token and loads the own-clinic queue, showing needs_review first", async () => {
     const api = makeApi();
     await signIn(api);
 
     expect(api.fetchStaffMe).toHaveBeenCalledWith(TOKEN);
     expect(await screen.findByText("staff-a@example.test")).toBeInTheDocument();
-    expect(api.listIntakes).toHaveBeenCalledWith(TOKEN, "default", "needs_review");
+    // One unfiltered list call for the signed-in clinic only; the tabs filter that response (#71)
+    expect(api.listIntakes).toHaveBeenCalledWith(TOKEN, "default", null);
+    expect(screen.getByRole("button", { name: /Needs review/ })).toHaveAttribute("aria-pressed", "true");
     const rows = within(await screen.findByRole("table")).getAllByRole("row");
     expect(rows).toHaveLength(2); // header + one intake
     expect(rows[1]).toHaveTextContent("Needs review");
@@ -182,8 +184,9 @@ describe("StaffReview sign-in", () => {
     const api = makeApi({ fetchStaffMe: vi.fn().mockResolvedValue(fail("unauthorized", 401)) });
     await signIn(api, "bad-token");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(STAFF_MESSAGES.unauthorized);
+    expect(await screen.findByRole("alert")).toHaveTextContent("This token was not accepted: it is invalid or has expired.");
     expect(screen.getByRole("heading", { name: "Staff sign-in" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Access token")).toHaveAttribute("aria-invalid", "true");
     expect(api.listIntakes).not.toHaveBeenCalled();
   });
 
@@ -203,23 +206,42 @@ describe("StaffReview sign-in", () => {
 });
 
 describe("StaffReview queue", () => {
-  it("filters by review status through the API", async () => {
-    const api = makeApi();
+  it("filters by status tabs with counts taken from the one list response (#71)", async () => {
+    const api = makeApi({
+      listIntakes: vi.fn().mockResolvedValue(
+        ok([
+          summary("flagged-0001", "needs_review", "emergency_signal"),
+          summary("flagged-0002", "needs_review", "low_confidence"),
+          summary("done-0003", "reviewed", "blocked_prescription"),
+          summary("plain-0004", "submitted", null),
+        ]),
+      ),
+    });
     const user = await signIn(api);
     await screen.findByRole("table");
 
-    api.listIntakes.mockResolvedValueOnce(ok([summary("done-0002", "reviewed", "low_confidence")]));
-    await user.selectOptions(screen.getByLabelText("Status"), "reviewed");
-    expect(api.listIntakes).toHaveBeenLastCalledWith(TOKEN, "default", "reviewed");
-    expect(await screen.findByText("low_confidence")).toBeInTheDocument();
+    const tab = (name: RegExp) => screen.getByRole("button", { name });
+    expect(tab(/^Needs review/)).toHaveTextContent("Needs review2");
+    expect(tab(/^Reviewed/)).toHaveTextContent("Reviewed1");
+    expect(tab(/^Escalated/)).toHaveTextContent("Escalated0");
+    expect(tab(/^Submitted/)).toHaveTextContent("Submitted1");
+    expect(tab(/^All/)).toHaveTextContent("All4");
+    // Accessible names keep the label and count apart
+    expect(screen.getByRole("button", { name: "Needs review, 2 intakes" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reviewed, 1 intake" })).toBeInTheDocument();
+    expect(screen.getByTestId("queue-scope")).toHaveTextContent("Counts are from the 4 intakes returned for clinic default");
+    expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(3);
 
-    api.listIntakes.mockResolvedValueOnce(ok([]));
-    await user.selectOptions(screen.getByLabelText("Status"), "escalated");
-    expect(api.listIntakes).toHaveBeenLastCalledWith(TOKEN, "default", "escalated");
-
-    api.listIntakes.mockResolvedValueOnce(ok([]));
-    await user.selectOptions(screen.getByLabelText("Status"), "All");
-    expect(api.listIntakes).toHaveBeenLastCalledWith(TOKEN, "default", null);
+    await user.click(tab(/^Reviewed/));
+    expect(tab(/^Reviewed/)).toHaveAttribute("aria-pressed", "true");
+    expect(within(screen.getByRole("table")).getByText("Blocked: prescription or dosing")).toBeInTheDocument();
+    await user.click(tab(/^Escalated/));
+    expect(screen.getByText("No intakes with this status.")).toBeInTheDocument();
+    await user.click(tab(/^All/));
+    expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(5);
+    // Switching tabs never refetches or requests another clinic
+    expect(api.listIntakes).toHaveBeenCalledTimes(1);
+    expect(api.listIntakes.mock.calls.every((c) => c[1] === "default")).toBe(true);
   });
 
   it("shows an empty state", async () => {
@@ -285,17 +307,24 @@ describe("StaffReview detail and transitions", () => {
     const listCalls = api.listIntakes.mock.calls.length;
 
     await user.click(screen.getByRole("button", { name: button }));
+    // Confirmation step first: nothing is sent yet
+    expect(api.transitionIntake).not.toHaveBeenCalled();
+    const confirm = screen.getByRole("button", { name: `Confirm: mark ${target}` });
+    await waitFor(() => expect(confirm).toHaveFocus());
+    await user.click(confirm);
+    // Pending: both actions disabled, a second click sends nothing
     expect(screen.getByText("Updating status…")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mark reviewed" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Mark escalated" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: button }));
+    expect(screen.queryByTestId("confirm-step")).not.toBeInTheDocument();
     expect(api.transitionIntake).toHaveBeenCalledTimes(1);
     expect(api.transitionIntake).toHaveBeenCalledWith(TOKEN, "default", "flagged-0001", target);
 
     api.listIntakes.mockResolvedValueOnce(ok([]));
     pending.resolve(ok(detail({ review_status: target })));
 
-    expect(await screen.findByText(`Marked ${target}.`)).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(`Marked ${target}\\.`))).toBeInTheDocument();
     expect(screen.getByTestId("detail-status")).toHaveTextContent(label);
     // Queue is refetched so the resolved intake leaves the needs_review list
     await waitFor(() => expect(api.listIntakes.mock.calls.length).toBe(listCalls + 1));
@@ -311,6 +340,7 @@ describe("StaffReview detail and transitions", () => {
     await openFirst(user);
 
     await user.click(screen.getByRole("button", { name: "Mark reviewed" }));
+    await user.click(screen.getByRole("button", { name: "Confirm: mark reviewed" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(STAFF_MESSAGES.network);
     expect(screen.getByTestId("detail-status")).toHaveTextContent("Needs review");
     expect(screen.getByRole("button", { name: "Mark reviewed" })).toBeEnabled();
@@ -323,6 +353,7 @@ describe("StaffReview detail and transitions", () => {
 
     api.getIntake.mockResolvedValueOnce(ok(detail({ review_status: "escalated" })));
     await user.click(screen.getByRole("button", { name: "Mark reviewed" }));
+    await user.click(screen.getByRole("button", { name: "Confirm: mark reviewed" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(STAFF_MESSAGES.conflict);
     await waitFor(() => expect(screen.getByTestId("detail-status")).toHaveTextContent("Escalated"));
@@ -515,5 +546,176 @@ describe("StaffReview FHIR export (#42)", () => {
 
     await user.click(await screen.findByRole("button", { name: "Load FHIR export" }));
     expect(await screen.findByText("The export contains no resources.")).toBeInTheDocument();
+  });
+});
+
+describe("Staff review workspace (#71)", () => {
+  it("sign-in explains operator-issued tokens without CLI instructions", () => {
+    render(<StaffReview api={makeApi()} />);
+    expect(screen.getByText(/short-lived access token the demo operator issued/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/python -m|issue-token/);
+    expect(screen.getByLabelText("Access token")).toHaveAttribute("type", "password");
+  });
+
+  it("never persists the token in localStorage, sessionStorage or cookies", async () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    const user = await signIn(makeApi());
+    await openFirst(user);
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
+    const stored = [
+      ...Object.keys(localStorage).map((k) => localStorage.getItem(k)),
+      ...Object.keys(sessionStorage).map((k) => sessionStorage.getItem(k)),
+      document.cookie,
+    ].join("|");
+    expect(stored).not.toContain(TOKEN);
+    expect(localStorage.length + sessionStorage.length).toBe(0);
+    expect(document.body.innerHTML).not.toContain(TOKEN);
+  });
+
+  it.each([
+    ["forbidden", 403, "This token is valid but has no staff access."],
+    ["unavailable", 503, STAFF_MESSAGES.unavailable],
+  ] as const)("shows a specific sign-in message for %s", async (kind, status, text) => {
+    await signIn(makeApi({ fetchStaffMe: vi.fn().mockResolvedValue(fail(kind, status)) }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(text);
+  });
+
+  it("formats every timestamp in UTC with an explicit en-US locale", async () => {
+    const user = await signIn(makeApi());
+    const row = within(await screen.findByRole("table")).getAllByRole("row")[1];
+    expect(row).toHaveTextContent("Oct 01, 2026, 10:00 UTC");
+    await openFirst(user);
+    expect(screen.getAllByText("Oct 01, 2026, 10:00 UTC").length).toBeGreaterThan(0);
+    const timeline = await screen.findByTestId("timeline");
+    expect(within(timeline).getByText("Oct 01, 2026, 10:05 UTC")).toHaveAttribute("datetime", "2026-10-01T10:05:00Z");
+  });
+
+  it("shows readable intake references and opens the detail with focus on its heading", async () => {
+    const user = await signIn(makeApi());
+    await user.click(await screen.findByRole("button", { name: "Open intake #flagged-" }));
+    const heading = await screen.findByRole("heading", { name: "Intake #flagged-" });
+    await waitFor(() => expect(heading).toHaveFocus());
+    expect(screen.getByText("flagged-0001")).toBeInTheDocument(); // full id in the detail
+  });
+
+  it("switches between queue and detail views with Back to queue (mobile/tablet)", async () => {
+    const user = await signIn(makeApi());
+    await screen.findByRole("table");
+    const workspace = document.querySelector(".workspace")!;
+    expect(workspace).toHaveAttribute("data-view", "queue");
+    await openFirst(user);
+    expect(workspace).toHaveAttribute("data-view", "detail");
+
+    await user.click(screen.getByRole("button", { name: "← Back to queue" }));
+    expect(workspace).toHaveAttribute("data-view", "queue");
+    expect(screen.queryByRole("heading", { name: /^Intake #/ })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Open intake #flagged-" })).toHaveFocus());
+  });
+
+  it("moves focus to Back to queue when the opened intake cannot be loaded", async () => {
+    const user = await signIn(makeApi({ getIntake: vi.fn().mockResolvedValue(fail("not_found", 404)) }));
+    await user.click(await screen.findByRole("button", { name: /^Open intake / }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(STAFF_MESSAGES.not_found);
+    await waitFor(() => expect(screen.getByRole("button", { name: "← Back to queue" })).toHaveFocus());
+  });
+
+  it("cancelling the confirmation sends nothing", async () => {
+    const api = makeApi();
+    const user = await signIn(api);
+    await openFirst(user);
+    await user.click(screen.getByRole("button", { name: "Mark escalated" }));
+    expect(screen.getByTestId("confirm-step")).toHaveTextContent("Mark this intake escalated?");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByTestId("confirm-step")).not.toBeInTheDocument();
+    expect(api.transitionIntake).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Mark reviewed" })).toBeEnabled();
+  });
+
+  it("refreshes the queue, detail and timeline after a successful transition", async () => {
+    const after = timeline({
+      review_status: "reviewed",
+      events: [
+        ...timeline().events.slice(0, 4),
+        { kind: "staff_transition", at: "2026-10-01T11:00:00Z", at_source: "review_events.created_at",
+          details: { actor_id: "demo-admin-a", from_status: "needs_review", to_status: "reviewed" } },
+      ],
+    });
+    const api = makeApi({ transitionIntake: vi.fn().mockResolvedValue(ok(detail({ review_status: "reviewed" }))) });
+    const user = await signIn(api);
+    await openFirst(user);
+    await screen.findByTestId("timeline");
+    const timelineCalls = api.getIntakeTimeline.mock.calls.length;
+    const listCalls = api.listIntakes.mock.calls.length;
+
+    api.getIntakeTimeline.mockResolvedValueOnce(ok(after));
+    await user.click(screen.getByRole("button", { name: "Mark reviewed" }));
+    await user.click(screen.getByRole("button", { name: "Confirm: mark reviewed" }));
+
+    expect(await screen.findByText(/Marked reviewed\. The queue and timeline were refreshed\./)).toBeInTheDocument();
+    await waitFor(() => expect(api.getIntakeTimeline.mock.calls.length).toBe(timelineCalls + 1));
+    await waitFor(() => expect(api.listIntakes.mock.calls.length).toBe(listCalls + 1));
+    const events = await screen.findByTestId("timeline");
+    await waitFor(() => expect(within(events).getByText("demo-admin-a", { exact: false })).toBeInTheDocument());
+    expect(within(events).getByText("Oct 01, 2026, 11:00 UTC")).toBeInTheDocument();
+  });
+
+  it("states when no webhook delivery is recorded instead of inventing one", async () => {
+    const user = await signIn(
+      makeApi({ getIntakeTimeline: vi.fn().mockResolvedValue(ok(timeline({ events: timeline().events.filter((e) => e.kind !== "webhook_delivery") }))) }),
+    );
+    await openFirst(user);
+    expect(await screen.findByTestId("no-webhook-delivery")).toHaveTextContent("No webhook delivery is recorded for this intake.");
+    expect(within(screen.getByTestId("timeline")).queryByText(/Webhook delivery/)).not.toBeInTheDocument();
+  });
+
+  it("requests only the signed-in clinic; a second membership is a separate, explicit switch (A/B isolation)", async () => {
+    const multi = { ...ME, memberships: [{ clinic_id: "default", role: "clinic_admin" }, { clinic_id: "demo-clinic-b", role: "clinic_admin" }] };
+    const api = makeApi({
+      fetchStaffMe: vi.fn().mockResolvedValue(ok(multi)),
+      listIntakes: vi.fn().mockImplementation((_t: string, clinic: string) =>
+        Promise.resolve(ok(clinic === "default" ? [summary("clinic-a-01", "needs_review", "emergency_signal")] : [summary("clinic-b-01", "needs_review", "low_confidence")])),
+      ),
+    });
+    const user = await signIn(api);
+    expect(await screen.findByRole("button", { name: "Open intake #clinic-a" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open intake #clinic-b" })).not.toBeInTheDocument();
+    expect(api.listIntakes.mock.calls.map((c) => c[1])).toEqual(["default"]);
+
+    await user.selectOptions(screen.getByRole("combobox"), "demo-clinic-b");
+    expect(await screen.findByRole("button", { name: "Open intake #clinic-b" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open intake #clinic-a" })).not.toBeInTheDocument();
+    expect(api.listIntakes.mock.calls.map((c) => c[1])).toEqual(["default", "demo-clinic-b"]);
+  });
+
+  it("a clinic B account never requests clinic A, and a 403 shows no records", async () => {
+    const meB = { ...ME, user_id: "demo-admin-b", memberships: [{ clinic_id: "demo-clinic-b", role: "clinic_admin" }] };
+    const api = makeApi({ fetchStaffMe: vi.fn().mockResolvedValue(ok(meB)), listIntakes: vi.fn().mockResolvedValue(fail("forbidden", 403)) });
+    await signIn(api);
+    expect(await screen.findByRole("alert")).toHaveTextContent(STAFF_MESSAGES.forbidden);
+    expect(api.listIntakes.mock.calls.every((c) => c[1] === "demo-clinic-b")).toBe(true);
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
+
+  it("summarises FHIR resources, keeps the JSON preview collapsed and states the disclaimer", async () => {
+    const bundle = {
+      resourceType: "Bundle",
+      type: "collection",
+      entry: ["QuestionnaireResponse", "Questionnaire", "Task", "Organization", "Device", "Provenance"].map((t, i) => ({
+        fullUrl: `urn:uuid:${i}`,
+        resource: { resourceType: t },
+      })),
+    };
+    const user = await signIn(makeApi({ exportIntakeFhir: vi.fn().mockResolvedValue(ok(bundle)) }));
+    await openFirst(user);
+    expect(await screen.findByTestId("fhir-disclaimer")).toHaveTextContent("not a FHIR conformance or certification claim");
+    await user.click(screen.getByRole("button", { name: "Load FHIR export" }));
+    const resources = await screen.findByTestId("fhir-resources");
+    for (const t of ["QuestionnaireResponse", "Questionnaire", "Task", "Organization", "Device", "Provenance"]) {
+      expect(within(resources).getByText(t)).toBeInTheDocument();
+    }
+    const details = screen.getByTestId("fhir-preview").closest("details")!;
+    expect(details).not.toHaveAttribute("open");
+    expect(within(details).getByText("JSON preview (6 entries)")).toBeInTheDocument();
   });
 });
