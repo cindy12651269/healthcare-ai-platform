@@ -2,8 +2,8 @@
 
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
-Scope: Issues #67–#70 (items 1–4 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d).
+Scope: Issues #67–#71 (items 1–5 of 7) so far
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 in review: implemented and validated locally (§6a); hosted validation pending deployment and securely issued tokens (§6b).
 
 ---
 
@@ -481,4 +481,94 @@ No sign-in, no token, synthetic text only.
 * Safari/Firefox, physical devices and 200 % zoom (#72).
 
 **Verdict for #70 on the hosted demo:** the deployed build is `8f6e963`. Webhook isolation was confirmed by environment and log before any flagged preset. All four presets show the correct expected rule outcome, reasons, emergency prominence and blocked acknowledgement without opening the trace, and they truthfully report that a duplicate created no new record or queue item. Consent stays a deliberate action, focus and the reviewer trace behave as specified, and the layout passes at 390 and 1280 px in both themes.
+
+---
+
+## 6. Issue 71 — Staff Review Workspace Experience
+
+**Status:** implemented on branch `feat/issue-71-staff-review-workspace`; in review. Frontend only: no backend, endpoint, RBAC, clinic-isolation, authentication or transition-rule change; no new dependency; no Render or environment change. **Not deployed; nothing here is hosted-verified** (§6b).
+
+**Delivered** (`app/components/StaffReview.tsx`, `IntakeEvidence.tsx`, `FhirExport.tsx`, new `app/services/format.ts`):
+
+* **Sign-in:** product copy; demo access explained as short-lived tokens the demo operator issues on request (#67 policy card unchanged). The `python -m api.auth issue-token` hint is removed from the UI; operator instructions remain in `docs/auth.md` and `docs/deployment.md`. The token stays in component state only; a test checks `localStorage`, `sessionStorage` and cookies after sign-in and sign-out. Specific messages:
+  * 401: *"invalid or has expired"*. The API answers `Invalid or expired token` for both cases, so the UI cannot separate them and says so.
+  * 403: valid token without staff access.
+  * 503: staff sign-in not configured.
+
+  The field is linked to its help text and error (`aria-describedby`, `aria-invalid`). A 401 during use still ends the session (unchanged).
+* **Layout:** at ≥ 1280 px the queue and detail sit side by side (2 : 3), with an empty-state placeholder until an intake is opened. Below 1280 px they are separate views: opening an intake shows the detail with **← Back to queue**. Focus moves to the intake heading on open, and back to the opened row (post-commit) on return. The queue table uses the stacked-card layout in the desktop queue column as well, so no column hides behind horizontal scroll.
+* **Queue:**
+  * One unfiltered `GET …/intakes` for the **signed-in clinic only** (an existing call). The endpoint is not paginated.
+  * Status tabs (*Needs review*, *Reviewed*, *Escalated*, *Submitted*, *All*) filter that response, and each tab shows its count from the same response. A scope note says the counts are *"from the N intakes returned for clinic X when the queue was loaded"*.
+  * `StatusBadge`, `ReasonList`/`ReasonLabel`, readable references (`#a1f3c2d4`; the full id is shown in the detail), and loading, empty and error/retry states.
+  * The clinic selector for multi-membership accounts is unchanged; switching requests only the chosen clinic.
+* **Dates:** every staff timestamp (queue, detail, timeline) is formatted with `Intl.DateTimeFormat("en-US", { timeZone: "UTC" })` plus the suffix *UTC*, e.g. *Oct 01, 2026, 10:00 UTC*. Timeline entries carry `<time datetime>` with the raw value.
+* **Detail:** a header with the reference, status badge, reasons, full id, received and last-updated time. A *Review action* section comes next, followed by the unchanged structured summary, report, safety result, *Why flagged* evidence with highlighted input matches, extracted fields and provenance (clinical and safety wording unchanged).
+* **Timeline:** a vertical timeline of the events the API returns, in order, with markers per kind (staff transition, webhook delivery). Webhook rows show only what is recorded (status, attempts, last HTTP/error). When none is recorded, the page says *"No webhook delivery is recorded for this intake"*, never "sent" or "disabled". Actors and times are shown only when present.
+* **Actions:** only for `needs_review` (rule unchanged); no bulk actions.
+  * *Mark reviewed* / *Mark escalated* opens an inline confirmation step (focus moves to *Confirm*; *Cancel* sends nothing).
+  * While pending, both actions are disabled and a second click sends nothing.
+  * On success: a success message, the detail updated from the response, the queue refetched, and the timeline remounted and reloaded.
+  * 409 and 404 reload the server's state (unchanged).
+* **FHIR export:** endpoint and payload unchanged.
+  * The disclaimer: synthetic demo data, export only, not a FHIR conformance or certification claim, nothing sent to a FHIR server, and the bundle contains the original intake text.
+  * On demand load; a resource summary (type × count from the returned Bundle); the existing download; the JSON preview in a collapsed `<details>`.
+
+**Tests.** `app/tests/StaffReview.test.tsx`: 27 → **40**. Updated tests: the unfiltered list call, tab counts and client filtering with no refetch, the confirmation step before a transition, and the new sign-in message.
+
+New tests:
+* no CLI text;
+* token not persisted;
+* 403 and 503 sign-in messages;
+* UTC/en-US formatting in queue, detail and timeline (`datetime` attribute);
+* readable references and focus on open;
+* list/detail navigation with *Back to queue* returning focus to the row;
+* confirmation cancel;
+* queue, detail and timeline refresh after a transition (new `staff_transition` event with actor and time);
+* no fabricated webhook delivery;
+* clinic A/B: only the signed-in clinic is requested, with an explicit switch for a two-clinic admin, and a clinic-B account that never requests clinic A and sees no rows on 403;
+* the FHIR resource summary, collapsed preview and disclaimer.
+
+Existing 401/403/404, 409, pending, failure, evidence and FHIR download tests still pass. Total **192 passed** (179 before). `npm run lint`, `typecheck`, `test` and `build` pass.
+
+### 6a. Local browser validation (2026-10-15)
+
+Production build against the #68 synthetic fixture API (`fixtures-server.mjs`, copied; any bearer string is accepted, and sign-in used the placeholder `synthetic-fixture-not-a-token`). **No real token was generated or used.** Headless Chrome over the DevTools Protocol (`capture-cdp.mjs`), with the browser deliberately set to **`de-DE` / `Asia/Taipei`** to show that the dates do not follow the browser.
+
+**Matrix:** sign-in, queue and detail × **390 / 768 / 1280 px × light / dark = 18 runs**.
+
+| Check | Result |
+| --- | --- |
+| Horizontal page overflow | **0 px in all 18 runs** |
+| Table horizontal scroll (counted as clipping for #71) | **0 in all 18 runs** |
+| Touch targets ≥ 44 × 44 | **No smaller target** |
+| Clipped content (cards, tabs, badges, reasons, timeline, detail values) | **None** |
+| Layout | 1280: queue and detail visible together, no back control. 390/768: queue only, or detail only with *Back to queue* |
+| Dates | *Oct 14, 2026, 01:00 UTC* under a `de-DE`/`Asia/Taipei` browser |
+| Focus | detail heading on open; the opened row's button after *Back to queue* (390 px) |
+| Confirmation | *Mark escalated* → *"Mark this intake escalated?"*, focus on *Confirm: mark escalated* (nothing sent; the fixture API has no transition endpoint) |
+| FHIR | resource summary shown, preview collapsed (the fixture Bundle has one `Task`) |
+| Token storage | `localStorage` 0, `sessionStorage` 0, no cookie |
+
+**Defects found and fixed in this pass:**
+* The row-open button's `data-open` attribute collided with the app shell's `nav[data-open]`, so *Back to queue* could not find the row. It is renamed `data-intake-id`, and focus is restored post-commit (the #70 lesson).
+* At 1280 px the *Received (UTC)* column was hidden behind horizontal table scroll. The desktop queue column now stacks too, and the capture counts table scroll as clipping.
+* The first cold navigation was measured before the stylesheet applied. The capture now waits for styles.
+
+**Evidence:** [`evidence/phase8_issue71_staff_local_2026-10-15/`](evidence/phase8_issue71_staff_local_2026-10-15/) — `{signin,queue,detail}-{390,768,1280}-{light,dark}.jpg`, `detail-confirm-fhir-1280-light.jpg`, `measurements.json`, `capture-cdp.mjs`, `fixtures-server.mjs`. Synthetic data only.
+
+### 6b. Hosted validation — pending
+
+Not deployed. Required after an authorized frontend deploy, with **securely issued short-lived tokens** (never committed or shown):
+1. `demo-admin-a` (clinic `default`) and `demo-admin-b` (`demo-clinic-b`) each see only their clinic's queue in the new UI.
+2. *Mark reviewed* and *Mark escalated* on eligible seeded `needs_review` intakes, with the timeline showing each transition (actor and time).
+3. FHIR preview and download, with the downloaded file validated by `interoperability/fhir_validation.py`.
+4. Hosted responsive screenshots at 390, 768 and 1280 px.
+
+### 6c. Limitations
+
+* Hosted validation pending (§6b). The real transition endpoint, real FHIR Bundle (six resource types) and download were exercised only with mocks in unit tests. The download was not validated against `fhir_validation.py` in this pass.
+* Expired and invalid tokens share one message, because the API does not distinguish them.
+* Counts reflect the list as loaded; they refresh after a transition or *Retry*, not live.
+* Chrome only; Safari/Firefox, physical devices, 200 % zoom and a real screen reader are #72.
 
