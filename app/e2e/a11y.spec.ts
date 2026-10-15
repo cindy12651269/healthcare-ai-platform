@@ -36,6 +36,7 @@ for (const scheme of ["light", "dark"] as const) {
         await expect(page.getByRole("contentinfo")).toHaveCount(1);
         await expect(page.getByRole("navigation", { name: "Demo sections" })).toBeVisible();
         await expect(page.locator("h1")).toHaveCount(1);
+        await expect(page.locator("html")).toHaveAttribute("lang", "en"); // 3.1.1
 
         // 2.4.1: the first Tab stop is the skip link, it is visible when focused and moves focus to main
         await page.keyboard.press(TAB);
@@ -120,3 +121,56 @@ test("mobile menu: Escape closes it and returns focus to the toggle", async ({ p
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(toggle).toBeFocused();
 });
+
+// Full keyboard walk (#72 follow-up): every Tab stop on each page, in order. Each one must show a focus
+// indicator (2.4.7) and must not be hidden behind other content (2.4.11: the element under its centre
+// is the element itself or inside it). The visited order is attached to the report for manual review.
+for (const [path] of PAGES) {
+  test(`${path}: full Tab order has visible, unobscured focus`, async ({ page }, testInfo) => {
+    await page.goto(path);
+    await expect(page.locator("h1")).toBeVisible();
+    const order: string[] = [];
+    for (let i = 0; i < 120; i++) {
+      await page.keyboard.press(TAB);
+      const stop = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        if (!el || el === document.body) return null;
+        if (el.dataset.e2eVisited) return { wrapped: true } as const; // back at an element already visited
+        el.dataset.e2eVisited = "1";
+        el.scrollIntoView({ block: "center" });
+        // First line box, so a link that wraps onto two lines is probed on its own text
+        const r = el.getClientRects()[0] ?? el.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        const s = getComputedStyle(el);
+        const name = (el.getAttribute("aria-label") || el.textContent || (el as HTMLInputElement).name || el.id || "").trim().replace(/\s+/g, " ").slice(0, 60);
+        return {
+          wrapped: false,
+          key: `${el.tagName.toLowerCase()} "${name}"`,
+          indicator: (s.outlineStyle !== "none" && parseFloat(s.outlineWidth) >= 2) || s.boxShadow !== "none",
+          unobscured: !!hit && (hit === el || el.contains(hit)),
+          size: r.width > 0 && r.height > 0,
+        };
+      });
+      if (!stop || stop.wrapped) break;
+      order.push(stop.key);
+      expect(stop.indicator, `${stop.key} focus indicator`).toBe(true);
+      expect(stop.size && stop.unobscured, `${stop.key} not obscured`).toBe(true);
+    }
+    expect(order.length).toBeGreaterThan(4);
+    await testInfo.attach("tab-order", { body: order.join("\n"), contentType: "text/plain" });
+  });
+
+  test(`${path}: 200% browser zoom (640 CSS px at 2x) and 200% text size do not cause horizontal scrolling`, async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 640, height: 400 }, deviceScaleFactor: 2 });
+    const page = await context.newPage();
+    await page.goto(path);
+    await expect(page.locator("h1")).toBeVisible();
+    const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(await overflow(), "page zoom 200%").toBeLessThanOrEqual(0);
+    // 1.4.4: type is rem-based, so doubling the root size doubles the text
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.addStyleTag({ content: "html { font-size: 200% !important; }" });
+    expect(await overflow(), "text 200%").toBeLessThanOrEqual(0);
+    await context.close();
+  });
+}
