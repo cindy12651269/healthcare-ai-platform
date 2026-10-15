@@ -1,0 +1,30 @@
+{
+ "2f005d14d0fc4de1acc4879d586481a3": {
+  "detail_http": 200,
+  "review_status": "reviewed",
+  "updated_at": "2026-10-15T12:29:37.508070Z",
+  "staff_transitions": [
+   [
+    "2026-10-15T12:29:37.508070+00:00",
+    "demo-admin-a",
+    "needs_review",
+    "reviewed"
+   ]
+  ],
+  "webhook_events": []
+ },
+ "demo-intake-b2": {
+  "detail_http": 200,
+  "review_status": "escalated",
+  "updated_at": "2026-10-15T12:29:44.191715Z",
+  "staff_transitions": [
+   [
+    "2026-10-15T12:29:44.191715+00:00",
+    "demo-admin-b",
+    "needs_review",
+    "escalated"
+   ]
+  ],
+  "webhook_events": []
+ }
+}

@@ -1,0 +1,223 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "meta": {
+    "tag": [
+      {
+        "system": "urn:healthcare-ai-platform:data",
+        "code": "synthetic-demo",
+        "display": "FHIR R4 — Synthetic Demo Data"
+      }
+    ]
+  },
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:f9a280fa-2786-56dd-9586-10e30462773f",
+      "resource": {
+        "resourceType": "QuestionnaireResponse",
+        "identifier": {
+          "system": "urn:healthcare-ai-platform:intake",
+          "value": "2f005d14d0fc4de1acc4879d586481a3"
+        },
+        "questionnaire": "urn:healthcare-ai-platform:fhir:Questionnaire:pre-visit-intake",
+        "status": "completed",
+        "authored": "2026-10-14T08:30:18.125428+00:00",
+        "item": [
+          {
+            "linkId": "symptoms",
+            "text": "Your symptoms",
+            "answer": [
+              {
+                "valueString": "Synthetic demo intake eebac05f: crushing chest pain and trouble breathing since breakfast."
+              }
+            ]
+          },
+          {
+            "linkId": "consent",
+            "text": "I consent to this information being processed to prepare a summary for my care team.",
+            "answer": [
+              {
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4c2e6774-1fc9-559d-8e39-a680bd5bc657",
+      "resource": {
+        "resourceType": "Questionnaire",
+        "url": "urn:healthcare-ai-platform:fhir:Questionnaire:pre-visit-intake",
+        "version": "1",
+        "name": "PreVisitIntake",
+        "title": "Pre-visit symptom intake (synthetic demo)",
+        "status": "active",
+        "description": "Static definition of the platform's pre-visit intake form (app/components/InputForm.tsx): one free-text symptoms field and one consent checkbox. Synthetic demo data only.",
+        "item": [
+          {
+            "linkId": "symptoms",
+            "text": "Your symptoms",
+            "type": "text",
+            "required": true
+          },
+          {
+            "linkId": "consent",
+            "text": "I consent to this information being processed to prepare a summary for my care team.",
+            "type": "boolean",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9c0ea3e0-9378-595c-a07f-8c7abbd3c04a",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:healthcare-ai-platform:intake-review",
+            "value": "2f005d14d0fc4de1acc4879d586481a3"
+          }
+        ],
+        "status": "completed",
+        "businessStatus": {
+          "coding": [
+            {
+              "system": "urn:healthcare-ai-platform:review-status",
+              "code": "reviewed"
+            }
+          ],
+          "text": "reviewed"
+        },
+        "intent": "order",
+        "description": "Staff review of a pre-visit intake",
+        "focus": {
+          "reference": "urn:uuid:f9a280fa-2786-56dd-9586-10e30462773f"
+        },
+        "authoredOn": "2026-10-14T08:30:18.132771+00:00",
+        "lastModified": "2026-10-15T12:29:37.508070+00:00",
+        "owner": {
+          "reference": "urn:uuid:f2be33d4-bfab-5a8d-b89e-a3de57c418d3"
+        },
+        "reasonCode": {
+          "text": "emergency_signal"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f2be33d4-bfab-5a8d-b89e-a3de57c418d3",
+      "resource": {
+        "resourceType": "Organization",
+        "identifier": [
+          {
+            "system": "urn:healthcare-ai-platform:clinic",
+            "value": "default"
+          }
+        ],
+        "name": "Default Clinic"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4f634085-668d-5b25-805e-44103206baf0",
+      "resource": {
+        "resourceType": "Device",
+        "deviceName": [
+          {
+            "name": "Healthcare AI Platform intake pipeline",
+            "type": "user-friendly-name"
+          }
+        ],
+        "version": [
+          {
+            "type": {
+              "text": "model"
+            },
+            "value": "mock"
+          },
+          {
+            "type": {
+              "text": "prompt"
+            },
+            "value": "deterministic_rule_based_baseline_v1"
+          },
+          {
+            "type": {
+              "text": "pipeline"
+            },
+            "value": "v0.1.0"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0b93715c-3241-520e-af24-7eb43c0d0f26",
+      "resource": {
+        "resourceType": "Provenance",
+        "target": [
+          {
+            "reference": "urn:uuid:f9a280fa-2786-56dd-9586-10e30462773f"
+          },
+          {
+            "reference": "urn:uuid:9c0ea3e0-9378-595c-a07f-8c7abbd3c04a"
+          }
+        ],
+        "recorded": "2026-10-14T08:30:18.132771+00:00",
+        "activity": {
+          "text": "AI structuring, safety check and escalation decision (run f7b26a16-42de-42ba-a5f1-4fc37c97a7f6)"
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "assembler"
+                }
+              ]
+            },
+            "who": {
+              "reference": "urn:uuid:4f634085-668d-5b25-805e-44103206baf0"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bb0bce7c-8c54-54cb-89f6-cbe75eb238c8",
+      "resource": {
+        "resourceType": "Provenance",
+        "target": [
+          {
+            "reference": "urn:uuid:9c0ea3e0-9378-595c-a07f-8c7abbd3c04a"
+          }
+        ],
+        "recorded": "2026-10-15T12:29:37.508070+00:00",
+        "activity": {
+          "text": "Staff review: needs_review -> reviewed"
+        },
+        "agent": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                  "code": "verifier"
+                }
+              ]
+            },
+            "who": {
+              "identifier": {
+                "system": "urn:healthcare-ai-platform:user",
+                "value": "demo-admin-a"
+              }
+            },
+            "onBehalfOf": {
+              "reference": "urn:uuid:f2be33d4-bfab-5a8d-b89e-a3de57c418d3"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

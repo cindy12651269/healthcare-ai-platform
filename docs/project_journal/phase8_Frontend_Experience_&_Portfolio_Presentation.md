@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
 Scope: Issues #67–#71 (items 1–5 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 in review: implemented and validated locally (§6a); hosted validation pending deployment and securely issued tokens (§6b).
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 closed (2026-10-15): PR #82 merged (`7585f84`); hosted staff workspace verified with short-lived tokens (§6d), one open defect (seeded-record references, §6d).
 
 ---
 
@@ -486,7 +486,7 @@ No sign-in, no token, synthetic text only.
 
 ## 6. Issue 71 — Staff Review Workspace Experience
 
-**Status:** implemented on branch `feat/issue-71-staff-review-workspace`; in review. Frontend only: no backend, endpoint, RBAC, clinic-isolation, authentication or transition-rule change; no new dependency; no Render or environment change. **Not deployed; nothing here is hosted-verified** (§6b).
+**Status:** closed (2026-10-15): PR #82 merged (`7585f84`, reviewed head `e4dc65b`; `main` CI run 38730669057 — success); deployed and verified on the hosted demo (§6d). Frontend only: no backend, endpoint, RBAC, clinic-isolation, authentication or transition-rule change; no new dependency; no Render or environment change.
 
 **Delivered** (`app/components/StaffReview.tsx`, `IntakeEvidence.tsx`, `FhirExport.tsx`, new `app/services/format.ts`):
 
@@ -558,7 +558,7 @@ Production build against the #68 synthetic fixture API (`fixtures-server.mjs`, c
 
 **Evidence:** [`evidence/phase8_issue71_staff_local_2026-10-15/`](evidence/phase8_issue71_staff_local_2026-10-15/) — `{signin,queue,detail}-{390,768,1280}-{light,dark}.jpg`, `detail-confirm-fhir-1280-light.jpg`, `measurements.json`, `capture-cdp.mjs`, `fixtures-server.mjs`. Synthetic data only.
 
-### 6b. Hosted validation — pending
+### 6b. Hosted validation plan (completed in §6d)
 
 Not deployed. Required after an authorized frontend deploy, with **securely issued short-lived tokens** (never committed or shown):
 1. `demo-admin-a` (clinic `default`) and `demo-admin-b` (`demo-clinic-b`) each see only their clinic's queue in the new UI.
@@ -568,7 +568,7 @@ Not deployed. Required after an authorized frontend deploy, with **securely issu
 
 ### 6c. Limitations
 
-* Hosted validation pending (§6b). The real transition endpoint, real FHIR Bundle (six resource types) and download were exercised only with mocks in unit tests. The download was not validated against `fhir_validation.py` in this pass.
+* ~~Hosted validation pending.~~ Done on 2026-10-15 (§6d). Before that, the real transition endpoint, real FHIR Bundle (six resource types) and download were exercised only with mocks in unit tests. The download was not validated against `fhir_validation.py` in this pass.
 * Expired and invalid tokens share one message, because the API does not distinguish them.
 * Counts reflect the list as loaded; they refresh after a transition or *Retry*, not live.
 * Chrome only; Safari/Firefox, physical devices, 200 % zoom and a real screen reader are #72.
@@ -578,4 +578,76 @@ Not deployed. Required after an authorized frontend deploy, with **securely issu
 * Below 1280 px, opening an intake hides the queue and the button that opened it. If the intake then failed to load (403/404/network), focus was left on `<body>`. Focus now moves to *Back to queue* on a load error (heading on success); a test covers the 404 case.
 
 The capture now records which row receives focus after *Back to queue*, and §6a states what was measured. Lint, typecheck, **193** tests and build pass. The 18-run matrix was re-run (0 overflow, 0 table scroll, no target < 44 × 44, nothing clipped), with screenshots and `measurements.json` refreshed. Token handling, clinic scoping, counts, UTC dates, timeline, transitions and FHIR were reviewed with no change needed. Hosted criteria remain **PENDING** (§6b).
+
+### 6d. Hosted staff workspace verification (2026-10-15)
+
+**Deploy.** PR #82 merged with a merge commit (`7585f84`, reviewed head `e4dc65b`; PR CI and `main` CI run 38730669057 — success). Frontend *Manual Deploy* by the account owner: `healthcare-ai-frontend`, source commit `7585f84`, *Live* at 19:56:31 Taiwan time (11:56:31 UTC). The API was not redeployed. No Render setting was changed. At 11:59:31 UTC `/staff` returned 200 with the #71 sign-in copy and no CLI hint.
+
+**Tokens (#67 procedure).** The owner issued **1-hour** tokens for `demo-admin-a` and `demo-admin-b` locally with `python -m api.auth issue-token … --ttl-hours 1`, as described in `docs/deployment.md` §6.
+* **Script:** the database URL and signing secret were entered at silent prompts and lived only in the script's process; they were never written or shown. The script was verified beforehand against a throwaway SQLite database with a fake secret, including success, partial-failure, short-secret and unreachable-host cases.
+* **Storage:** the tokens were stored in `~/.hc-demo-71/tokens.env` (directory 700, file 600, outside the repository). The checks loaded them inside their own processes and never printed them.
+* **Verification:** `GET /api/staff/me` returned 200 for both: `demo-admin-a` → `default` (`clinic_admin`), `demo-admin-b` → `demo-clinic-b` (`clinic_admin`).
+* **Hygiene:** every signed-in page was checked for the token in its HTML, `localStorage`, `sessionStorage` and cookies (none found). Screenshots were taken only before a token was entered or after sign-in. The evidence was scanned for token, URL and secret patterns (none found).
+* **Cleanup:** `~/.hc-demo-71` was deleted after the run (12:31 UTC). No token appears in the repository, logs, screenshots or chat.
+
+**Isolation and eligibility, read-only, before any change** (`api-before.json`):
+
+| Check | Result |
+| --- | --- |
+| `demo-admin-a` → `default` list / `demo-clinic-b` list | 200 (12 intakes: 4 submitted, 5 needs_review, 2 reviewed, 1 escalated) / **403** |
+| `demo-admin-b` → `demo-clinic-b` list / `default` list | 200 (4 intakes, one per status) / **403** |
+| Cross-clinic detail of each target | **403**; via the reader's own clinic path **404** |
+| `2f005d14d0fc4de1acc4879d586481a3` | clinic `default`, **`needs_review`**, `emergency_signal`; synthetic: *"Synthetic demo intake eebac05f: crushing chest pain and trouble breathing since breakfast."* (created by `scripts/hosted_check.py` at the #67 check, §2a); mock provenance; events submitted → processed → safety_evaluated → escalation_decision; **no staff transition** |
+| `demo-intake-b2` | clinic `demo-clinic-b`, **`needs_review`**, `low_confidence`; seeded (run id `demo-seed:demo-intake-b2`, synthetic text); **no staff transition** |
+
+`demo-intake-a2` was not used: it was already marked reviewed in the Phase 7 browser check (2026-10-14), and re-seeding never resets a staff-changed status. The owner approved `2f005d14…` instead. No database was recreated or re-seeded.
+
+**Transitions in the hosted UI** (`capture-cdp-hosted.mjs transitions`, 1280 px light, browser locale `de-DE` / time zone `Asia/Taipei`):
+
+| | `demo-admin-a` on `2f005d14…` | `demo-admin-b` on `demo-intake-b2` |
+| --- | --- | --- |
+| In own *Needs review* queue | yes (tab *"Needs review, 5 intakes"*) | yes (*"Needs review, 1 intake"*) |
+| Before | *Needs review*, `emergency_signal`, 4 events, no staff action | *Needs review*, `low_confidence`, 4 events, no staff action |
+| Confirmation | *"Mark this intake reviewed?"*, focus on *Confirm: mark reviewed* | *"Mark this intake escalated?"*, focus on *Confirm: mark escalated* |
+| Pending | *Updating status…*, both actions disabled, about 0.6 s | same, about 0.4 s |
+| Success | *"Marked reviewed. The queue and timeline were refreshed."* | *"Marked escalated. …"* |
+| After (UI) | **Reviewed**; timeline adds *Staff action · Oct 15, 2026, 12:29 UTC · demo-admin-a: Needs review → Reviewed* | **Escalated**; *Staff action · Oct 15, 2026, 12:29 UTC · demo-admin-b: Needs review → Escalated* |
+| After (API, `api-after.json`) | `reviewed`; `staff_transition` 12:29:37.508 UTC, actor `demo-admin-a`, `needs_review → reviewed` | `escalated`; 12:29:44.192 UTC, actor `demo-admin-b`, `needs_review → escalated` |
+| Webhook | no `webhook_delivery` event; the UI says *"No webhook delivery is recorded for this intake"* | same |
+| Queue after | *Needs review* 4 (was 5) | *Needs review* 0, *Escalated* 2 |
+
+Staff transitions do not call the webhook notifier (`api/routers/records.py` has no webhook call), and the webhook is disabled on the hosted API (§5d). These two transitions are the only data changes this check made.
+
+**FHIR export** (`demo-admin-a`, after the transition):
+* **Panel:** the summary showed *QuestionnaireResponse × 1, Questionnaire × 1, Task × 1, Organization × 1, Device × 1, Provenance × 2* (7 entries; the second Provenance records the staff transition). The JSON preview was collapsed by default (*"JSON preview (7 entries)"*) and opened on request. The disclaimer was present (*"… not a FHIR conformance or certification claim …"*).
+* **Download:** *Download JSON* saved `intake-2f005d14d0fc4de1acc4879d586481a3-fhir-r4.json` (sha256 `6de74bb0…64104`): a `collection` Bundle tagged `synthetic-demo`, Task `completed` / `reviewed`.
+* **Validation:** run on the unmodified file, `interoperability.fhir_validation.validate_bundle` returned **0 errors** (R4 4.0.1 JSON Schema per resource, required primitives, internal references; `fhir-validation.txt`). It was not run through the official HL7 validator, so this is not a conformance claim.
+
+**Responsive matrix** (`capture-cdp-hosted.mjs matrix`): sign-in, queue and detail × **390 / 768 / 1280 px × light / dark = 18 views**, plus *Back to queue* at 390 and 768. Light used `demo-admin-a`, dark `demo-admin-b`. Read-only: rows were opened from the *All* tab and no action was taken.
+
+| Check | Result |
+| --- | --- |
+| Horizontal overflow; table horizontal scroll | **0 in all views** |
+| Touch targets ≥ 44 × 44; clipped content; one `h1` | **None smaller; none clipped; 18/18** |
+| Layout | 1280: queue and detail side by side. 390/768: queue only, then detail only with *Back to queue* |
+| Focus | detail heading on open (6/6); after *Back to queue*, the opened row (`row:d7cdb418…`, `row:demo-intake-b1`; 4/4) |
+| Dates | UTC, en-US (*Oct 15, 2026, 12:29 UTC*) under a `de-DE` / `Asia/Taipei` browser |
+| Isolation in the UI | `demo-admin-a` saw only `default` intakes; `demo-admin-b` only `demo-clinic-b` |
+| Token in page/storage | none (all signed-in views) |
+
+**Defect found (open, not fixed here: application code was out of scope for this check).** `intakeRef()` shows the first 8 characters of the id, so every seeded intake (`demo-intake-a1` … `b4`) appears as **`#demo-int`**. In clinic B's queue all four rows look the same, and their open buttons share the accessible name *"Open intake #demo-int"*. Hex ids (`#2f005d14`) are unaffected, and the detail view shows the full id. The local fixtures used hex ids only, so this was not caught. **Recommended follow-up:** derive the reference from the end of the id, or show the full id when it is not a hex hash, with a test for seeded ids.
+
+**Evidence:** [`evidence/phase8_issue71_hosted_frontend_2026-10-15/`](evidence/phase8_issue71_hosted_frontend_2026-10-15/):
+* screenshots: `{a,b}-queue-1280-light.jpg`, `{a,b}-detail-before-1280-light.jpg`, `{a,b}-confirm-1280-light.jpg`, `{a,b}-detail-after-1280-light.jpg`, `a-fhir-preview-1280-light.jpg`, `{signin,queue,detail}-{390,768,1280}-{light,dark}.jpg`;
+* `measurements-transitions.json`, `measurements-matrix.json`, `api-before.json`, `api-after.json`;
+* the downloaded `intake-2f005d14d0fc4de1acc4879d586481a3-fhir-r4.json` (synthetic) and `fhir-validation.txt`;
+* `capture-cdp-hosted.mjs`.
+
+No token, database URL or secret is included.
+
+**Not verified on the hosted demo:** a two-clinic account and the clinic switcher (no seeded user has two memberships; unit-tested); the 409 conflict path (unit-tested); a real screen reader; Safari/Firefox, physical devices and 200 % zoom (#72).
+
+**Verdict for #71 on the hosted demo:** the deployed build is `7585f84`.
+* **PASS:** clinic isolation (UI and API), both transitions with confirmation, pending state, success and timeline/actor updates, FHIR summary, preview, download and validation, responsive layout and focus in both themes, UTC dates and token hygiene.
+* **Open defect:** readable references are ambiguous for seeded ids (above). It does not affect access control or data, but it does affect the *readable intake references* criterion and needs a frontend follow-up.
 
