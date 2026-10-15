@@ -1,0 +1,143 @@
+{
+  "phase": "probe",
+  "base": "https://healthcare-ai-frontend-1s23.onrender.com",
+  "before": {
+    "at": "2026-10-15T11:25:42.555Z",
+    "vw": 1280,
+    "overflow": 0,
+    "offenders": [],
+    "small": [],
+    "clipped": 0,
+    "facts": {
+      "h1": 1,
+      "indicator": "Demo · synthetic data · mock mode",
+      "llmMode": "LLM Mode: Mock",
+      "scenarios": [
+        {
+          "id": "scenario-routine",
+          "text": "“I have had a sore throat and a mild fever for two days.”",
+          "expect": "Expected outcome: Not flagged: stored as submitted, symptoms and duration extracted.",
+          "pressed": "false"
+        },
+        {
+          "id": "scenario-emergency",
+          "text": "“I have chest pain and shortness of breath since this morning.”",
+          "expect": "Expected outcome: Emergency guidance shown; flagged for staff review (emergency_signal).",
+          "pressed": "false"
+        },
+        {
+          "id": "scenario-prescription",
+          "text": "“Should I take 500 mg of amoxicillin for this cough?”",
+          "expect": "Expected outcome: Generated report blocked; safe acknowledgement shown; flagged (blocked_prescription).",
+          "pressed": "false"
+        },
+        {
+          "id": "scenario-vague",
+          "text": "“I just don't feel right and wanted to check in.”",
+          "expect": "Expected outcome: No lexicon symptom; confidence below 0.5; flagged (low_confidence).",
+          "pressed": "false"
+        }
+      ],
+      "consentChecked": false,
+      "progress": null,
+      "progressText": null,
+      "badge": null,
+      "badgeStatus": null,
+      "reasonsHeading": null,
+      "reasons": [],
+      "emergencyFirst": null,
+      "blockedNotice": null,
+      "reportHeading": null,
+      "nextStep": null,
+      "baselineNote": false,
+      "traceVisible": false,
+      "focus": "body"
+    }
+  },
+  "submittedAt": "2026-10-15T11:25:42.733Z",
+  "stages": [
+    {
+      "at": "2026-10-15T11:25:42.735Z",
+      "stage": "processing",
+      "submitDisabled": true
+    },
+    {
+      "at": "2026-10-15T11:25:43.248Z",
+      "stage": "done",
+      "submitDisabled": false
+    }
+  ],
+  "result": {
+    "at": "2026-10-15T11:25:43.751Z",
+    "vw": 1280,
+    "overflow": 0,
+    "offenders": [],
+    "small": [],
+    "clipped": 0,
+    "facts": {
+      "h1": 1,
+      "indicator": "Demo · synthetic data · mock mode",
+      "llmMode": "LLM Mode: Mock",
+      "scenarios": [
+        {
+          "id": "scenario-routine",
+          "text": "“I have had a sore throat and a mild fever for two days.”",
+          "expect": "Expected outcome: Not flagged: stored as submitted, symptoms and duration extracted.",
+          "pressed": "false"
+        },
+        {
+          "id": "scenario-emergency",
+          "text": "“I have chest pain and shortness of breath since this morning.”",
+          "expect": "Expected outcome: Emergency guidance shown; flagged for staff review (emergency_signal).",
+          "pressed": "false"
+        },
+        {
+          "id": "scenario-prescription",
+          "text": "“Should I take 500 mg of amoxicillin for this cough?”",
+          "expect": "Expected outcome: Generated report blocked; safe acknowledgement shown; flagged (blocked_prescription).",
+          "pressed": "false"
+        },
+        {
+          "id": "scenario-vague",
+          "text": "“I just don't feel right and wanted to check in.”",
+          "expect": "Expected outcome: No lexicon symptom; confidence below 0.5; flagged (low_confidence).",
+          "pressed": "false"
+        }
+      ],
+      "consentChecked": true,
+      "progress": "done",
+      "progressText": "✓Demo server ready (done)✓Process your intake (done)✓Submission completed (done) Submission completed.",
+      "badge": "Submitted",
+      "badgeStatus": "submitted",
+      "reasonsHeading": null,
+      "reasons": [],
+      "emergencyFirst": false,
+      "blockedNotice": null,
+      "reportHeading": "Pre-visit report",
+      "nextStep": "Your intake has been stored as submitted. Authorized clinic staff can see it in their queue; no review flag was raised.",
+      "baselineNote": true,
+      "traceVisible": false,
+      "focus": "results-heading"
+    }
+  },
+  "network": [
+    {
+      "at": "2026-10-15T11:25:42.041Z",
+      "method": "GET",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/health",
+      "status": 200
+    },
+    {
+      "at": "2026-10-15T11:25:42.649Z",
+      "method": "OPTIONS",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/api/ingest",
+      "status": 200
+    },
+    {
+      "at": "2026-10-15T11:25:42.651Z",
+      "method": "POST",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/api/ingest",
+      "status": 200
+    }
+  ]
+}

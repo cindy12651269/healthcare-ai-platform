@@ -3,7 +3,7 @@
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
 Scope: Issues #67–#70 (items 1–4 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 in review: implemented and validated locally (§5a); hosted validation pending deployment authorization (§5b).
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d).
 
 ---
 
@@ -340,7 +340,7 @@ About 43 s from the first check to *ready*. No environment or mode was shown bef
 
 ## 5. Issue 70 — Patient Intake Experience
 
-**Status:** implemented on branch `feat/issue-70-patient-intake-experience`; in review. Frontend only: no backend, `/api/ingest`, validation-rule, consent-semantics, safety-guard or escalation-rule change; no new dependency (`app/package.json` unchanged); no environment variable or Render change. **Not deployed; nothing here is hosted-verified** (§5b).
+**Status:** closed (2026-10-15): PR #80 merged (`8f6e963`, reviewed head `6dd697a`; `main` CI run 38725970985 — success); deployed and verified on the hosted demo (§5d). Frontend only: no backend, `/api/ingest`, validation-rule, consent-semantics, safety-guard or escalation-rule change; no new dependency (`app/package.json` unchanged); no environment variable or Render change.
 
 **Delivered:**
 
@@ -407,7 +407,7 @@ About 43 s from the first check to *ready*. No environment or mode was shown bef
 
 **Evidence:** [`evidence/phase8_issue70_intake_local_2026-10-15/`](evidence/phase8_issue70_intake_local_2026-10-15/) — `intake-form-{390,768,1280}-{light,dark}.jpg`, `result-emergency-{390,768,1280}-{light,dark}.jpg`, `result-{routine,prescription,vague}-{390-light,1280-dark}.jpg`, `stage-waking-1280-light.jpg`, `stage-processing-slow-1280-light.jpg`, `error-{client-validation,400-consent,422,502,503,network}-390-light.jpg`, `focus-scenario-card-390-light.jpg`, `developer-trace-1280-dark.jpg`, `measurements.json` (all 30 runs and every interaction check), `capture-cdp.mjs`, `fixtures-server.mjs`, `gen-ingest-fixtures.py`, `ingest-fixtures.json`. Screenshots of the other outcome/viewport combinations were measured but not committed, to keep the evidence size in line with earlier issues. Synthetic data only.
 
-### 5b. Hosted validation — pending
+### 5b. Hosted validation plan (completed in §5d)
 
 The new frontend is **not deployed**, so none of the above is a hosted result, and the #67 API checks (§2a) do not validate this UI. Hosted validation needs, in order:
 
@@ -419,7 +419,7 @@ The new frontend is **not deployed**, so none of the above is a hosted result, a
 
 ### 5c. Limitations
 
-* Hosted validation pending (§5b).
+* ~~Hosted validation pending.~~ Done on 2026-10-15 (§5d).
 * The browser outcomes come from real mock-pipeline responses, but `persistence: saved` is set by the fixture server. The `duplicate`/not-stored badge and wording, which is what the hosted presets will show (§5b), are covered by unit tests, not by a browser screenshot.
 * Timeout (60 s) and the full 6-attempt wake failure are covered by unit tests, not browser runs; `422` with a string detail and `500` are unit-tested only.
 * The counter announces only near the limit; screen-reader output itself was not tested with a real screen reader (VoiceOver/NVDA).
@@ -431,4 +431,54 @@ The new frontend is **not deployed**, so none of the above is a hosted result, a
 * The network/timeout recovery note stated *"no second record is created"* as a guarantee. It now says the demo *normally* recognises identical text, *"but that cannot be guaranteed"*; a test rejects the old claim.
 
 Two small wording fixes in the same commit: the queue sentence no longer promises review *"before your visit"*, and the blocked notice says *"prescription or dosing content"* instead of *"advice"*. Lint, typecheck, 179 tests and build pass. The 30-run browser matrix was re-run (0 overflow, no target under 44 × 44, nothing clipped, same focus and keyboard results), and the committed screenshots and `measurements.json` were refreshed.
+
+### 5d. Hosted frontend verification (2026-10-15)
+
+**Deploy.** PR #80 merged with a merge commit (`8f6e963`, reviewed head `6dd697a`; PR CI and `main` CI run 38725970985 — success). Frontend *Manual Deploy* by the account owner: `healthcare-ai-frontend`, source commit `8f6e963`, *Live* at 19:22:40 Taiwan time (11:22:40 UTC). The API was not redeployed (no backend change). No Render setting was changed. At 11:24:46 UTC `/intake` returned 200 with the #70 markup (scenario section, four *Expected outcome:* blocks), and `/health` returned `{"status":"ok","environment":"demo","llm_mode":"mock"}`.
+
+**Webhook isolation, verified before any flagged preset.**
+1. **Environment (owner, Render → `healthcare-ai-api` → Environment):** `WEBHOOK_URL` absent, `WEBHOOK_SECRET` configured. With a secret and no URL, `api/webhook.py::_config` logs the disabled warning and returns no configuration, so `notify_escalation` returns `disabled` for every saved record. → **PASS**
+2. **Log check (Render logs, read-only, inspected in the browser):** one unique non-flagged probe was sent through the hosted UI. Text: *"Synthetic probe for issue seventy: I have had a mild cough and a runny nose for three days."*, first confirmed locally in mock mode as `submitted`, no reasons and no safety actions. It was sent at 11:25:42 UTC (POST 200; UI: *Submitted*, *"stored as submitted … no review flag was raised"*). The API logs for the last hour contain exactly one ingest request, on instance `2gh2c`:
+   * `11:25:42  INFO:api.ingest:Received ingest request`
+   * `11:25:43  INFO:agents.pipeline:Persisted health record | record_id=d7cdb418b38e4f2394b046f0e9958fcb | run_id=cbb5b0d0-78a0-477d-b00e-1ca6d4e28a42`
+   * `11:25:43  WARNING:api.webhook:Escalation webhook disabled: WEBHOOK_URL and WEBHOOK_SECRET (>= 32 chars) are both required`
+
+   The run ID matches the *Reference* on the hosted result page. A search for `webhook` over the hour returns only that warning: no delivery, retry or failure line. → **PASS**
+
+   Only then were flagged presets sent. The probe is the one new record this check created (non-flagged, synthetic).
+
+**The four presets on the hosted UI** (`capture-cdp-hosted.mjs presets`, 11:30:16–11:30:45 UTC): each card selected, consent ticked separately, submitted from the keyboard. **390 / 1280 px × light / dark**, i.e. 4 form views and 16 submissions (4 presets × 4 views).
+
+| Preset | Badge (all 4 views) | Reasons (heading *Escalation rules this description matched*) | Other | Next step |
+| --- | --- | --- | --- | --- |
+| routine | *Already received · no new record* (`data-status="duplicate"`) | — | *Pre-visit report*; rule-based baseline note | *"An identical description was received earlier, so no new record was created and nothing new was added to the clinic staff queue."* |
+| emergency | same | `emergency_signal` (*Emergency signal*) | emergency guidance is the first element after the heading (`role="alert"`) 4/4 | same |
+| prescription | same | `blocked_prescription` | blocked notice + *Safe acknowledgement (report withheld)* 4/4 | same |
+| vague | same | `low_confidence` | — | same |
+
+* **Actual hosted behaviour: every preset submission was a duplicate.** The preset texts were stored in Phase 7 and §2a. The API log shows 16 × `Persistence skipped: identical input already stored` (11:30:19–11:30:42 UTC) and no `Persisted` line. The webhook notifier runs only for `saved`, so it never ran, and there is no webhook line after the probe's. The last run ID in the log (`c8171451…`) is the one in the hosted developer trace (*Storage: duplicate*). The UI never said *Flagged for staff review* and never claimed a queue item for these responses.
+* **Consent:** unchecked after selecting each card, 16/16. The selected card is `aria-pressed="true"`, the others `false`.
+* **Staged progress:** the API was awake, so each submission went *processing → done* with Submit disabled until done (about 0.2–1 s). The **waking** stage was not observed on the hosted demo: no cold start happened during this run. It is covered by unit tests and the local browser run (§5a).
+* **Focus:** *Your intake has been received* heading after each result (16/16), with a 3 px focus ring after keyboard submission. Client validation (*"short"*): field focused, `aria-invalid`, `aria-describedby` `symptoms-hint symptoms-counter symptoms-error`, `role="alert"`, nothing sent.
+* **Developer trace:** hidden by default; behind the reviewer toggle it showed escalation required *yes*, `needs_review`, `low_confidence`, *Storage* `duplicate`.
+* **Start a new intake:** text empty, consent unchecked, no selection, result and trace gone, focus on the form heading.
+* **Layout:** 20 measured views, 0 px overflow, no target under 44 × 44, nothing clipped, one `h1`, *LLM Mode: Mock* from `/health`.
+* **Requests:** 17 `POST /api/ingest` in total (probe + 16), all 200; 5 `GET /health`, one per page load.
+
+**Evidence:** [`evidence/phase8_issue70_hosted_frontend_2026-10-15/`](evidence/phase8_issue70_hosted_frontend_2026-10-15/):
+* screenshots: `intake-form-{390,1280}-{light,dark}.jpg`, `result-{routine,emergency,prescription,vague}-{390,1280}-{light,dark}.jpg`, `probe-routine-unique-1280-light.jpg`, `developer-trace-1280-dark.jpg`, `error-client-validation-390-light.jpg`;
+* measurements: `measurements-probe.json`, `measurements-presets.json` (per view: facts, stages, focus, request log with method/URL/status only);
+* `render-api-log-excerpt.txt` (internal client addresses redacted; no environment values, secrets or tokens);
+* `capture-cdp-hosted.mjs`.
+
+No sign-in, no token, synthetic text only.
+
+**Not verified on the hosted demo:**
+* the waking stage during a real cold start;
+* the *Flagged for staff review* badge with the saved-record queue wording: it needs a new, unique flagged text, which was deliberately not sent. Covered by unit tests and §5a;
+* every server error class (400/422/500/502/503/network/timeout): not induced on a shared demo; covered by unit tests and §5a;
+* the signed-in staff view of the probe record;
+* Safari/Firefox, physical devices and 200 % zoom (#72).
+
+**Verdict for #70 on the hosted demo:** the deployed build is `8f6e963`. Webhook isolation was confirmed by environment and log before any flagged preset. All four presets show the correct expected rule outcome, reasons, emergency prominence and blocked acknowledgement without opening the trace, and they truthfully report that a duplicate created no new record or queue item. Consent stays a deliberate action, focus and the reviewer trace behave as specified, and the layout passes at 390 and 1280 px in both themes.
 

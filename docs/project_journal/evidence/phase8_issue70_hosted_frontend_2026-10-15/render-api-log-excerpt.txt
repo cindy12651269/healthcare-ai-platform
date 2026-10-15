@@ -1,0 +1,32 @@
+# healthcare-ai-api application logs (Render dashboard, read-only), 2026-10-15. Display time is UTC+8.
+# Filters: "Last hour" with search terms ingest / Persist / webhook / identical. Instance [2gh2c].
+# Redacted: internal client addresses (10.x.x.x). No environment values, secrets or tokens appear.
+
+## Non-flagged probe (run_id cbb5b0d0-78a0-477d-b00e-1ca6d4e28a42), the only ingest request before 19:30
+07:25:42 PM [2gh2c] INFO: <redacted>:0 - "OPTIONS /api/ingest HTTP/1.1" 200 OK
+07:25:42 PM [2gh2c] INFO:api.ingest:Received ingest request
+07:25:43 PM [2gh2c] INFO:agents.pipeline:Persisted health record | record_id=d7cdb418b38e4f2394b046f0e9958fcb | run_id=cbb5b0d0-78a0-477d-b00e-1ca6d4e28a42
+07:25:43 PM [2gh2c] WARNING:api.webhook:Escalation webhook disabled: WEBHOOK_URL and WEBHOOK_SECRET (>= 32 chars) are both required
+07:25:43 PM [2gh2c] {"run_id": "cbb5b0d0-78a0-477d-b00e-1ca6d4e28a42", ..., "status": "success", "flags": {"rag_enabled": false, "escalation_required": false, "escalation_reasons": []}, "latency_ms": 206, ...}
+07:25:43 PM [2gh2c] INFO: <redacted>:0 - "POST /api/ingest HTTP/1.1" 200 OK
+
+## Search "webhook", last hour: exactly one line (the probe's warning above); no delivery, retry or failure lines.
+
+## Search "Persist", last hour: the probe's "Persisted" line above, then 16 preset submissions, none persisted:
+07:30:19 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=87b8c8a3-643f-44b6-af8b-4a2e7ec32b11
+07:30:20 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=153338c3-1b92-4781-ba0b-0f822d24e074
+07:30:22 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=4acddb7a-798d-4b72-aa8d-bb063e8e514b
+07:30:23 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=e3fc43e0-9ae9-4e22-882c-a69f6de26f7b
+07:30:25 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=8e97698d-6ab9-485a-9b2f-ed114a09d1e9
+07:30:27 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=dee70981-0793-4a98-8642-264fdb575fa9
+07:30:28 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=3497606d-b3c0-4b02-86f8-c2490a7188bf
+07:30:30 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=4c69db7e-2ab4-4f03-8b1f-e7371653730c
+07:30:32 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=5c6849a5-75bc-4dae-802a-31d2a555cbfa
+07:30:33 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=96cffc2c-fc04-4e43-bfb3-f801c2807ac1
+07:30:34 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=015477cd-b5df-4de3-b1ad-26f3988ff6a3
+07:30:36 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=0974774a-51ba-4ba5-b381-9e1eec4c9f47
+07:30:38 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=a470f218-cfaa-484c-bc15-97af019a65a2
+07:30:39 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=0ea06694-e6b8-4352-9642-4c622abe3acc
+07:30:41 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=9b629b95-54fa-4f2e-bd33-258b58772101
+07:30:42 PM [2gh2c] WARNING:agents.pipeline:Persistence skipped: identical input already stored | run_id=c8171451-0eda-46d5-a894-4a37c426e98c
+# The last run_id matches the developer trace captured in developer-trace-1280-dark.jpg (Storage: duplicate).
