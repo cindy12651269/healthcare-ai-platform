@@ -82,7 +82,7 @@ def process_raw_input(
     # 3. PHI detection
     contains_phi = _detect_phi(raw_text)
 
-    # 4. HIPAA Consent Gate
+    # 4. Consent gate (keyword PHI heuristic; not a compliance control)
     if contains_phi and not consent_granted:
         logger.warning(
             f"PHI detected but consent_granted=False | input_id={input_id}"

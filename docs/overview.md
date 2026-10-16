@@ -17,12 +17,12 @@ All data is synthetic. This project does not provide medical diagnosis or treatm
 
 Full evidence: [`project_status.md`](project_status.md).
 
-Phases 1–7 are complete (Phase 6: security and data-handling notes #34, hosted demo #35, portfolio handover #36; closed 2026-10-09. Phase 7: extraction baseline #40, evidence timeline #41, FHIR R4 export #42, guided demo #43; closed 2026-10-13). Synthetic data only; not production software; no HIPAA compliance claim.
+Phases 1–8 are complete (Phase 6: security and data-handling notes #34, hosted demo #35, portfolio handover #36; closed 2026-10-09. Phase 7: extraction baseline #40, evidence timeline #41, FHIR R4 export #42, guided demo #43; closed 2026-10-13. Phase 8: safe public demo, design system, product dashboard, patient intake and staff workspace UX, accessibility and browser E2E, final README #67–#73; closed 2026-10-16). Synthetic data only; not production software; no HIPAA compliance claim.
 
 **Implemented and tested**
 
 * FastAPI service with `POST /api/ingest`, working end to end without an LLM key (deterministic mock mode by default)
-* Next.js guided demo landing, patient intake UI at `/intake` with four synthetic scenario presets and a developer trace behind a reviewer toggle, a read-only system card, and a staff review workspace at `/staff` with "why flagged" evidence, a review timeline and FHIR export (#41–#43) ([`staff_review_ui.md`](staff_review_ui.md))
+* Next.js product dashboard with live API status, patient intake UI at `/intake` with four synthetic scenario presets and a developer trace behind a reviewer toggle, a read-only system card, and a staff review workspace at `/staff` with "why flagged" evidence, a review timeline and FHIR export (#41–#43) ([`staff_review_ui.md`](staff_review_ui.md))
 * Intake validation, PHI keyword detection and consent gate
 * Schema-validated structuring and reports; opt-in real OpenAI provider (`LLM_MODE=real`) with strict JSON-schema output and no fallback to mock
 * Deterministic safety guard: diagnosis/prescription blocking, PHI masking, emergency guidance
@@ -34,9 +34,9 @@ Phases 1–7 are complete (Phase 6: security and data-handling notes #34, hosted
 * Retrieval agent and vector store abstraction (mock embeddings; not wired into the API)
 * Deterministic benchmark harness, per-run audit events, stage-level latency metrics
 * Export-only FHIR R4 Bundle of one intake, validated in CI against the pinned official R4 JSON Schema; no FHIR server, coding or full HL7 validation ([`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md))
-* GitHub Actions CI: backend and PostgreSQL integration tests, mock benchmark (RAG off/on), frontend lint/typecheck/tests/build
+* GitHub Actions CI: backend and PostgreSQL integration tests, mock benchmark (RAG off/on) with the extraction and safety suites, frontend lint/typecheck/tests/build, and Playwright browser E2E (Chromium)
 * Security and data-handling notes: data flow, what is masked vs stored (raw intake text is stored unmasked), threat model, HIPAA gap list without a compliance claim; a regression test that pipeline, request and staff-action audit events contain no raw intake text ([`security_data_handling.md`](security_data_handling.md))
-* One hosted demo on Render free plans (API, frontend, PostgreSQL) with migrations, synthetic demo seed and health checks on deploy; the flagged-intake → clinic queue → signed webhook flow verified on 2026-10-09; the Phase 7 redeploy verified at API level on 2026-10-13 and in the hosted staff browser UI on 2026-10-14 for one seeded intake (sign-in, queue, evidence, timeline, FHIR preview/download, mark reviewed, sign-out; screenshots in [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4a); the emergency, prescription and vague presets remain unverified on the hosted demo (§4) ([`deployment.md`](deployment.md), [`demo_walkthrough.md`](demo_walkthrough.md))
+* One hosted demo on Render free plans (API, frontend, PostgreSQL) with migrations, synthetic demo seed and health checks on deploy; the flagged-intake → clinic queue → signed webhook flow verified on 2026-10-09; the Phase 7 redeploy verified at API level on 2026-10-13 and in the hosted staff browser UI on 2026-10-14 for one seeded intake (sign-in, queue, evidence, timeline, FHIR preview/download, mark reviewed, sign-out; screenshots in [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4a). Phase 8 redeployed the frontend and verified it on the hosted demo on 2026-10-14 – 2026-10-16, including all four presets with the webhook disabled and the staff workspace with short-lived tokens ([Phase 8 journal](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md), [`deployment.md`](deployment.md), [`demo_walkthrough.md`](demo_walkthrough.md))
 
 ---
 

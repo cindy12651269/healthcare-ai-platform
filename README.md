@@ -6,7 +6,7 @@
 
 > **Portfolio demo, not a medical device and not production software.** Synthetic data only. It gives no diagnosis, prescription or medical advice, is not clinically validated, and makes **no HIPAA or other compliance claim** ([`docs/security_data_handling.md`](docs/security_data_handling.md)). Never enter real personal or health information.
 
-**Status:** Phases 1–7 closed. Phase 8 (frontend experience and portfolio presentation): implementation and hosted validation are complete for #67–#73. #67–#72 are closed. This README (#73) was merged in PR #89 and checked on the hosted demo on 2026-10-16; #73 and Phase 8 close formally once the closure documentation is merged with green CI. Capability evidence is in [`docs/project_status.md`](docs/project_status.md).
+**Status:** Phases 1–8 closed. Phase 8 (frontend experience and portfolio presentation, #67–#73) closed on 2026-10-16 after its closure documentation (PR #90) merged with green CI; the hosted demo was last checked that day. Capability evidence is in [`docs/project_status.md`](docs/project_status.md).
 
 ## Live demo
 
