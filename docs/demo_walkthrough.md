@@ -1,60 +1,98 @@
 # Hosted Demo Walkthrough
 
-Reproducible walkthrough of the hosted demo (#35), including the Phase 7 guided demo (#43). Synthetic data only: never enter real personal or health information. No medical advice; no HIPAA compliance claim.
+Step-by-step use of the hosted demo, matching the UI deployed after Phase 8 (#67–#72; frontend build `68db16a`, checked 2026-10-16). Synthetic data only: never enter real personal or health information. No medical advice, no HIPAA or other compliance claim.
 
 | | URL |
 | --- | --- |
-| Frontend | https://healthcare-ai-frontend-1s23.onrender.com |
+| Frontend (product dashboard) | https://healthcare-ai-frontend-1s23.onrender.com |
 | API | https://healthcare-ai-api-tovn.onrender.com |
 
-The services run on Render's free plan and sleep after ~15 minutes idle. Wake them first; the first request can take about a minute:
+Screenshots of each step: [`screenshots/`](screenshots/README.md).
 
-```bash
-curl -s https://healthcare-ai-api-tovn.onrender.com/health
-# {"status":"ok","app":"Healthcare AI Platform","environment":"demo","llm_mode":"mock"}
-curl -s -o /dev/null -w "%{http_code}\n" https://healthcare-ai-frontend-1s23.onrender.com/
-```
+## Before you start: cold starts and demo data
 
-> **Phase 7 (#43) status.** Verified against the hosted demo on 2026-10-13 after the API was redeployed from `2afdb4b` (migration 004 applied, 8 demo intakes seeded). Verified: the landing page, the four preset buttons, the System Card, both seeded queues with every status, cross-clinic denial, evidence timelines and FHIR R4 export, via the API with operator-issued tokens. Only the routine preset was submitted. The flagged presets were not re-submitted (each sends a real webhook), and the staff browser UI was not driven. On 2026-10-14 the staff browser UI was driven on the same deployment for the seeded `demo-intake-a2` (sign-in, queue, evidence, timeline, FHIR preview/download, mark reviewed, sign-out; screenshots in §4a); the flagged presets remain unverified. Details: [Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4.
+* **Cold start.** Render free services sleep after about 15 minutes idle. Opening any page starts the wake-up. The page shows *"Waking the demo server (can take up to a minute)"* with the attempt count, then *"Demo server is awake"*. If the API still has not answered after six attempts, the page shows *Try again*. An intake submitted while the server is waking is held and not sent until the API answers. To wake the demo from a terminal:
 
-## 0. Guided demo landing (anyone)
+  ```bash
+  curl -s https://healthcare-ai-api-tovn.onrender.com/health
+  # {"status":"ok","app":"Healthcare AI Platform","environment":"demo","llm_mode":"mock"}
+  ```
 
-Open the frontend root (`/`). It explains the workflow (patient intake → AI processing → safety & escalation → staff review → evidence timeline → FHIR export) and links to **Patient intake** (`/intake`), **Staff review** (`/staff`) and the **System card** (`/system-card`). With `NEXT_PUBLIC_DEMO_MODE=true` it also lists the seeded demo staff identities (user id, clinic, role) — identities only, never tokens.
+* **Mock mode.** The hosted API runs `LLM_MODE=mock`. Extraction is a deterministic rule-based baseline and no language model is called. The header shows *Demo · synthetic data · mock mode*, and `/intake` shows *LLM Mode: Mock*.
+* **No webhook delivery.** The escalation webhook has no receiver on the hosted demo (#67), so nothing is sent to a third party.
+* **Database lifecycle.** The free database expires no later than **2026-11-08**. It is then recreated and re-seeded ([`deployment.md`](deployment.md) §9.4), and records submitted by visitors are lost. Re-seeding never resets a status that staff changed, so the hosted queues may differ from the seed description in §3.
 
-The **System card** shows the pipeline stages, the current execution mode (`mock`), the safety and escalation rules with the 0.5 low-confidence threshold, the committed #32 and #40 evaluation results with their limitations, known limitations and a "Not a medical device" statement.
+## 1. Product dashboard (anyone)
 
-## 1. Patient intake: four scenarios (anyone)
+Open `/`. The page shows:
 
-1. Open `/intake`. The header shows `LLM Mode: Mock`.
-2. Click a scenario button. It fills the text only; tick consent yourself, then submit. Identical text is stored only once, so add something unique (e.g. "Synthetic test 4821") if you want a new record each time.
+* the product statement and two entry points, *Try Patient Intake* and *Explore Staff Workflow*;
+* the **Live system status** card: API reachability, `environment` and `llm_mode`, exactly as `GET /health` reports them;
+* the seven-stage workflow, each stage labelled *Implemented*, *Mock mode* or *Demo limit*, with the signed webhook drawn as a conditional branch of the escalation step;
+* *What is real vs. mock*, capability cards with evidence links, and the seeded demo staff identities (no credentials).
 
-| Scenario | Preset text | Expected |
+## 2. Patient intake: four synthetic scenarios (anyone)
+
+1. Open `/intake` (*Patient intake* in the navigation).
+2. Choose a scenario card. It fills the description only: it never ticks consent and never submits. Each card shows its expected outcome.
+3. Tick consent yourself, then *Submit intake*. Progress shows *Demo server ready* → *Process your intake* → *Submission completed*. While a submission is active, the form and the Submit button are disabled.
+4. Read the result. The heading *Your intake has been received* comes first, then emergency guidance when it applies, then the **Outcome** card (status, matched rules, what happens next). The intake summary, extracted information, safety findings and the pre-visit report follow, or a safe acknowledgement if the report was withheld.
+
+| Scenario | Synthetic text | Expected outcome |
 | --- | --- | --- |
-| Routine symptoms | I have had a sore throat and a mild fever for two days. | Summary shown; symptoms *sore throat, fever*, duration *two days*; not flagged (`submitted`) |
-| Emergency language | I have chest pain and shortness of breath since this morning. | Emergency guidance banner; flagged `emergency_signal` |
-| Prescription request | Should I take 500 mg of amoxicillin for this cough? | Report blocked, safe acknowledgement shown; flagged `blocked_prescription` |
-| Vague / low confidence | I just don't feel right and wanted to check in. | No lexicon symptom, confidence below 0.5; flagged `low_confidence` |
+| Routine symptoms | I have had a sore throat and a mild fever for two days. | Not flagged (`submitted`); symptoms *sore throat, fever*, duration *two days* |
+| Emergency language | I have chest pain and shortness of breath since this morning. | Urgent-care guidance shown first; rule `emergency_signal` |
+| Prescription request | Should I take 500 mg of amoxicillin for this cough? | Report withheld, *Safe acknowledgement (report withheld)*; rule `blocked_prescription` |
+| Vague / low confidence | I just don't feel right and wanted to check in. | No lexicon symptom, confidence below 0.5; rule `low_confidence` |
 
-These outcomes are pinned by `tests/test_demo_seed_intakes.py::test_scenario_presets_produce_the_documented_outcomes`. The **developer trace** is hidden by default; tick "Reviewer / developer: show the pipeline trace" to see the raw `/api/ingest` response (`escalation`, `persistence.record_id`).
+These outcomes are pinned by `tests/test_demo_seed_intakes.py::test_scenario_presets_produce_the_documented_outcomes` and were verified on the hosted UI on 2026-10-15 ([Phase 8 journal](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md) §5d).
 
-## 2. Staff review, evidence, FHIR export and clinic isolation (operator token required)
+**Duplicate submissions.** Byte-identical text is stored only once. The four preset texts are already stored on the hosted database, so submitting one shows the matched rules and any safety guidance, but the badge reads *Already received · no new record*. The next step then says *"An identical description was received earlier, so no new record was created and nothing new was added to the clinic staff queue."* This is correct behaviour. A duplicate never triggers the webhook. Editing the text creates a new record. Please do so only with synthetic text, and only if you actually need a new queue item.
 
-Staff tokens are issued by the operator, not by the browser ([`deployment.md`](deployment.md) §6 step 2); the site never publishes a token. Seeded synthetic users: `demo-staff-a` / `demo-admin-a` (clinic `default`) and `demo-admin-b` (`demo-clinic-b`). The demo seed (`APP_ENV=demo` only) adds four synthetic intakes per clinic, one in each review status (`submitted`, `needs_review`, `reviewed`, `escalated`); resolved ones carry one seeded staff transition.
+**Errors.** If the API is unreachable, returns an error or times out, the page says so. Your text and consent choice are kept, and nothing is retried automatically: *Try again* / *Send again* is always an explicit action.
 
-1. Open `/staff` and paste a `demo-staff-a` token (kept in browser memory only). The `default` queue shows the flagged scenario intakes from step 1 and the seeded `demo-intake-a2`. Filter **All** to see every status.
-2. Open a flagged intake. **Why flagged** shows the triggered rule and its recorded evidence; the original input sits next to the extracted fields (derived), with recorded safety matches highlighted where they occur in the input; provenance shows mode `mock`, model/prompt/pipeline versions and the run id. The **Timeline** lists submitted → processed → safety evaluated → escalation decision → webhook delivery → staff actions.
-3. Mark it **Reviewed** or **Escalated**: the timeline reloads with the staff action (actor, from → to).
-4. **FHIR R4 — Synthetic Demo Data**: click "Load FHIR export" for the JSON Bundle preview, then "Download JSON". The `Task` shows the current status and escalation reason; a `Provenance` names the reviewer after step 3.
-5. Clinic isolation: with a `demo-admin-b` token, the `demo-clinic-b` queue shows only `demo-intake-b1`–`b4`; the `default` clinic's queue returns 403 and none of its intakes appear.
+**Reviewer trace.** Tick *Reviewer / developer: show the pipeline trace for this submission* to see escalation, review status, reasons and storage status. The full `/api/ingest` response includes the raw intake text (a documented #32 finding).
 
-## 3. Signed webhook (operator)
+## 3. Staff review, evidence, FHIR export and clinic isolation (operator token required)
 
-Each newly stored `needs_review` intake sends one HMAC-signed POST to the configured receiver, with only `event`, `schema_version`, `idempotency_key`, `intake_id` and `clinic_id`. The operator verifies it with `scripts/verify_webhook.py` ([`deployment.md`](deployment.md) §6 step 4).
+Staff access needs a short-lived token for one of the seeded synthetic users. Tokens are **issued on request by the demo operator** (the repository owner) and are never published: there is no public sign-up, guest login or shared password, and no password exists for these users. The operator procedure is in [`deployment.md`](deployment.md) §6 and §9.3.
 
-## 4. Scripted version
+| User id | Clinic | Role |
+| --- | --- | --- |
+| `demo-staff-a` | `default` | `clinic_staff` |
+| `demo-admin-a` | `default` | `clinic_admin` |
+| `demo-admin-b` | `demo-clinic-b` | `clinic_admin` |
 
-`python -m scripts.hosted_check --api https://healthcare-ai-api-tovn.onrender.com` (with `STAFF_A_TOKEN` and `STAFF_B_TOKEN` set) runs the original Phase 5 acceptance flow (emergency intake → `default` queue → cross-clinic denial) non-interactively and prints `[PASS]`/`[FAIL]` per check. Result on 2026-10-09: 8/8 PASS, exactly one webhook, `VALID signature` ([`deployment.md`](deployment.md) §7).
+The demo seed (`APP_ENV=demo` only) creates four synthetic intakes per clinic, one per review status. On the hosted demo, clinic `default` also contains the intakes submitted by visitors and by earlier verifications.
+
+1. Open `/staff` (*Staff review*), paste the token and select *Sign in*. The token stays in the tab's memory: it is not written to browser storage or cookies, and it is gone after *Sign out*, a reload or closing the tab.
+2. **Queue.** Status tabs (*Needs review*, *Reviewed*, *Escalated*, *Submitted*, *All*) with counts from the clinic's loaded list. Times are shown in UTC. At 1280 px and wider, the queue and the detail sit side by side; on narrower screens, opening an intake shows the detail with *← Back to queue*.
+3. **Detail.** The header shows the reference, status, reasons, full id and times. The page then shows the structured summary, the report, the safety result and *Why flagged* with the recorded evidence. The original input appears beside the extracted fields, with the guard's matches highlighted. Provenance shows the mode, model, prompt and pipeline versions and the run id.
+4. **Timeline.** Submitted → processed → safety evaluated → escalation decision, then any webhook delivery attempts and staff actions (actor, from → to). With no delivery recorded, it says *"No webhook delivery is recorded for this intake."*
+5. **Decision.** Only `needs_review` intakes can be changed. *Mark reviewed* or *Mark escalated* opens a confirmation step; *Confirm* applies the change, *Cancel* sends nothing. The queue and timeline then refresh. Staff transitions never send a webhook.
+6. **FHIR R4 export.** *Load FHIR export* shows the disclaimer (synthetic data, export only, not a conformance or certification claim, contains the original intake text), the resource summary and a collapsed JSON preview. *Download JSON* saves the Bundle.
+7. **Clinic isolation.** A `demo-admin-b` token shows only `demo-clinic-b` intakes (`#demo-intake-b1` … `#demo-intake-b4`). Clinic `default` requests return 403, and none of its intakes appear.
+
+Staff actions change the shared hosted data, so please use them sparingly.
+
+## 4. System card (anyone)
+
+`/system-card` lists the known limitations first, then the pipeline stages (the webhook stage is marked *Conditional*), the safety and escalation rules (low-confidence threshold 0.5), the review rule, and the evaluation results with their sample sizes and caveats. The results come from the committed `evaluation/system_card_results.json`: 16 safety and escalation cases, and 6 in-sample extraction cases.
+
+## 5. Signed webhook (operator, not on the public demo)
+
+When `WEBHOOK_URL` and `WEBHOOK_SECRET` are both configured, each **newly stored** `needs_review` intake sends one HMAC-SHA256-signed POST carrying only `event`, `schema_version`, `idempotency_key`, `intake_id` and `clinic_id`. Duplicates and staff transitions send nothing. The operator verifies a delivery with `scripts/verify_webhook.py` ([`deployment.md`](deployment.md) §6 step 4; last verified 2026-10-09). The public demo keeps `WEBHOOK_URL` unset ([`deployment.md`](deployment.md) §9.1).
+
+## 6. Scripted check (operator)
+
+`python -m scripts.hosted_check --api https://healthcare-ai-api-tovn.onrender.com`, with `STAFF_A_TOKEN` and `STAFF_B_TOKEN` set in the environment, runs the original acceptance flow: emergency intake → clinic `default` queue → cross-clinic denial. It prints `[PASS]`/`[FAIL]` per check. Latest result: 8/8 PASS on 2026-10-14, webhook disabled ([Phase 8 journal](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md) §2a). The script submits a new flagged synthetic intake, so the operator confirms webhook isolation before running it.
 
 ## What this demo does not show
 
-Real LLM output (the hosted demo runs in mock mode; extraction is a rule-based baseline), retrieval (not wired into the API), clinical validation, real patient data, or any production or compliance property. See [`project_status.md`](project_status.md).
+* real LLM output (mock mode only; extraction is a rule-based baseline);
+* retrieval (not connected to the API);
+* clinical validation or accuracy;
+* real patient data;
+* any production, HIPAA or other compliance property.
+
+See [`project_status.md`](project_status.md).
