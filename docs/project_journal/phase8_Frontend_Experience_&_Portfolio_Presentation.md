@@ -1,9 +1,9 @@
 # Phase 8 — Frontend Experience & Portfolio Presentation
 
 Healthcare AI Platform
-Timeline: Phase 8 (from 2026-10-14)
+Timeline: Phase 8 (2026-10-14 – 2026-10-16)
 Scope: Issues #67–#73 (items 1–7 of 7) and follow-up #84
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 closed (2026-10-15): PR #82 merged (`7585f84`); hosted staff workspace verified with short-lived tokens (§6d); the seeded-reference defect was fixed in #84 (PR #85, `1ed0b4a`) and verified on the hosted demo (§6f). #72 closed (2026-10-15): PR #87 merged (`68db16a`, reviewed head `5fce187`; `main` CI run 38750010849 — success); deployed and verified on the hosted demo (§7i), recorded by PR #88 (`dbae578`; `main` CI run 38754022572 — success). #73 in review (§8): Phase 8 is **not closed** until #73 is merged and the merge-date hosted walkthrough is recorded in §8e.
+Status: Complete; formal closure pending (§8f). Implementation and hosted validation of #67–#73 are done; #73 and GitHub Project #10 are closed after the closure-documentation PR merges with green `main` CI. Per issue: #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 closed (2026-10-15): PR #82 merged (`7585f84`); hosted staff workspace verified with short-lived tokens (§6d); the seeded-reference defect was fixed in #84 (PR #85, `1ed0b4a`) and verified on the hosted demo (§6f). #72 closed (2026-10-15): PR #87 merged (`68db16a`, reviewed head `5fce187`; `main` CI run 38750010849 — success); deployed and verified on the hosted demo (§7i), recorded by PR #88 (`dbae578`; `main` CI run 38754022572 — success). #73: PR #89 merged (`8698193`, 2026-10-16 06:21:16 UTC; `main` CI run 38860730424 — success), and the merge-date hosted walkthrough passed (§8e). **Ready to close:** implementation and hosted validation are complete. #73 and Phase 8 are closed formally only after the closure documentation PR is merged with green `main` CI (§8f).
 
 ---
 
@@ -851,7 +851,7 @@ Issue #72 was closed on 2026-10-15 at 14:47 UTC. Implementation: PR #87, merged 
 
 ## 8. Issue 73 — Final README & Portfolio Presentation
 
-**Status:** in review (branch `docs/issue-73-readme-portfolio`, baseline `main` `dbae578`). Documentation, diagrams and screenshots only: no application, backend, auth, database, CI or Render change.
+**Status:** merged. PR #89 (branch `docs/issue-73-readme-portfolio`, baseline `main` `dbae578`) was merged as `8698193` at 2026-10-16 06:21:16 UTC; the hosted walkthrough passed (§8e). Formal closure is pending (§8f). Documentation, diagrams and screenshots only: no application, backend, auth, database, CI or Render change.
 
 ### 8a. Delivered
 
@@ -904,13 +904,70 @@ Isolated `git worktree` at `dbae578` in a temporary directory, with a new Python
 ### 8d. Limitations
 
 * The staff screenshots are from 2026-10-15 (builds `7585f84` and `1ed0b4a`). The later #72 build changed no staff-workspace layout (it added `lang`, the meta description, the icon and the error pages), but the staff workspace was not re-captured on build `68db16a`, because that needs a new token. The emergency outcome shown is a duplicate (*Already received · no new record*). A *Flagged for staff review* badge on a newly saved record has not been captured on the hosted demo.
-* The README's statement that the hosted links work is verified for 2026-10-16. It must be re-checked on the merge date.
+* The README's statement that the hosted links work was re-checked on the merge date (§8e).
 
-### 8e. Merge-date hosted walkthrough
+### 8e. Merge, CI and merge-date hosted walkthrough (2026-10-16)
 
-**Pending.** To be done on the day #73 is merged and recorded here before Phase 8 is closed:
-* the README links;
-* the dashboard, intake form and system card on the deployed build;
-* the database expiry date.
+**Review Gate and merge.**
+* The Review Gate on head `28a6419` found one blocker: the README's authorship counts (144 commits; 69 of 99 non-merge commits with a `Co-Authored-By: Claude` trailer) read as current totals. They are now anchored to `main` at `dbae578`. The counts were not recomputed, and nothing else changed.
+* New head `dd64d63`. PR CI run 38860421063 passed all four jobs; GitHub reported MERGEABLE / CLEAN.
+* PR #89 was merged with a merge commit pinned to that head: **`8698193e1d5d47d31117b78218738300d792b162`**, at 2026-10-16 06:21:16 UTC.
+* `main` CI run [38860730424](https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38860730424) passed all four jobs:
+  * backend 248 passed (11 PostgreSQL integration tests);
+  * benchmark, extraction and safety suites green;
+  * frontend 10 files, 238 tests;
+  * browser E2E 35 passed (Chromium).
+* No deploy was needed or made: the merge changed documentation only, so the hosted frontend still serves the #72 build (`68db16a`). The served `/` carries the `<html lang="en">` and meta description that only that build contains.
 
-Staff-workspace checks need an operator-issued token and are optional.
+**Read-only hosted walkthrough** (06:39–06:42 UTC):
+* no intake submitted, no sign-in, no token, no staff transition, no webhook;
+* every request was a GET, plus browser-issued CORS preflights;
+* evidence: [`evidence/phase8_issue73_hosted_walkthrough_2026-10-16/`](evidence/phase8_issue73_hosted_walkthrough_2026-10-16/).
+
+HTTP checks (`curl`, `http-checks.txt`):
+
+| Time (UTC) | Request | Result |
+| --- | --- | --- |
+| 06:39:47 | API `GET /health` | **200 after 42.6 s (cold start)**; `{"status":"ok","app":"Healthcare AI Platform","environment":"demo","llm_mode":"mock"}` |
+| 06:40:30 | API `GET /` | 200, 0.2 s (`{"message":"Healthcare AI Platform API is running","docs":"/docs"}`) |
+| 06:40:30 | Frontend `GET /` | **200 after 13.6 s** (frontend instance also asleep) |
+| 06:40:44 | Frontend `/intake`, `/staff`, `/system-card` | 200, about 0.2 s each |
+| 06:40:44 | Frontend `/does-not-exist-e73` | **404** |
+| 06:40:45 | API `GET /api/system-card` | 200, 0.2 s |
+
+Browser checks: headless Chromium (Playwright 1.63), 1280 × 900, light theme, `en-US`, UTC. The script is `walkthrough-hosted.mjs`, results are in `walkthrough-results.json`, and there is one screenshot per page. The final run was at 06:41:35–06:41:41 UTC: the first run's staff check matched the page heading, so the check was made explicit and the run repeated with the same results.
+
+| Page | HTTP | Visible state | Result |
+| --- | --- | --- | --- |
+| `/` dashboard | 200 | *Demo · synthetic data · mock mode* indicator; *Live system status*: *Reachable*, environment `demo`, LLM mode `mock`; *Try Patient Intake* and *Explore Staff Workflow* | PASS |
+| `/intake` | 200 | *LLM Mode: Mock*; the four scenario cards (*Routine symptoms*, *Emergency language*, *Prescription request*, *Vague / low confidence*), each with its exact synthetic text and *Expected outcome*; consent unchecked; nothing submitted | PASS |
+| `/system-card` | 200 | *Not a medical device*; *Current execution mode: mock (deterministic rule-based baseline, not LLM output)*; safety total 16 cases, 16/16 and 16/16, 3 known gaps; extraction 6 cases, micro/macro P = R = 1.00. The hosted `GET /api/system-card` `evaluation` is **deep-equal** to the committed `evaluation/system_card_results.json` | PASS |
+| `/staff` | 200 | Signed out: *Visiting the public demo?* policy card, an empty *Access token* field and *Sign in*; no queue status tabs and no *Sign out* | PASS |
+| `/does-not-exist-e73` | 404 | Styled *Page not found* / *Error 404* inside the app shell, with *Return to the dashboard* | PASS |
+
+* All pages: `lang="en"`, one `h1`, and empty `localStorage`, `sessionStorage` and cookies.
+* Requests: 138 in total, **0 non-GET**. The API received 4 × `GET /health` and 1 × `GET /api/system-card`.
+* The only console error is the browser's own *"Failed to load resource … 404"* for the missing-page document itself.
+* The cold-start waking banner was not observed in the browser, because the `curl` checks had already woken both services.
+
+**README verification:**
+* **Internal links:** run against `main` at `8698193`. All 72 Markdown links (5 with `#anchors`, checked with GitHub heading-slug rules) and 12 image paths resolve: **84/84 passed, 0 failed**.
+* **External URLs:** the 6 public URLs (5 live demo URLs and the CI run link) returned HTTP 200: **6/6**. The `localhost` URLs appear only inside setup code blocks and were not checked.
+* **GitHub rendering:** on `main` (06:42 UTC), both README Mermaid diagrams rendered with no error, and all 12 screenshots loaded (0 broken). Both diagrams in `diagrams/architecture.md` rendered too.
+
+**Database expiry.** Read on the Render dashboard (`healthcare-ai-db` → *Info*) at 06:42 UTC by the signed-in account owner's browser session. Only the lines about expiry and creation were extracted; no connection details were read, recorded or shown, and nothing was clicked or changed. The dashboard says *"Your database will expire on November 8, 2026. The database will be deleted unless you upgrade to a paid compute plan."* and *Created: 7 days ago*. The expiry is therefore **2026-11-08**, equal to the documented upper bound. [`../deployment.md`](../deployment.md) §9.4, the README and the demo walkthrough now state the confirmed date.
+
+**Not checked in this walkthrough:**
+* the signed-in staff workspace (it needs an operator-issued token);
+* the flagged-outcome UI (it needs a submission);
+* webhook delivery, which is disabled on the hosted demo.
+
+These were verified on 2026-10-15 (§5d, §6d, §6f) and are unchanged, because no frontend or backend code has changed since the #72 build.
+
+### 8f. Closure
+
+Implementation, CI and hosted validation for #73 are complete, and with them all seven Phase 8 issues (#67–#73) and follow-up #84. This closure documentation is submitted as its own docs-only PR. **Formal closure happens only after that PR is merged with green `main` CI:**
+1. Close #73.
+2. Mark #73 *Done* on GitHub Project #10 and close the project.
+
+No further documentation change is planned. The closure PR's merge SHA and its `main` CI run are recorded on #73 when it is closed, not here, because they do not exist yet.

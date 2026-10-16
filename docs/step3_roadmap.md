@@ -1,6 +1,6 @@
 # Step 3 — Development Roadmap
 
-**Last revised:** 2026-10-16 (Phase 8 status: #67–#72 closed, #73 in review)
+**Last revised:** 2026-10-16 (Phase 8 closure prepared: #73 merged in PR #89, merge-date walkthrough passed)
 **Previous revision:** 2026-10-06 (Phase 4 closure: phase overview synchronized with the GitHub Projects for Phases 4–7)
 
 GitHub Issues and Projects are the source of truth for implementation progress. This document explains **what the remaining work is and why it exists**. It does not duplicate issue checklists.
@@ -43,7 +43,7 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | 5 | Clinical Review & Escalation Workflow | **COMPLETE** — Issues #29–#33 |
 | 6 | Security, Deployment & Handover | **COMPLETE** — Issues #34–#36 |
 | 7 | Demo Experience, AI Evidence & FHIR Interoperability | **COMPLETE** — Issues #40–#43; hosted API redeployed and verified 2026-10-13 |
-| 8 | Frontend Experience & Portfolio Presentation | **IN PROGRESS** — #67–#72 (and follow-up #84) closed; #73 (final README and portfolio presentation) in review. Closes after #73 is merged and the merge-date hosted walkthrough is recorded |
+| 8 | Frontend Experience & Portfolio Presentation | **COMPLETE** (formal closure pending) — Issues #67–#73 and follow-up #84 implemented and verified on the hosted demo; #73 merged in PR #89 (`8698193`). #73 and the GitHub Project close after the closure documentation PR merges with green CI |
 | — | Optional enhancements | Not required for portfolio completion |
 
 Each phase is tracked as a GitHub Project of the same name, and GitHub Issues remain authoritative wherever this document and an issue differ. The work items in §5–§6 were written on 2026-10-02, before the issues existed; they are now delivered by Phases 3–6 as mapped below.
@@ -124,7 +124,7 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 * Authorization and isolation covered by tests; CI green.
 * README and docs accurately describe what is and is not implemented.
 
-### Phase 8 — Frontend Experience & Portfolio Presentation (in progress)
+### Phase 8 — Frontend Experience & Portfolio Presentation (complete; formal closure pending)
 
 Phase 8 makes the delivered workflow safe to show publicly and presentable to prospective clients, without adding backend capabilities. It is tracked as GitHub Project #10. Record: [`project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md`](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md).
 
@@ -136,7 +136,7 @@ Phase 8 makes the delivered workflow safe to show publicly and presentable to pr
 | #70 Patient intake experience | Closed 2026-10-15 |
 | #71 Staff review workspace experience (follow-up #84: distinct intake references) | Closed 2026-10-15 |
 | #72 Accessibility, frontend quality and browser E2E validation | Closed 2026-10-15 |
-| #73 Final README and portfolio presentation | In review |
+| #73 Final README and portfolio presentation | Merged 2026-10-16 (PR #89, `8698193`); merge-date walkthrough passed; issue closes after the closure documentation PR |
 
 ---
 

@@ -1,0 +1,10 @@
+# Issue #73 merge-date HTTP checks, 2026-10-16 (UTC), curl, GET only, no headers or body recorded
+# time  method  url  http_status  total_time
+06:39:47 GET https://healthcare-ai-api-tovn.onrender.com/health             200 42.645400s
+06:40:30 GET https://healthcare-ai-api-tovn.onrender.com/                   200 0.207560s
+06:40:30 GET https://healthcare-ai-frontend-1s23.onrender.com/              200 13.604522s
+06:40:44 GET https://healthcare-ai-frontend-1s23.onrender.com/intake        200 0.201731s
+06:40:44 GET https://healthcare-ai-frontend-1s23.onrender.com/staff         200 0.202702s
+06:40:44 GET https://healthcare-ai-frontend-1s23.onrender.com/system-card   200 0.191583s
+06:40:44 GET https://healthcare-ai-frontend-1s23.onrender.com/does-not-exist-e73 404 0.186586s
+06:40:45 GET https://healthcare-ai-api-tovn.onrender.com/api/system-card    200 0.197230s
