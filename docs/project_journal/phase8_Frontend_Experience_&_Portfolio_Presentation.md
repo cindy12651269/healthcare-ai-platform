@@ -2,8 +2,8 @@
 
 Healthcare AI Platform
 Timeline: Phase 8 (from 2026-10-14)
-Scope: Issues #67–#71 (items 1–5 of 7) so far
-Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 closed (2026-10-15): PR #82 merged (`7585f84`); hosted staff workspace verified with short-lived tokens (§6d); the seeded-reference defect was fixed in #84 (PR #85, `1ed0b4a`) and verified on the hosted demo (§6f).
+Scope: Issues #67–#73 (items 1–7 of 7) and follow-up #84
+Status: In progress — #67 closed (2026-10-14): PR #74 merged (`f84a1da`, `main` CI run 38537057498 — success); hosted API validated (§2a) and hosted frontend deployed and verified (§2c). #68 closed (2026-10-14): PR #76 merged (`ba028df`); hosted frontend verified on the public pages (§3c), signed-in staff workspace pending a token. #69 closed (2026-10-14): PR #78 merged (`24d2a6b`); hosted dashboard and system card verified (§4c). #70 closed (2026-10-15): PR #80 merged (`8f6e963`); hosted intake verified with webhook isolation confirmed first (§5d). #71 closed (2026-10-15): PR #82 merged (`7585f84`); hosted staff workspace verified with short-lived tokens (§6d); the seeded-reference defect was fixed in #84 (PR #85, `1ed0b4a`) and verified on the hosted demo (§6f). #72 closed (2026-10-15): PR #87 merged (`68db16a`, reviewed head `5fce187`; `main` CI run 38750010849 — success); deployed and verified on the hosted demo (§7i), recorded by PR #88 (`dbae578`; `main` CI run 38754022572 — success). #73 in review (§8): Phase 8 is **not closed** until #73 is merged and the merge-date hosted walkthrough is recorded in §8e.
 
 ---
 
@@ -842,3 +842,75 @@ Evidence: [`evidence/phase8_issue72_hosted_frontend_2026-10-15/`](evidence/phase
 * **Still NOT VERIFIED:** native Safari (WebDriver needs "Allow remote automation") and a VoiceOver or other screen-reader pass. This is not a WCAG 2.2 AA conformance claim.
 
 **Verdict:** hosted validation PASS for the checks above. Native Safari and screen-reader checks remain deferred.
+
+### 7j. Closure
+
+Issue #72 was closed on 2026-10-15 at 14:47 UTC. Implementation: PR #87, merged as `68db16a` (reviewed head `5fce187`); `main` CI run [38750010849](https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38750010849) passed. The hosted post-deployment validation (§7i) was recorded by PR #88, merged as `dbae578`; `main` CI run [38754022572](https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38754022572) passed all four jobs: backend 248 passed (11 PostgreSQL), frontend 238, browser E2E 35 (Chromium), benchmark green.
+
+---
+
+## 8. Issue 73 — Final README & Portfolio Presentation
+
+**Status:** in review (branch `docs/issue-73-readme-portfolio`, baseline `main` `dbae578`). Documentation, diagrams and screenshots only: no application, backend, auth, database, CI or Render change.
+
+### 8a. Delivered
+
+* **README** rewritten as the portfolio presentation:
+  * product introduction and business use case;
+  * live demo links, with mock mode, webhook isolation and free-tier limits stated;
+  * dated hosted screenshots, desktop and mobile;
+  * Mermaid patient-to-clinician workflow and system architecture;
+  * capability table (*Implemented* / *Partial* / *Not connected* / *Not implemented*) with links to code and tests;
+  * technology stack, safe demo walkthrough, setup and configuration, testing, CI and deployment;
+  * evaluation results with sample sizes and caveats;
+  * limitations, portfolio relevance, and scope and authorship.
+* **Diagrams** ([`../diagrams/architecture.md`](../diagrams/architecture.md)): a new patient-to-clinician workflow and an updated architecture diagram, each with notes that tie every edge to the code. The webhook is drawn as conditional (newly saved `needs_review` record **and** a configured receiver; disabled on the hosted demo). RAG is shown as not connected to the API (`api/deps.py` builds no retrieval agent). Both LLM edges are dashed: mock mode, the default, calls no model.
+* **Screenshots** ([`../screenshots/`](../screenshots/README.md)), 13 images, each with its capture date in the filename and its provenance in the inventory:
+  * **5 new, 2026-10-16.** Public pages only (dashboard desktop and mobile, intake form with a scenario selected, staff sign-in, system card), captured by `capture-hosted-public.mjs` at 05:43 UTC. The script did not sign in and sent no token. The request log shows 132 GET requests and 0 non-GET; no intake was submitted, and browser storage was empty.
+  * **8 reused, 2026-10-15.** Cropped from the verified #70, #71 and #84 hosted evidence, with their original dates: routine outcome (the #70 probe), emergency outcome desktop and mobile, clinic B queue desktop and mobile, intake detail, evidence and timeline, and FHIR preview.
+  * No new staff token was issued, no flagged text was submitted, no hosted record was changed and no webhook was triggered for #73.
+* **Docs updated:** [`../demo_walkthrough.md`](../demo_walkthrough.md) (rewritten for the Phase 8 UI: cold start, duplicates, staff tabs and confirmation, FHIR panel, token policy), [`../project_status.md`](../project_status.md) (audit at `dbae578`, §2c Phase 8 verification, Phase 8 row *in progress*), [`../step3_roadmap.md`](../step3_roadmap.md) (Phase 8 row and work items), and this journal (the #72 closure reference in the header and §7j).
+
+### 8b. Clean-checkout validation (2026-10-16)
+
+Isolated `git worktree` at `dbae578` in a temporary directory, with a new Python 3.11.11 virtual environment and Node 24.8.0. The existing development checkout, its `.env` and its Docker containers were not used or changed. Commands as documented in the README:
+
+| Command | Result |
+| --- | --- |
+| `pip install -r requirements-dev.txt` | OK |
+| `python -m pytest -q` (no database) | **237 passed, 11 skipped** (the PostgreSQL tests, as documented) |
+| `TEST_DATABASE_URL=… python -m pytest -q` (throwaway `postgres:15` from `scripts/e2e_local_db.sh`) | **248 passed** (same count as CI) |
+| `python -m evaluation.benchmark --mode mock --rag off` / `--rag on` | 6/6 runs `success` each; RAG on: 2 retrieval hits per case |
+| `python -m evaluation.benchmark --suite safety` | 16 cases, exit 0 |
+| `python -m evaluation.benchmark --suite extraction --mode mock` | 6 cases, micro P = R = 1.00, macro P = R = 1.00 |
+| `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` (in `app/`) | all exit 0; **238 tests passed** (10 files); 6 static routes prerendered |
+| `E2E_DATABASE_URL=$(../scripts/e2e_local_db.sh start) npm run e2e`, then `… stop` | **35 passed** (Chromium, 1.4 min) |
+| `docker compose -p hc73clean config --quiet`; `docker compose -p hc73clean build api frontend` | config valid; both images built |
+
+**Not executed:**
+* `docker compose up` itself. `docker-compose.yml` pins `container_name` (`healthcare_api`, `healthcare_postgres`, …), and these names already exist as stopped containers of the local development stack. Starting a second stack would require removing them, so it was not done. The README now says to stop any other copy of the stack first. The same API, database migrations and production frontend build were exercised end to end by the E2E run above.
+* The local staff CLI (`python -m api.auth create-user` / `issue-token`). It is covered by `tests/test_auth_rbac.py`, and the E2E stack issues a test-only token through the same module.
+* Firefox and WebKit E2E (`E2E_ALL_BROWSERS=1`), last run for #72 (§7h), and the Render Blueprint deploy (no deploy for a documentation PR).
+
+### 8c. Documentation checks (2026-10-16)
+
+* **Links:** 170 relative links, image paths and `#anchors` in the seven changed Markdown files resolve; anchors were checked with GitHub's heading-slug rules. Every external URL returned HTTP 200: the frontend pages, API `/health` and the CI run link.
+* **Mermaid:** all four diagrams (2 in the README, 2 in `architecture.md`) render without errors in `@mermaid-js/mermaid-cli` 11.4.2. Renders were reviewed for layout, and the README architecture was re-laid out top-down after the first render routed an edge through the webhook node. GitHub's own rendering is to be confirmed on the PR page.
+* **Secrets:** the changed documents, the screenshot directory (including the image bytes) and the capture log were searched for bearer tokens, JWT-like strings, provider keys, private keys, `Authorization` values and database URLs with credentials: no match. The capture log records method and URL only.
+* **Claims:** every capability statement in the README is in the capability table and agrees with `project_status.md` §3. COMPLETE maps to *Implemented*, PARTIAL to *Partial*. Retrieval is shown as *Not connected*, the matrix's PARTIAL ("not wired into the API pipeline"). Every occurrence of HIPAA, production, clinically validated, accuracy, conformance, certification or guarantee is a negation or a limitation. Sample sizes are as in the committed snapshot: 16 safety cases, 6 in-sample extraction cases.
+* **Authorship facts** (`git` at `dbae578`): 144 commits, all by Cindy Lin; 99 non-merge commits, 69 of them with a `Co-Authored-By: Claude` trailer; 45 merged pull requests; first commit 2025-11-30.
+* **Market research reference:** the 2026-09-24 review is kept outside the repository. The README quotes only its descriptive counts across six accessible listings, with no price or outcome claim.
+
+### 8d. Limitations
+
+* The staff screenshots are from 2026-10-15 (builds `7585f84` and `1ed0b4a`). The later #72 build changed no staff-workspace layout (it added `lang`, the meta description, the icon and the error pages), but the staff workspace was not re-captured on build `68db16a`, because that needs a new token. The emergency outcome shown is a duplicate (*Already received · no new record*). A *Flagged for staff review* badge on a newly saved record has not been captured on the hosted demo.
+* The README's statement that the hosted links work is verified for 2026-10-16. It must be re-checked on the merge date.
+
+### 8e. Merge-date hosted walkthrough
+
+**Pending.** To be done on the day #73 is merged and recorded here before Phase 8 is closed:
+* the README links;
+* the dashboard, intake form and system card on the deployed build;
+* the database expiry date.
+
+Staff-workspace checks need an operator-issued token and are optional.

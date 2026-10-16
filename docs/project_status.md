@@ -1,8 +1,8 @@
 # Project Status — Evidence-Based Capability Audit
 
-**Audit date:** 2026-10-13 (Phase 7 closure)
-**Audited commit:** `4194d18` (main, merge of PR #64; #40–#43 closed, Phase 7 complete). §2 records the Phase 5 closure run at `eb92cac`; §2a adds the Phase 6 verification and §2b the Phase 7 verification, including the hosted staff browser UI check of 2026-10-14 (documentation-only update).
-**Previous audit:** 2026-10-09 at `8affdfd`
+**Audit date:** 2026-10-16 (Phase 8, before closure: #67–#72 closed, #73 in review)
+**Audited commit:** `dbae578` (main, merge of PR #88). §2c adds the Phase 8 verification. Phase 8 is **not closed**: closure needs #73 merged and the merge-date hosted walkthrough recorded in the Phase 8 journal.
+**Previous audit:** 2026-10-13 at `4194d18` (Phase 7 closure; §2 records the Phase 5 closure run at `eb92cac`, §2a the Phase 6 and §2b the Phase 7 verification)
 **Source of truth for implementation progress:** GitHub Issues / Projects. This document records what the repository *actually does* at the audited commit, so that reviewers can distinguish working code from planned work.
 
 Related documents:
@@ -52,6 +52,31 @@ A file existing in the repository is not evidence of implementation. The empty p
 * Hosted demo redeployed from `2afdb4b` on 2026-10-13 (migration 004 and demo seed applied) and verified at API level with read-only staff requests: system card matches the committed snapshot, both seeded clinic queues, cross-clinic 403 in both directions, timelines, FHIR Bundles for ten intakes passing `validate_bundle`, ids-only export audit events. **Not exercised on the hosted demo:** the emergency, prescription and vague presets (the webhook destination has not been isolated) and a new signed webhook delivery ([Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4).
 * Hosted staff browser UI verified manually on 2026-10-14 as `demo-admin-a` in clinic `default` (Clinic A), with screenshots and the downloaded FHIR JSON committed: token sign-in, review queue, intake detail and report, safety evidence and provenance, timeline, FHIR R4 preview and JSON download, "Mark reviewed" on `demo-intake-a2`, and sign-out all PASS. One seeded intake, one session; "Mark escalated" was not exercised in the browser and the post-transition state was not captured in a screenshot ([Phase 7 journal](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) §4a).
 
+### 2c. Phase 8 verification (2026-10-14 – 2026-10-16)
+
+* CI green on `main` after every Phase 8 merge. At `dbae578` ([run 38754022572](https://github.com/cindy12651269/healthcare-ai-platform/actions/runs/38754022572)), all four jobs passed:
+  * backend **248 passed**, with 11 PostgreSQL integration tests executed;
+  * benchmark, extraction and safety suites green;
+  * frontend **238** Vitest tests, plus lint, typecheck and build;
+  * browser E2E **35 passed** on Chromium (#72).
+* Locally (#72), the Playwright suite passed 105 times: 35 tests × Chromium, Firefox and WebKit.
+* Hosted demo, frontend redeployed after each issue and verified ([Phase 8 journal](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md)):
+  * webhook isolated (`WEBHOOK_URL` unset), confirmed in the environment and the logs (§2a, §5d);
+  * cold start observed (§2c, §4c);
+  * dashboard and system-card values deep-equal to the committed snapshot (§4c);
+  * the four presets on the deployed UI (§5d, all duplicates of stored texts);
+  * staff workspace with short-lived operator-issued tokens: clinic isolation both ways, transitions, and a FHIR download with 0 `validate_bundle` errors (§6d, §6f);
+  * accessibility spot checks (45/45) and Lighthouse after the #72 deploy (§7i).
+* Issue #73 clean-checkout validation (2026-10-16, isolated worktree at `dbae578`):
+  * `pytest` 237 passed and 11 skipped without a database, then 248 passed with a throwaway PostgreSQL;
+  * all four documented benchmark commands;
+  * frontend `npm ci`, lint, typecheck, 238 tests and build;
+  * Playwright E2E 35 passed;
+  * Compose config valid and both images built.
+
+  `docker compose up` itself was not run, because its fixed container names collide with an existing local stack (Phase 8 journal §8).
+* **Not verified:** native Safari, a human screen-reader pass, real LLM mode (never run in CI or on the hosted demo), and a new signed webhook delivery since 2026-10-09.
+
 Resolved earlier (Phase 3): `POST /api/ingest` returned HTTP 500 without an OpenAI key, and `AuditMiddleware` recorded handled HTTP errors as `success`. Both were fixed in PR #21 (Issue #20); `tests/test_ingest_e2e.py` exercises the unmocked path.
 
 ---
@@ -78,9 +103,9 @@ Resolved earlier (Phase 3): `POST /api/ingest` returned HTTP 500 without an Open
 | Observability (metrics / tracing) | **COMPLETE** (local scope) | Stage-level timings, p50/p95 aggregation in benchmark, run IDs (`observability/`). No exporter or dashboard. |
 | Automated testing | **COMPLETE** (current scope) | Unit, contract, auth/RBAC, review-queue, escalation, safety-evaluation and webhook tests (webhook delivery uses fake and loopback receivers, no network). An unmocked API → pipeline → PostgreSQL integration suite (migrations 001–004, ingest, isolation) that CI fails if skipped. Frontend unit tests for the patient and staff UIs. All run in CI on every PR and push to `main` (counts in §2). A Playwright browser E2E job (#72) runs the core intake and staff flows, accessibility checks and API-unreachable states on Chromium against a local mock-mode stack with a test-only token (Phase 8 journal §7). |
 | Deployment / CI/CD | **COMPLETE** (single demo environment) | GitHub Actions CI on every PR and push to `main` (#25). Dockerfiles and Docker Compose for local use, with automatic migrations. One hosted demo on Render free plans from `render.yaml`, with migrations, synthetic demo seed and health checks on deploy; hosted acceptance flow verified 2026-10-09 ([`deployment.md`](deployment.md), #35); Phase 7 API redeployed from `2afdb4b` (migration 004, demo seed) and verified 2026-10-13 (Phase 7 journal §4). Free-tier limits: services sleep when idle; the free database expires after 30 days. |
-| Frontend / UI | **COMPLETE** (demo scope) | Guided demo landing, read-only system card and a patient intake UI with four synthetic scenario presets; the developer trace panel (#16) is hidden behind a reviewer toggle (#43) and a staff review workspace at `/staff` (#31, [`staff_review_ui.md`](staff_review_ui.md)). Both are linted, type-checked, tested and built in CI. The staff flow was checked manually in a browser and is covered by the Playwright browser E2E job (#72): sign-in with a test-only token → queue → detail → FHIR preview, against a local mock-mode stack. The Phase 7 staff additions (evidence, timeline, FHIR preview/download) are covered by frontend unit tests, and were checked manually in the hosted staff browser UI on 2026-10-14 for one seeded intake (Phase 7 journal §4a). |
+| Frontend / UI | **COMPLETE** (demo scope) | Phase 8 (#68–#72): design tokens and app shell, product dashboard with live `/health` status, staged patient intake with outcome-first results and explicit error recovery, staff workspace with status tabs, confirmation step, UTC dates and FHIR summary, styled 404/500 and an error boundary; responsive at 390–1440 px and checked on the hosted demo (Phase 8 journal). Earlier: guided demo landing, read-only system card and a patient intake UI with four synthetic scenario presets; the developer trace panel (#16) is hidden behind a reviewer toggle (#43) and a staff review workspace at `/staff` (#31, [`staff_review_ui.md`](staff_review_ui.md)). Both are linted, type-checked, tested and built in CI. The staff flow was checked manually in a browser and is covered by the Playwright browser E2E job (#72): sign-in with a test-only token → queue → detail → FHIR preview, against a local mock-mode stack. The Phase 7 staff additions (evidence, timeline, FHIR preview/download) are covered by frontend unit tests, and were checked manually in the hosted staff browser UI on 2026-10-14 for one seeded intake (Phase 7 journal §4a). |
 | Reliability / error handling | **PARTIAL** | Typed intake, structuring and report errors mapped to 400/422; provider failures to 502 and configuration errors to 503, with LLM timeouts and bounded retries (#22). A blocked safety output returns 200 with a safe acknowledgement (#29). Retrieval failure is non-fatal, persistence outcomes are reported, and webhook failures never fail the request (#33). Webhook delivery is synchronous, with no total deadline and no resend. |
-| Documentation / handover | **COMPLETE** (portfolio scope) | Architecture, API, data-model, auth, review-queue, staff-UI, evaluation, webhook, security and deployment docs; Phase 1–7 journals. Handover (#36, PR #57): README, [`diagrams/architecture.md`](diagrams/architecture.md), [`decisions.md`](decisions.md), [`demo_walkthrough.md`](demo_walkthrough.md); the Step 2/4/5 documents are marked as historical with current-state notes. |
+| Documentation / handover | **COMPLETE** (portfolio scope) | Phase 8 presentation (#73, in review): README with dated hosted screenshots ([`screenshots/`](screenshots/README.md)), Mermaid workflow and architecture diagrams ([`diagrams/architecture.md`](diagrams/architecture.md)), capability and evidence table, safe demo instructions ([`demo_walkthrough.md`](demo_walkthrough.md)). Earlier: architecture, API, data-model, auth, review-queue, staff-UI, evaluation, webhook, security and deployment docs; Phase 1–7 journals. Handover (#36, PR #57): README, [`diagrams/architecture.md`](diagrams/architecture.md), [`decisions.md`](decisions.md), [`demo_walkthrough.md`](demo_walkthrough.md); the Step 2/4/5 documents are marked as historical with current-state notes. |
 | FHIR / interoperability | **PARTIAL** (export only) | Clinic-scoped FHIR R4 Bundle export of one intake (QuestionnaireResponse, Questionnaire, Task, Organization, Device, Provenance), validated in CI against the pinned official R4 JSON Schema plus required-element and reference checks (#42, [`interoperability/fhir_mapping.md`](interoperability/fhir_mapping.md)). No FHIR server, inbound FHIR, Patient/Condition resources or coding. HL7 v2 and a general EHR router are out of scope (roadmap §8). |
 | Explainability / evidence provenance | **PARTIAL** | Run trace exposes intake, structured output, retrieval chunks and safety reasons. Staff see per-intake evidence (triggered rule, recorded matches highlighted in the input, provenance) and a timeline of processing, webhook delivery and staff transitions (#41, [`review_queue_api.md`](review_queue_api.md#intake-evidence--timeline-41)). Stage times are not persisted; report output does not cite retrieval sources. |
 
@@ -116,5 +141,6 @@ The runtime audit log (`audit.jsonl`) and generated benchmark results (`evaluati
 | Phase 5 — Clinical Review & Escalation Workflow | #29–#33 | Closed | [`phase5_Clinical_Review_&_Escalation_Workflow.md`](project_journal/phase5_Clinical_Review_&_Escalation_Workflow.md) |
 | Phase 6 — Security, Deployment & Handover | #34–#36 | Closed | [`phase6_Security_Deployment_&_Handover.md`](project_journal/phase6_Security_Deployment_&_Handover.md) |
 | Phase 7 — Demo Experience, AI Evidence & FHIR Interoperability | #40–#43 | Closed (hosted verified 2026-10-13; staff browser UI 2026-10-14) | [`phase7_Demo_Experience_AI_Evidence_&_FHIR.md`](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) |
+| Phase 8 — Frontend Experience & Portfolio Presentation | #67–#73 (+ #84) | **In progress**: #67–#72 and #84 closed; #73 in review; merge-date hosted walkthrough pending | [`phase8_Frontend_Experience_&_Portfolio_Presentation.md`](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md) |
 
 The journals are historical records written at the time each phase closed. Where this audit qualifies a journal statement (for example, mock-mode retrieval "improving grounding"), the qualification is recorded here rather than by editing the journal.
