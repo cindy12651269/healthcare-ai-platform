@@ -1,0 +1,733 @@
+{
+  "base": "https://healthcare-ai-frontend-1s23.onrender.com",
+  "facts": [
+    {
+      "view": "dashboard-desktop",
+      "url": "/",
+      "width": 1280,
+      "title": "Product Dashboard | Healthcare AI Platform",
+      "storage": {
+        "local": 0,
+        "session": 0,
+        "cookies": 0
+      },
+      "capturedAt": "2026-10-16T05:43:02.836Z"
+    },
+    {
+      "view": "dashboard-mobile",
+      "url": "/",
+      "width": 390,
+      "title": "Product Dashboard | Healthcare AI Platform",
+      "storage": {
+        "local": 0,
+        "session": 0,
+        "cookies": 0
+      },
+      "capturedAt": "2026-10-16T05:43:05.926Z"
+    },
+    {
+      "view": "system-card-desktop",
+      "url": "/system-card",
+      "width": 1280,
+      "title": "System Card | Healthcare AI Platform",
+      "storage": {
+        "local": 0,
+        "session": 0,
+        "cookies": 0
+      },
+      "capturedAt": "2026-10-16T05:43:08.225Z"
+    },
+    {
+      "view": "intake-form-desktop",
+      "scenarioSelected": "Routine symptoms",
+      "consentChecked": false
+    },
+    {
+      "view": "intake-form-desktop",
+      "url": "/intake",
+      "width": 1280,
+      "title": "Pre-visit Intake | Healthcare AI Platform",
+      "storage": {
+        "local": 0,
+        "session": 0,
+        "cookies": 0
+      },
+      "capturedAt": "2026-10-16T05:43:10.624Z"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "url": "/staff",
+      "width": 1280,
+      "title": "Staff Review | Healthcare AI Platform",
+      "storage": {
+        "local": 0,
+        "session": 0,
+        "cookies": 0
+      },
+      "capturedAt": "2026-10-16T05:43:12.722Z"
+    }
+  ],
+  "requests": [
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0l6czsm21q1-u.css"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/31835ab2nsw8y.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0fc6cxhtbk0ou.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/071dwbp0i77q9.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_pwyttnlxx-.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-1b002pfnukveb.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1__e2nv58-o8m.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-38cb_7r8rmhdl.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_buildManifest.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_ssgManifest.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_clientMiddlewareManifest.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/health"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_2k-hac-296.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_2k-hac-296.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1hnffes_6bgkg.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s166boipuy7a.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/3-c5087sgcl5m.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/07vpgxdw448xg.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s_04_omybper.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0752jhxbt6px3.js"
+    },
+    {
+      "view": "dashboard-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2h0zf2_y1iwix.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0l6czsm21q1-u.css"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/31835ab2nsw8y.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0fc6cxhtbk0ou.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/071dwbp0i77q9.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_pwyttnlxx-.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-1b002pfnukveb.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1__e2nv58-o8m.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-38cb_7r8rmhdl.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_buildManifest.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_ssgManifest.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_clientMiddlewareManifest.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/health"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/3-c5087sgcl5m.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0752jhxbt6px3.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2h0zf2_y1iwix.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/07vpgxdw448xg.js"
+    },
+    {
+      "view": "dashboard-mobile",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s_04_omybper.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/system-card"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0l6czsm21q1-u.css"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/31835ab2nsw8y.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0fc6cxhtbk0ou.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/071dwbp0i77q9.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_pwyttnlxx-.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-1b002pfnukveb.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1hnffes_6bgkg.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s166boipuy7a.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_buildManifest.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_ssgManifest.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_clientMiddlewareManifest.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/health"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/api/system-card"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_2k-hac-296.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/3-c5087sgcl5m.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0752jhxbt6px3.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2h0zf2_y1iwix.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1__e2nv58-o8m.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-38cb_7r8rmhdl.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/07vpgxdw448xg.js"
+    },
+    {
+      "view": "system-card-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s_04_omybper.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/intake"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0l6czsm21q1-u.css"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/31835ab2nsw8y.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0fc6cxhtbk0ou.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/071dwbp0i77q9.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_pwyttnlxx-.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-1b002pfnukveb.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/3-c5087sgcl5m.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0752jhxbt6px3.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2h0zf2_y1iwix.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_buildManifest.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_ssgManifest.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_clientMiddlewareManifest.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/health"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_2k-hac-296.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_2k-hac-296.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1hnffes_6bgkg.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s166boipuy7a.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/07vpgxdw448xg.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s_04_omybper.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1__e2nv58-o8m.js"
+    },
+    {
+      "view": "intake-form-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-38cb_7r8rmhdl.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/staff"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0l6czsm21q1-u.css"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/31835ab2nsw8y.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0fc6cxhtbk0ou.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/071dwbp0i77q9.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_pwyttnlxx-.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-1b002pfnukveb.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/3-c5087sgcl5m.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/07vpgxdw448xg.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s_04_omybper.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_buildManifest.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_ssgManifest.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/UWW7YjyvVo0A2O-7pqw_S/_clientMiddlewareManifest.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-api-tovn.onrender.com/health"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/21b2d48h4n_xq.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_2k-hac-296.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1q_2k-hac-296.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1hnffes_6bgkg.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2s166boipuy7a.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1an0cdjeovckj.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/1__e2nv58-o8m.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-38cb_7r8rmhdl.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/35unladgmyqbu.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/0752jhxbt6px3.js"
+    },
+    {
+      "view": "staff-signin-desktop",
+      "method": "GET",
+      "url": "https://healthcare-ai-frontend-1s23.onrender.com/_next/static/chunks/turbopack-2h0zf2_y1iwix.js"
+    }
+  ],
+  "nonGetRequests": []
+}
