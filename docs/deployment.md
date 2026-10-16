@@ -212,8 +212,8 @@ Staff tokens are **issued on request by the demo operator** (§6 step 2, short T
 | Item | Value |
 | --- | --- |
 | Database | `healthcare-ai-db`, Render free PostgreSQL (PostgreSQL 18) |
-| Created | on or before 2026-10-09 (first deploy, §7) |
-| Expires | **no later than 2026-11-08** (30 days after creation on the free plan); confirm the exact date on the dashboard |
+| Created | on or before 2026-10-09 (first deploy, §7); the dashboard showed *Created: 7 days ago* on 2026-10-16 |
+| Expires | **2026-11-08**: confirmed on the dashboard (*"Your database will expire on November 8, 2026"*), read-only, 2026-10-16 06:42 UTC (Phase 8 journal §8e) |
 | Data | migrations + synthetic seed only (`db.seed_demo`); visitor intakes are synthetic and disposable |
 
 **Check expiry** (before sharing the link, and weekly while it is shared): Dashboard → `healthcare-ai-db` → *Info*. Render shows the expiration date and a warning banner as it approaches, and emails the account owner. Record the exact date in the table above when it is first confirmed. Free-plan terms (expiry period, any grace period before deletion) can change: check render.com/docs/free before relying on them.

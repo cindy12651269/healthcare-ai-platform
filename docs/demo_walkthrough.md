@@ -20,7 +20,7 @@ Screenshots of each step: [`screenshots/`](screenshots/README.md).
 
 * **Mock mode.** The hosted API runs `LLM_MODE=mock`. Extraction is a deterministic rule-based baseline and no language model is called. The header shows *Demo · synthetic data · mock mode*, and `/intake` shows *LLM Mode: Mock*.
 * **No webhook delivery.** The escalation webhook has no receiver on the hosted demo (#67), so nothing is sent to a third party.
-* **Database lifecycle.** The free database expires no later than **2026-11-08**. It is then recreated and re-seeded ([`deployment.md`](deployment.md) §9.4), and records submitted by visitors are lost. Re-seeding never resets a status that staff changed, so the hosted queues may differ from the seed description in §3.
+* **Database lifecycle.** The free database expires on **2026-11-08** (Render dashboard, read 2026-10-16). It is then recreated and re-seeded ([`deployment.md`](deployment.md) §9.4), and records submitted by visitors are lost. Re-seeding never resets a status that staff changed, so the hosted queues may differ from the seed description in §3.
 
 ## 1. Product dashboard (anyone)
 
