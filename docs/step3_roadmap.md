@@ -43,7 +43,7 @@ In a September 2026 review of a small sample of healthcare software engagement r
 | 5 | Clinical Review & Escalation Workflow | **COMPLETE** — Issues #29–#33 |
 | 6 | Security, Deployment & Handover | **COMPLETE** — Issues #34–#36 |
 | 7 | Demo Experience, AI Evidence & FHIR Interoperability | **COMPLETE** — Issues #40–#43; hosted API redeployed and verified 2026-10-13 |
-| 8 | Frontend Experience & Portfolio Presentation | **COMPLETE** (formal closure pending) — Issues #67–#73 and follow-up #84 implemented and verified on the hosted demo; #73 merged in PR #89 (`8698193`). #73 and the GitHub Project close after the closure documentation PR merges with green CI |
+| 8 | Frontend Experience & Portfolio Presentation | **COMPLETE** — Issues #67–#73 and follow-up #84; closed 2026-10-16 after PR #89 (`8698193`) and closure PR #90 (`0e6ff28`) merged with green CI |
 | — | Optional enhancements | Not required for portfolio completion |
 
 Each phase is tracked as a GitHub Project of the same name, and GitHub Issues remain authoritative wherever this document and an issue differ. The work items in §5–§6 were written on 2026-10-02, before the issues existed; they are now delivered by Phases 3–6 as mapped below.
@@ -124,7 +124,7 @@ Only #16 and #17 exist as issues today. The other items below are proposed and w
 * Authorization and isolation covered by tests; CI green.
 * README and docs accurately describe what is and is not implemented.
 
-### Phase 8 — Frontend Experience & Portfolio Presentation (complete; formal closure pending)
+### Phase 8 — Frontend Experience & Portfolio Presentation (complete, closed 2026-10-16)
 
 Phase 8 makes the delivered workflow safe to show publicly and presentable to prospective clients, without adding backend capabilities. It is tracked as GitHub Project #10. Record: [`project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md`](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md).
 
@@ -136,7 +136,7 @@ Phase 8 makes the delivered workflow safe to show publicly and presentable to pr
 | #70 Patient intake experience | Closed 2026-10-15 |
 | #71 Staff review workspace experience (follow-up #84: distinct intake references) | Closed 2026-10-15 |
 | #72 Accessibility, frontend quality and browser E2E validation | Closed 2026-10-15 |
-| #73 Final README and portfolio presentation | Merged 2026-10-16 (PR #89, `8698193`); merge-date walkthrough passed; issue closes after the closure documentation PR |
+| #73 Final README and portfolio presentation | Closed 2026-10-16 (PR #89 `8698193`, closure PR #90 `0e6ff28`) |
 
 ---
 

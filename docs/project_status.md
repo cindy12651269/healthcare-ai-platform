@@ -1,7 +1,7 @@
 # Project Status — Evidence-Based Capability Audit
 
 **Audit date:** 2026-10-16 (Phase 8 closure prepared: #67–#72 closed; #73 implementation merged and hosted walkthrough done)
-**Audited commit:** `8698193` (main, merge of PR #89, the #73 implementation). §2c adds the Phase 8 verification. Phase 8 implementation and hosted validation are complete. #73 and Phase 8 close formally after the closure documentation PR is merged with green `main` CI.
+**Audited commit:** `8698193` (main, merge of PR #89, the #73 implementation). §2c adds the Phase 8 verification. Phase 8 implementation and hosted validation are complete; Phase 8 was closed on 2026-10-16 after the closure documentation PR #90 merged (`0e6ff28`) with green `main` CI.
 **Previous audit:** 2026-10-13 at `4194d18` (Phase 7 closure; §2 records the Phase 5 closure run at `eb92cac`, §2a the Phase 6 and §2b the Phase 7 verification)
 **Source of truth for implementation progress:** GitHub Issues / Projects. This document records what the repository *actually does* at the audited commit, so that reviewers can distinguish working code from planned work.
 
@@ -146,6 +146,6 @@ The runtime audit log (`audit.jsonl`) and generated benchmark results (`evaluati
 | Phase 5 — Clinical Review & Escalation Workflow | #29–#33 | Closed | [`phase5_Clinical_Review_&_Escalation_Workflow.md`](project_journal/phase5_Clinical_Review_&_Escalation_Workflow.md) |
 | Phase 6 — Security, Deployment & Handover | #34–#36 | Closed | [`phase6_Security_Deployment_&_Handover.md`](project_journal/phase6_Security_Deployment_&_Handover.md) |
 | Phase 7 — Demo Experience, AI Evidence & FHIR Interoperability | #40–#43 | Closed (hosted verified 2026-10-13; staff browser UI 2026-10-14) | [`phase7_Demo_Experience_AI_Evidence_&_FHIR.md`](project_journal/phase7_Demo_Experience_AI_Evidence_&_FHIR.md) |
-| Phase 8 — Frontend Experience & Portfolio Presentation | #67–#73 (+ #84) | **Complete; formal closure pending**: #67–#72 and #84 closed; #73 merged (PR #89, `8698193`, `main` CI green) and the merge-date walkthrough passed (2026-10-16). #73 and Phase 8 close after the closure documentation PR merges with green CI | [`phase8_Frontend_Experience_&_Portfolio_Presentation.md`](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md) |
+| Phase 8 — Frontend Experience & Portfolio Presentation | #67–#73 (+ #84) | **Closed** (2026-10-16): #67–#73 and #84 closed; #73 implementation PR #89 (`8698193`) and closure documentation PR #90 (`0e6ff28`) merged with green `main` CI; merge-date walkthrough passed | [`phase8_Frontend_Experience_&_Portfolio_Presentation.md`](project_journal/phase8_Frontend_Experience_&_Portfolio_Presentation.md) |
 
 The journals are historical records written at the time each phase closed. Where this audit qualifies a journal statement (for example, mock-mode retrieval "improving grounding"), the qualification is recorded here rather than by editing the journal.
